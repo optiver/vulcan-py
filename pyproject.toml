@@ -3,5 +3,6 @@ module-dir="testbackend"
 
 [build-system]
 requires=[]
+# requires=['setuptools', 'wheel >= 0.25']
 build-backend="testbackend:helloworld"
 backend-path=["."]

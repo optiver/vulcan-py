@@ -1,6 +1,12 @@
 import shlex
 import sys
 import subprocess
+import shutil
+import os
+try:
+    import setuptools.build_meta
+except ImportError:
+    pass
 
 class Testing:
     def __init__(self):
@@ -35,5 +41,15 @@ class Testing:
         print("GET_REQUIRES_ARGS:", config_settings)
         return ['setuptools', 'wheel >= 0.25', 'common_py', 'toml']
 
+    def prepare_metadata_for_build_wheel(self, metadata_directory, config_settings=None):
+        import setuptools.build_meta
+        md = setuptools.build_meta.prepare_metadata_for_build_wheel(metadata_directory, config_settings)
+        with open(os.path.join(metadata_directory, 'TESTING'), 'w+') as f:
+            f.write("PERSON_MAKING_THIS: Joel Christiansen")
+        print("PREPARED_METADATA:", md)
+        return md
+
+
 
 helloworld = Testing()
+# helloworld = setuptools.build_meta
