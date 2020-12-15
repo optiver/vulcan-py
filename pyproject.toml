@@ -1,0 +1,7 @@
+[tool.common_py]
+module-dir="testbackend"
+
+[build-system]
+requires=[]
+build-backend="testbackend:helloworld"
+backend-path=["."]
