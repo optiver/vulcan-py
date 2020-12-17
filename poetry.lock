@@ -256,7 +256,7 @@ reference = "optiver"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6"
-content-hash = "9d9c8d8496642741b840fa859216717c19569e77a977500dad94a6053c0b15bd"
+content-hash = "c9709538182748e82fb24b6eaa158c8b074b5006ab0312176236c156845f4b85"
 
 [metadata.files]
 atomicwrites = [
