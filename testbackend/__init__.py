@@ -48,13 +48,15 @@ def gen_setup():
         #   b) _say_ that it is trying to generate it on stdout
         raise RuntimeError(f"No poetry.lock found in {os.getcwd()}")
     try:
-        print(os.listdir())
         out = subprocess.check_output('poetry export --without-hashes'.split(), encoding='utf-8')
     except subprocess.CalledProcessError as e:
-        print(e.output)
+        print("Raw output from poetry:", e.output)
         raise
-    if out.startswith('Warning: The lock file is not up to date with the latest changes in pyproject.toml. You may be getting outdated dependencies. Run update to update them.'):
-        raise RuntimeError('Warning: The lock file is not up to date with the latest changes in pyproject.toml. You may be getting outdated dependencies. Run poetry update to update them.')
+    if out.startswith('Warning: The lock file is not up to date with the latest changes in pyproject.toml.'
+                      ' You may be getting outdated dependencies. Run update to update them.'):
+        raise RuntimeError(
+            'Warning: The lock file is not up to date with the latest changes in pyproject.toml.'
+            ' You may be getting outdated dependencies. Run poetry update to update them.')
     reqs = []
     for line in out.split('\n'):
         try:
@@ -62,7 +64,7 @@ def gen_setup():
         except pkg_resources.extern.packaging.requirements.InvalidRequirement as e:
             # Poetry export starts with this preamble:
             # --extra-index-url http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple
-            # or 
+            # or
             # --index-url http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple
             #
             # which can't be parsed. But it can be ignored!
@@ -70,7 +72,7 @@ def gen_setup():
                 continue
             elif e.args[0].startswith('Parse error at "\'--index-\'":'):
                 continue
-            print(out)
+            print("Failed to parse requirement", line)
             raise
     return io.StringIO(dedent(f"""\
         from setuptools import setup
