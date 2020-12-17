@@ -1,8 +1,25 @@
 [tool.common_py]
 module-dir="testbackend"
 
+[tool.poetry]
+name = "testfrontend"
+version = "0.1.0"
+description = ""
+authors = ["Me"]
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+requests = "^2.25.1"
+
+[[tool.poetry.source]]
+name = "optiver"
+url = "http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.4"
+
+
 [build-system]
-requires=[]
-# requires=['setuptools', 'wheel >= 0.25']
-build-backend="testbackend:helloworld"
+requires=['setuptools', 'wheel >= 0.25']
+build-backend="testbackend"
 backend-path=["."]
