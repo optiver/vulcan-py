@@ -67,10 +67,10 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):
         exec(compile(code, __file__, 'exec'), locals())
 
     def get_requires_for_build_wheel(self, config_settings=None):
-        return ['wheel', 'poetry']
+        return ['setuptools', 'wheel >= 0.25', 'poetry']
 
     def get_requires_for_build_sdist(self, config_settings=None):
-        return ['poetry']
+        return ['setuptools', 'poetry']
 
 
 # The primary backend

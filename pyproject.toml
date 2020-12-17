@@ -20,6 +20,6 @@ pytest = "^3.4"
 
 
 [build-system]
-requires=['setuptools', 'wheel >= 0.25']
+requires=['setuptools']
 build-backend="testbackend"
 backend-path=["."]
