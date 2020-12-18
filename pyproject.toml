@@ -1,22 +1,22 @@
 [tool.common_py]
-module-dir="testbackend"
+module-dir="vulcan"
 application_entry_points = [  # WIP, not yet working
-    "testbackendep=testbackend.test_ep:main"
+    "vulcan=vulcan.test_ep:main"
 ]
 
 
 [tool.poetry]
-name = "testbackend"
+name = "vulcan"
 version = "0.1.0"
 description = ""
 authors = ["Me"]
-# packages = [
-#     { include="testbackend" },
-# ]
+packages = [
+    { include="vulcan" },
+]
 
 
 [tool.poetry.scripts]
-myep = "testbackend.test_ep:main"
+myep = "vulcan.test_ep:main"
 
 [tool.poetry.plugins."housekeeper_checks"]
 my_test_check="housekeeper_checks.fake.whatever:run_check"
@@ -35,5 +35,5 @@ default = true
 [build-system]
 pytest = "^3.4"
 requires=['setuptools']
-build-backend="testbackend"
+build-backend="vulcan"
 backend-path=["."]
