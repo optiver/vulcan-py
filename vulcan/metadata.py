@@ -13,7 +13,7 @@ def build_metadata(config: configparser.ConfigParser, pyproject: Mapping[str, An
     #  - description
     #  - classifiers
     #  - keywords
-    # knwon HANDLED tags:
+    # known HANDLED tags:
     #  - (poetry -> setuptools)
     #  - homepage -> url
     #  - authors -> author

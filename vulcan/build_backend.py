@@ -21,7 +21,7 @@ __all__ = ['get_requires_for_build_sdist',
 def gen_setup_cfg() -> None:
     # importing here rather than at top level because toml is not built-in
     import toml
-    check_manifest()
+    check_required_files()
     config = configparser.ConfigParser()
     config.read('setup.cfg')  # fine even if the file doesn't exist
 
@@ -40,8 +40,7 @@ def gen_setup_cfg() -> None:
         print(f.read())
 
 
-def check_manifest() -> None:
-    # These files are mandatory for running. If they are not here, they are probably not in the manifest.
+def check_required_files() -> None:
     for f in ('pyproject.toml', 'poetry.lock'):
         if not os.path.exists(f):
             raise RuntimeError(f"No {f} found in {os.getcwd()}. This file is required")
