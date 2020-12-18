@@ -16,11 +16,11 @@ packages = [
 
 
 [tool.poetry.scripts]
-myep = "vulcan.test_ep:main"
+myep = "vulcan.test_ep:main" 
 
 [tool.poetry.dependencies]
 python = ">=3.6"
-requests = "^2.25.1"
+setuptools = "^51.0.0"
 
 [[tool.poetry.source]]
 name = "optiver"
@@ -31,5 +31,5 @@ default = true
 [build-system]
 pytest = "^3.4"
 requires=['setuptools']
-build-backend="vulcan"
+build-backend="vulcan.build_backend"
 backend-path=["."]
