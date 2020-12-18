@@ -1,5 +1,9 @@
 [tool.common_py]
 module-dir="testbackend"
+application_entry_points = [  # WIP, not yet working
+    "testbackendep=testbackend.test_ep:main"
+]
+
 
 [tool.poetry]
 name = "testfrontend"
@@ -17,10 +21,8 @@ url = "http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple"
 default = true
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.4"
-
-
 [build-system]
+pytest = "^3.4"
 requires=['setuptools']
 build-backend="testbackend"
 backend-path=["."]

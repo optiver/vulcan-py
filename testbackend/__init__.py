@@ -1,3 +1,4 @@
+import configparser
 import io
 import os
 import subprocess
@@ -18,22 +19,24 @@ def _open_setup_script(setup_script):
     if not os.path.exists(setup_script):
         # Supply a default setup.py
         gen_setup_cfg()
-        return gen_setup()
+        return io.StringIO(u"from setuptools import setup; setup()")
     raise RuntimeError(
         "TestBackend is not compatible with setup.py, please migrate to setup.cfg or pyproject.toml")
 
 
 def gen_setup_cfg():
-    import configparser
+    # importing here rather than at top level because toml is not built-in
     import toml
     config = configparser.ConfigParser()
-    if os.path.exists('setup.cfg'):
-        with open('setup.cfg') as f:
-            config.read(f)
+    config.read('setup.cfg')  # fine even if the file doesn't exist
 
     pyproject = toml.load('pyproject.toml')
     config['metadata'] = {k: v for k, v in pyproject['tool']['poetry'].items()
                           if k in ('name', 'version', 'description', 'authors')}
+
+    if not config.has_section('options'):
+        config['options'] = {}
+    config['options']['install_requires'] = '\n'.join([str(req) for req in gen_reqs()])
     with open('setup.cfg', 'w+') as f:
         config.write(f)
 
@@ -41,17 +44,19 @@ def gen_setup_cfg():
         toml.dump(pyproject, f)
 
 
-def gen_setup():
+def gen_reqs():
     if not os.path.exists('poetry.lock'):
         # If this is not already present, poetry will
         #   a) try to generate it, and
         #   b) _say_ that it is trying to generate it on stdout
-        raise RuntimeError(f"No poetry.lock found in {os.getcwd()}")
+        # We consider this a failure condition
+        raise RuntimeError(f"No poetry.lock found in {os.getcwd()}. If this is unexpected, check MANIFEST.in")
     try:
         out = subprocess.check_output('poetry export --without-hashes'.split(), encoding='utf-8')
     except subprocess.CalledProcessError as e:
         print("Raw output from poetry:", e.output)
         raise
+    # Lockfile is out of date with pyproject.toml, this is also a failure condition
     if out.startswith('Warning: The lock file is not up to date with the latest changes in pyproject.toml.'
                       ' You may be getting outdated dependencies. Run update to update them.'):
         raise RuntimeError(
@@ -66,20 +71,17 @@ def gen_setup():
             # --extra-index-url http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple
             # or
             # --index-url http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple
-            #
-            # which can't be parsed. But it can be ignored!
+            # depending on the specific configured sources which can't be parsed. But it can be ignored!
             if e.args[0].startswith('Parse error at "\'--extra-\'":'):
                 continue
             elif e.args[0].startswith('Parse error at "\'--index-\'":'):
                 continue
             print("Failed to parse requirement", line)
             raise
-    return io.StringIO(dedent(f"""\
-        from setuptools import setup
-        setup(
-            install_requires={repr([str(r) for r in reqs])}
-            )
-        """))
+
+    # yes this feels super hackey, but this is how actual setuptools does it and it works pretty well so
+    # ¯\_(ツ)_/¯
+    return reqs
 
 
 class ApplicationBuildMetaBackend(_BuildMetaBackend):
@@ -95,14 +97,16 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):
         exec(compile(code, __file__, 'exec'), locals())
 
     def build_sdist(self, sdist_directory, config_settings=None):
-        print("SDIST: ", sdist_directory, config_settings)
-        print("CDW: ", os.getcwd())
+        # just here to show that they are here
         return super().build_sdist(sdist_directory, config_settings)
 
     def build_wheel(self, wheel_directory, config_settings=None, metadata_directory=None):
-        print("WHEEL: ", wheel_directory, config_settings, metadata_directory)
-        print("CDW: ", os.getcwd())
+        # just here to show that they are here
         return super().build_wheel(wheel_directory, config_settings, metadata_directory)
+
+    def prepare_metadata_for_build_wheel(self, metadata_directory, config_settings=None):
+        # just here to show that they are here
+        return super().prepare_metadata_for_build_wheel(metadata_directory, config_settings)
 
     def get_requires_for_build_wheel(self, config_settings=None):
         return ['setuptools', 'wheel >= 0.25', 'poetry', 'toml']
