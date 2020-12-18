@@ -2,7 +2,7 @@ import configparser
 import os
 import subprocess
 from collections import defaultdict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
 import pkg_resources
@@ -16,7 +16,7 @@ __all__ = ['get_requires_for_build_sdist',
            'build_sdist']
 
 
-def build_packages(config: configparser.ConfigParser, pyproject: Dict[str, Any]) -> None:
+def build_packages(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
     if not config.has_section('options'):
         config['options'] = {}
     config['options']['install_requires'] = '\n'.join([str(req) for req in gen_reqs()])
@@ -32,7 +32,7 @@ def build_packages(config: configparser.ConfigParser, pyproject: Dict[str, Any])
         config['options']['python_requires'] = pyproject['tool']['poetry']['dependencies']['python']
 
 
-def build_entry_points(config: configparser.ConfigParser, pyproject: Dict[str, Any]) -> None:
+def build_entry_points(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
     setupcfg_scripts: Dict[str, str] = {}
     if 'options.entry_points' in config:
         setupcfg_scripts = dict(config['options.entry_points'].items())
@@ -65,9 +65,6 @@ def gen_setup_cfg():
     with open('setup.cfg') as f:
         print("Generated setup.cfg:")
         print(f.read())
-
-    with open('pyproject.toml', 'w+') as f:
-        toml.dump(pyproject, f)
 
 
 def convert_packages(pkgs: List[Dict[str, str]]) -> Dict[str, str]:
