@@ -75,7 +75,7 @@ def build_packages(config: configparser.ConfigParser, pyproject: Mapping[str, An
     if not config.has_section('options'):
         config['options'] = {}
     if 'install_requires' in config['options']:
-        print(f"Overwriting install_requires {config['options']['install_requires']}")
+        print(f"Overwriting install_requires {config['options']['install_requires']!r}")
     config['options']['install_requires'] = '\n'.join([str(req) for req in gen_reqs()])
     find = False
     # next 2 ifs are the equivilent of find_packages('.') by default, prefering any configured values
