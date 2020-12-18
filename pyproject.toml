@@ -6,10 +6,21 @@ application_entry_points = [  # WIP, not yet working
 
 
 [tool.poetry]
-name = "testfrontend"
+name = "testbackend"
 version = "0.1.0"
 description = ""
 authors = ["Me"]
+# packages = [
+#     { include="testbackend" },
+# ]
+
+
+[tool.poetry.scripts]
+myep = "testbackend.test_ep:main"
+
+[tool.poetry.plugins."housekeeper_checks"]
+my_test_check="housekeeper_checks.fake.whatever:run_check"
+another_test_check="housekeeper_checks.another.check:run_check"
 
 [tool.poetry.dependencies]
 python = ">=3.6"

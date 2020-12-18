@@ -1,8 +1,8 @@
 import configparser
-import io
 import os
 import subprocess
-from textwrap import dedent
+from collections import defaultdict
+from typing import Any, Dict, List
 
 import pkg_resources
 import pkg_resources.extern  # type: ignore
@@ -15,13 +15,31 @@ __all__ = ['get_requires_for_build_sdist',
            'build_sdist']
 
 
-def _open_setup_script(setup_script):
-    if not os.path.exists(setup_script):
-        # Supply a default setup.py
-        gen_setup_cfg()
-        return io.StringIO(u"from setuptools import setup; setup()")
-    raise RuntimeError(
-        "TestBackend is not compatible with setup.py, please migrate to setup.cfg or pyproject.toml")
+def build_packages(config: configparser.ConfigParser, pyproject: Dict[str, Any]) -> None:
+    if not config.has_section('options'):
+        config['options'] = {}
+    config['options']['install_requires'] = '\n'.join([str(req) for req in gen_reqs()])
+    find = False
+    if 'packages' not in config['options']:
+        find = True
+        config['options']['packages'] = 'find:'
+
+    if 'packages' in pyproject['tool']['poetry'] and find:
+        config['options.packages.find'] = convert_packages(pyproject['tool']['poetry']['packages'])
+
+
+def build_entry_points(config: configparser.ConfigParser, pyproject: Dict[str, Any]) -> None:
+    setupcfg_scripts: Dict[str, str] = {}
+    if 'options.entry_points' in config:
+        setupcfg_scripts = dict(config['options.entry_points'].items())
+    if 'scripts' in pyproject['tool']['poetry']:
+        setupcfg_scripts['console_scripts'] = '\n'.join(
+            [f'{k}={v}' for k, v in pyproject['tool']['poetry']['scripts'].items()])
+    if 'plugins' in pyproject['tool']['poetry']:
+        for section, commands in pyproject['tool']['poetry']['plugins'].items():
+            setupcfg_scripts[section] = '\n'.join([f'{k}={v}' for k, v in commands.items()])
+
+    config['options.entry_points'] = setupcfg_scripts
 
 
 def gen_setup_cfg():
@@ -34,14 +52,27 @@ def gen_setup_cfg():
     config['metadata'] = {k: v for k, v in pyproject['tool']['poetry'].items()
                           if k in ('name', 'version', 'description', 'authors')}
 
-    if not config.has_section('options'):
-        config['options'] = {}
-    config['options']['install_requires'] = '\n'.join([str(req) for req in gen_reqs()])
+    build_packages(config, pyproject)
+    build_entry_points(config, pyproject)
+
     with open('setup.cfg', 'w+') as f:
         config.write(f)
 
+    with open('setup.cfg') as f:
+        print(f.read())
+
     with open('pyproject.toml', 'w+') as f:
         toml.dump(pyproject, f)
+
+
+def convert_packages(pkgs: List[Dict[str, str]]) -> Dict[str, str]:
+    actual = defaultdict(list)
+    for pkg in pkgs:
+        for k, v in pkg.items():
+            if k == 'from':
+                k = 'where'
+            actual[k].append(v)
+    return {k: ','.join(v) for k, v in actual.items()}
 
 
 def gen_reqs():
@@ -79,22 +110,16 @@ def gen_reqs():
             print("Failed to parse requirement", line)
             raise
 
-    # yes this feels super hackey, but this is how actual setuptools does it and it works pretty well so
-    # ¯\_(ツ)_/¯
+    # yes this feels super hackey, but this is how actual setuptools does it
+    # and it works pretty well so ¯\_(ツ)_/¯
     return reqs
 
 
 class ApplicationBuildMetaBackend(_BuildMetaBackend):
 
     def run_setup(self, setup_script='setup.py'):
-        # Here we are in the build directory
-        __file__ = setup_script
-        __name__ = '__main__'
-
-        with _open_setup_script(__file__) as f:
-            code = f.read().replace(r'\r\n', r'\n')
-
-        exec(compile(code, __file__, 'exec'), locals())
+        gen_setup_cfg()
+        return super().run_setup(setup_script)
 
     def build_sdist(self, sdist_directory, config_settings=None):
         # just here to show that they are here
