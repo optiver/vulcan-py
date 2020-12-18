@@ -8,11 +8,10 @@ application_entry_points = [  # WIP, not yet working
 [tool.poetry]
 name = "vulcan"
 version = "0.1.0"
-description = ""
-authors = ["Me"]
-packages = [
-    { include="vulcan" },
-]
+description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
+authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
+homepage = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
+packages = [ { include="vulcan" } ]
 
 
 [tool.poetry.scripts]

@@ -3,6 +3,6 @@ package = []
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6"
-content-hash = "ab4ec58f029dab5f9fab903d9290b337eb03dd9dab895adc17aabf77c337da73"
+content-hash = "daf9689eeeebdd3db135c3a97e79195fbd9baac01c474c95627235b7ecc2b3ec"
 
 [metadata.files]
