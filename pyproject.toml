@@ -9,9 +9,16 @@ application_entry_points = [  # WIP, not yet working
 name = "vulcan"
 version = "0.1.0"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
+authors = ["Joel Christiansen"]
 homepage = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
 packages = [ { include="vulcan" } ]
+readme = "README.md"
+keywords = [ "build", "tooling", "christmas" ] 
+classifiers = [
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
 
 
 [tool.poetry.scripts]

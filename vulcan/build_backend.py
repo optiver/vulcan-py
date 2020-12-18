@@ -2,7 +2,7 @@ import configparser
 import os
 
 from vulcan.metadata import build_metadata
-from vulcan.options import build_entry_points, build_packages
+from vulcan.options import build_entry_points, build_packages, build_package_data
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
@@ -29,6 +29,7 @@ def gen_setup_cfg() -> None:
 
     build_metadata(config, pyproject)
     build_packages(config, pyproject)
+    build_package_data(config, pyproject)
     build_entry_points(config, pyproject)
 
     with open('setup.cfg', 'w+') as f:

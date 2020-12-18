@@ -77,3 +77,9 @@ def build_packages(config: configparser.ConfigParser, pyproject: Mapping[str, An
 
     if 'python' in pyproject['tool']['poetry'].get('dependencies', {}):
         config['options']['python_requires'] = pyproject['tool']['poetry']['dependencies']['python']
+
+
+def build_package_data(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
+    if not config.has_section('options'):
+        config['options'] = {}
+    config['options']['include_package_data'] = 'true'
