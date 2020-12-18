@@ -59,6 +59,7 @@ def gen_setup_cfg():
         config.write(f)
 
     with open('setup.cfg') as f:
+        print("Generated setup.cfg:")
         print(f.read())
 
     with open('pyproject.toml', 'w+') as f:
