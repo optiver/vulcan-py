@@ -18,10 +18,6 @@ packages = [
 [tool.poetry.scripts]
 myep = "vulcan.test_ep:main"
 
-[tool.poetry.plugins."housekeeper_checks"]
-my_test_check="housekeeper_checks.fake.whatever:run_check"
-another_test_check="housekeeper_checks.another.check:run_check"
-
 [tool.poetry.dependencies]
 python = ">=3.6"
 requests = "^2.25.1"

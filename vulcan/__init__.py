@@ -3,7 +3,8 @@ import os
 import subprocess
 from collections import defaultdict
 from typing import Any, Dict, List
-
+# importing setuptools here rather than at point of use forces user to specify setuptools in their
+# [build-system][requires] section
 import pkg_resources
 import pkg_resources.extern  # type: ignore
 from setuptools.build_meta import _BuildMetaBackend  # type: ignore
@@ -26,6 +27,9 @@ def build_packages(config: configparser.ConfigParser, pyproject: Dict[str, Any])
 
     if 'packages' in pyproject['tool']['poetry'] and find:
         config['options.packages.find'] = convert_packages(pyproject['tool']['poetry']['packages'])
+
+    if 'python' in pyproject['tool']['poetry'].get('dependencies', {}):
+        config['options']['python_requires'] = pyproject['tool']['poetry']['dependencies']['python']
 
 
 def build_entry_points(config: configparser.ConfigParser, pyproject: Dict[str, Any]) -> None:
