@@ -3,6 +3,7 @@ import os
 import subprocess
 from collections import defaultdict
 from typing import Any, Dict, List, Mapping
+
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
 import pkg_resources
@@ -46,8 +47,9 @@ def build_entry_points(config: configparser.ConfigParser, pyproject: Mapping[str
     config['options.entry_points'] = setupcfg_scripts
 
 
-def gen_setup_cfg():
+def gen_setup_cfg() -> None:
     # importing here rather than at top level because toml is not built-in
+    check_manifest()
     import toml
     config = configparser.ConfigParser()
     config.read('setup.cfg')  # fine even if the file doesn't exist
@@ -67,6 +69,13 @@ def gen_setup_cfg():
         print(f.read())
 
 
+def check_manifest() -> None:
+    # These files are mandatory for running. If they are not here, they are probably not in the manifest.
+    for f in ('setup.cfg', 'pyproject.toml', 'poetry.lock'):
+        if not os.path.exists(f):
+            raise RuntimeError(f"No {f} found in {os.getcwd()}. This file is required")
+
+
 def convert_packages(pkgs: List[Dict[str, str]]) -> Dict[str, str]:
     actual = defaultdict(list)
     for pkg in pkgs:
@@ -77,13 +86,7 @@ def convert_packages(pkgs: List[Dict[str, str]]) -> Dict[str, str]:
     return {k: ','.join(v) for k, v in actual.items()}
 
 
-def gen_reqs():
-    if not os.path.exists('poetry.lock'):
-        # If this is not already present, poetry will
-        #   a) try to generate it, and
-        #   b) _say_ that it is trying to generate it on stdout
-        # We consider this a failure condition
-        raise RuntimeError(f"No poetry.lock found in {os.getcwd()}. If this is unexpected, check MANIFEST.in")
+def gen_reqs() -> List[pkg_resources.Requirement]:
     try:
         out = subprocess.check_output('poetry export --without-hashes'.split(), encoding='utf-8')
     except subprocess.CalledProcessError as e:
@@ -112,8 +115,6 @@ def gen_reqs():
             print("Failed to parse requirement", line)
             raise
 
-    # yes this feels super hackey, but this is how actual setuptools does it
-    # and it works pretty well so ¯\_(ツ)_/¯
     return reqs
 
 
