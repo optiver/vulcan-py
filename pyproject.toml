@@ -1,6 +1,6 @@
-[tool.common_py]
+[tool.common_py]  # WIP, not yet working, still not sure if it belongs here at all, kinda think not.
 module-dir="vulcan"
-application_entry_points = [  # WIP, not yet working
+application_entry_points = [
     "vulcan=vulcan.test_ep:main"
 ]
 
@@ -9,32 +9,44 @@ application_entry_points = [  # WIP, not yet working
 name = "vulcan"
 version = "0.1.0"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-authors = ["Joel Christiansen"]
+# poetry says this should be "name <email>" setuptools has those in seperate fields. I don't care a ton about
+# this one
+authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
 homepage = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
 packages = [ { include="vulcan" } ]
 readme = "README.md"
+# I think nobody in optiver uses these, but we get them for free with almost no work so hey
 keywords = [ "build", "tooling", "christmas" ] 
-classifiers = [
+classifiers = [  # same with these
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
-
-
+# says "Hello!"
 [tool.poetry.scripts]
 myep = "vulcan.test_ep:main" 
 
+# this is not the actual runtime dependencies, but the build-frontend (pip probably) will take care of
+# installing the deps we say in vulcan/build_backend:ApplicationBuildMetaBackend.get_requires_for_build_*
 [tool.poetry.dependencies]
 python = ">=3.6"
 
 [[tool.poetry.source]]
+# semi-mandatory, needed for poetry but doesn't help with pip. Not super nice.
 name = "optiver"
 url = "http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple"
 default = true
 
 [tool.poetry.dev-dependencies]
+# note: poetry will not actually install this, see https://github.com/python-poetry/poetry/issues/1584
+# if that issue is resolved when reading this, please remove these lines and let me know.
+# until then, just pip install it, it's a dev dependency and it's setuptools. If you're paranoid about
+# versioning, at time of writing the version of setuptools I'm using is 51.0.0
+setuptools = "^51.0.0"
+
 [build-system]
-pytest = "^3.4"
+# in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
+# to correctly install and use this tool
 requires=['setuptools']
 build-backend="vulcan.build_backend"
-backend-path=["."]
+backend-path=["."]  # and this line should be removed for all other projects

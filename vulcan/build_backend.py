@@ -23,10 +23,14 @@ def gen_setup_cfg() -> None:
     import toml
     check_required_files()
     config = configparser.ConfigParser()
+    # here we read it in, even if we don't expect it to be there, because we only support basic param
+    # generation from pyproject.toml so if someone wants to do something more interesting they will still need
+    # to have both files
     config.read('setup.cfg')  # fine even if the file doesn't exist
 
+    # guarenteed to be here by the check_required_files above
     pyproject = toml.load('pyproject.toml')
-
+    # all of these modify config in-place
     build_metadata(config, pyproject)
     build_packages(config, pyproject)
     build_package_data(config, pyproject)
@@ -36,6 +40,7 @@ def gen_setup_cfg() -> None:
         config.write(f)
 
     with open('setup.cfg') as f:
+        # purely for debug purposes, pip will hide the output of this if -v is not provided
         print("Generated setup.cfg:")
         print(f.read())
 
@@ -46,6 +51,7 @@ def check_required_files() -> None:
             raise RuntimeError(f"No {f} found in {os.getcwd()}. This file is required")
 
 
+# For docs on the hooks: https://www.python.org/dev/peps/pep-0517/#build-backend-interface
 class ApplicationBuildMetaBackend(_BuildMetaBackend):
 
     def run_setup(self, setup_script='setup.py'):
