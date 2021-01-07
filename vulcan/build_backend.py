@@ -58,6 +58,7 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):  # type: ignore
     def run_setup(self, setup_script: str = 'setup.py') -> str:
         _old_setup = None
         if os.path.exists('setup.cfg'):
+            print("Existant setup.cfg found, saving to recreate after generated setup is complete")
             # we need to do this because tox does not correctly change working directory when building, which
             # means the generated setup.cfg when run under tox ends up in the toxinidir. See:
             # https://github.com/tox-dev/tox/blob/master/src/tox/helper/build_isolated.py
@@ -71,9 +72,11 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):  # type: ignore
         res = super().run_setup(setup_script)
         # remove/undo any generated configs in setup.cfg (so we're back to clean checkout if we're under tox)
         if _old_setup is not None:
+            print("Recreating old setup.cfg")
             with open('setup.cfg', 'w+') as f:
                 f.write(_old_setup)
         else:
+            print("Removing generated setup.cfg")
             os.remove('setup.cfg')
         return str(res)
 

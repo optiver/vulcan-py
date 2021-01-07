@@ -2,6 +2,7 @@ import configparser
 import os
 import sys
 from typing import Any, Mapping
+import re
 
 
 def build_metadata(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
@@ -29,7 +30,14 @@ def build_metadata(config: configparser.ConfigParser, pyproject: Mapping[str, An
     poetry = pyproject['tool']['poetry']
     # poetry believes a package may have multiple authors, setuptools and wheel metadata disagree
     if poetry.get('authors'):
-        config['metadata']['author'] = poetry['authors'][0]
+        author_re = re.compile('(?P<name>.*)(?: <(?P<email>.*)>)')
+        match = author_re.match(poetry['authors'][0])
+        if match:
+            author, author_email = match.group('name'), match.group('email')
+            config['metadata']['author'] = author
+            config['metadata']['author_email'] = author_email
+        else:
+            config['metadata']['author'] = poetry['authors'][0]
     # poetry believes just saying "check here" is sufficient, wheels want the content and don't care where you
     # put it
     if poetry.get('readme'):

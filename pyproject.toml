@@ -52,7 +52,6 @@ build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
 [tool.pytest.ini_options]
-filterwarnings =
-    ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning
-junit_family=xunit1
-testpaths = [ "tests" ]
+filterwarnings = [ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning" ]
+junit_family="xunit1"
+testpaths = [ "tests", ]
