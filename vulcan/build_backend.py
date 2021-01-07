@@ -55,8 +55,26 @@ def check_required_files() -> None:
 class ApplicationBuildMetaBackend(_BuildMetaBackend):
 
     def run_setup(self, setup_script='setup.py'):
+        _old_setup = None
+        if os.path.exists('setup.cfg'):
+            # we need to do this because tox does not correctly change working directory when building, which
+            # means the generated setup.cfg when run under tox ends up in the toxinidir. See:
+            # https://github.com/tox-dev/tox/blob/master/src/tox/helper/build_isolated.py
+
+            # This is NOT true for pip, which correctly creates a working directory in /tmp
+            with open('setup.cfg') as f:
+                _old_setup = f.read()
+        # generate setup.cfg from pyproject.toml
         gen_setup_cfg()
-        return super().run_setup(setup_script)
+        # run setup
+        res = super().run_setup(setup_script)
+        # remove/undo any generated configs in setup.cfg (so we're back to clean checkout if we're under tox)
+        if _old_setup is not None:
+            with open('setup.cfg', 'w+') as f:
+                f.write(_old_setup)
+        else:
+            os.remove('setup.cfg')
+        return res
 
     def build_sdist(self, sdist_directory, config_settings=None):
         # just here to show that they are here

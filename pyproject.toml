@@ -16,7 +16,7 @@ homepage = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/bro
 packages = [ { include="vulcan" } ]
 readme = "README.md"
 # I think nobody in optiver uses these, but we get them for free with almost no work so hey
-keywords = [ "build", "tooling", "christmas" ] 
+keywords = [ "build", "tooling" ] 
 classifiers = [  # same with these
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
