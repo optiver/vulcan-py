@@ -1,5 +1,6 @@
 import configparser
 import os
+from typing import List
 
 from vulcan.metadata import build_metadata
 from vulcan.options import build_entry_points, build_packages, build_package_data
@@ -52,9 +53,9 @@ def check_required_files() -> None:
 
 
 # For docs on the hooks: https://www.python.org/dev/peps/pep-0517/#build-backend-interface
-class ApplicationBuildMetaBackend(_BuildMetaBackend):
+class ApplicationBuildMetaBackend(_BuildMetaBackend):  # type: ignore
 
-    def run_setup(self, setup_script='setup.py'):
+    def run_setup(self, setup_script: str = 'setup.py') -> str:
         _old_setup = None
         if os.path.exists('setup.cfg'):
             # we need to do this because tox does not correctly change working directory when building, which
@@ -74,24 +75,25 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):
                 f.write(_old_setup)
         else:
             os.remove('setup.cfg')
-        return res
+        return str(res)
 
-    def build_sdist(self, sdist_directory, config_settings=None):
+    def build_sdist(self, sdist_directory: str, config_settings: str = None) -> str:
         # just here to show that they are here
-        return super().build_sdist(sdist_directory, config_settings)
+        return str(super().build_sdist(sdist_directory, config_settings))
 
-    def build_wheel(self, wheel_directory, config_settings=None, metadata_directory=None):
+    def build_wheel(self, wheel_directory: str, config_settings: str = None, metadata_directory: str = None
+                    ) -> str:
         # just here to show that they are here
-        return super().build_wheel(wheel_directory, config_settings, metadata_directory)
+        return str(super().build_wheel(wheel_directory, config_settings, metadata_directory))
 
-    def prepare_metadata_for_build_wheel(self, metadata_directory, config_settings=None):
+    def prepare_metadata_for_build_wheel(self, metadata_directory: str, config_settings: str = None) -> str:
         # just here to show that they are here
-        return super().prepare_metadata_for_build_wheel(metadata_directory, config_settings)
+        return str(super().prepare_metadata_for_build_wheel(metadata_directory, config_settings))
 
-    def get_requires_for_build_wheel(self, config_settings=None):
+    def get_requires_for_build_wheel(self, config_settings: str = None) -> List[str]:
         return ['setuptools', 'wheel >= 0.25', 'poetry', 'toml']
 
-    def get_requires_for_build_sdist(self, config_settings=None):
+    def get_requires_for_build_sdist(self, config_settings: str = None) -> List[str]:
         return ['setuptools', 'poetry', 'toml']
 
 
