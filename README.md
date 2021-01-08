@@ -17,3 +17,22 @@ That's it. Pip and this project will deal with:
 
 If you are using shiv to create the application, you can then directly use the generated wheel to create an
 application, e.g. `shiv -p '/usr/bin/env python3.6' -c your_entry_point  -o {distdir}/your_bin_name -E --compile-pyc appname-1.2.3-py3-none-any.whl`
+
+
+## To convert a project currently using setup.py or setup.cfg:
+
+1. Convert the values in the setup.py to pyproject.toml (such that poetry is happy to run `poetry lock` without
+complaint, see [here](https://python-poetry.org/docs/pyproject/) for more specific instructions).
+
+2. Add the following block to the pyproject.toml
+
+```ini
+[build-system]
+requires=['setuptools', 'vulcan']
+build-backend="vulcan.build_backend"
+```
+
+3. Run `poetry lock` and commit `poetry.lock` if you have not already.
+
+4. That should be it. The created files and packages should be entirely compatabile (indistinguishable except
+   for the install requirements) with setup.py packages.
