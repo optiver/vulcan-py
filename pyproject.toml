@@ -15,9 +15,6 @@ classifiers = [  # same with these
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
-# says "Hello!"
-[tool.poetry.scripts]
-myep = "vulcan.test_ep:main" 
 
 # this is not the actual runtime dependencies, but the build-frontend (pip probably) will take care of
 # installing the deps we say in vulcan/build_backend:ApplicationBuildMetaBackend.get_requires_for_build_*
