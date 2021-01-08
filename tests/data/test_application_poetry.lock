@@ -77,13 +77,10 @@ type = "legacy"
 url = "http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple"
 reference = "optiver"
 
-[extras]
-pgsql = []
-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6"
-content-hash = "177b6fe4d80e20f77e4d7ec2c9c093f974f4e307c181d890431572f12378ea68"
+content-hash = "4d824e21443c62148657a1e45574600f94aad957937133f389eaf0ad3229813f"
 
 [metadata.files]
 certifi = [
