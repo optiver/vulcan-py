@@ -1,10 +1,3 @@
-[tool.common_py]  # WIP, not yet working, still not sure if it belongs here at all, kinda think not.
-module-dir="vulcan"
-application_entry_points = [
-    "vulcan=vulcan.test_ep:main"
-]
-
-
 [tool.poetry]
 name = "vulcan"
 version = "0.0.0"  # do not change this, we take VERSION instead from the file. poetry is just stubborn
