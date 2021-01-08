@@ -102,3 +102,9 @@ def build_package_data(config: configparser.ConfigParser, pyproject: Mapping[str
             "'include' and 'exclude' keys in [tool.poetry] section are not allowed with vulcan."
             "Please use MANIFEST.in to include or exclude data files")
     config['options']['include_package_data'] = 'true'
+
+
+def check_unsupported(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
+    if pyproject['tool']['poetry'].get('extras') is not None:
+        raise ValueError(("[tool.poetry.extras] is unsupported with vulcan, "
+                          "poetry does not handle locking extras correctly"))

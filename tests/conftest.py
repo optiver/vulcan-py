@@ -107,8 +107,6 @@ myep = "vulcan.test_ep:main"
 [tool.poetry.plugins.testplugin]
 someplugin = "some.import:spec"
 
-[tool.poetry.extras]
-pgsql = ["psycopg2-binary"]
 """)
 
     return tmp_path
