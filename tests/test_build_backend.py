@@ -87,12 +87,6 @@ class TestMetadata:
             'console_scripts': {'myep': 'vulcan.test_ep:main'},
             'testplugin': {'someplugin': 'some.import:spec'}}
 
-    def test_extras_require(self, wheel_metadata: pkginfo.Wheel, sdist_metadata: pkginfo.SDist) -> None:
-        assert sdist_metadata.provides_extras == ['pgsql']
-        # now it's the wheel's turn to behave oddly I guess? But it still gets installed correctly with the
-        # right extras so I don't even know at this point.
-        assert wheel_metadata.provides_extras == ()
-
 
 class TestOptions:
     def test_gen_reqs(self, test_application: Path) -> None:

@@ -102,14 +102,3 @@ def build_package_data(config: configparser.ConfigParser, pyproject: Mapping[str
             "'include' and 'exclude' keys in [tool.poetry] section are not allowed with vulcan."
             "Please use MANIFEST.in to include or exclude data files")
     config['options']['include_package_data'] = 'true'
-
-
-def build_extras_require(config: configparser.ConfigParser, pyproject: Mapping[str, Any]) -> None:
-    print("Building extras")
-    if pyproject['tool']['poetry'].get('extras') is None:
-        print("No extras")
-        return
-    if not config.has_section('options.extras_require'):
-        print("Some extras")
-        config['options.extras_require'] = {k: '; '.join(v) for k, v in
-                                            pyproject['tool']['poetry']['extras'].items()}

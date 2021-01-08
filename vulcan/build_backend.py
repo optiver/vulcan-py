@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from vulcan.metadata import build_metadata
 from vulcan.options import (build_entry_points, build_package_data,
-                            build_packages, build_extras_require)
+                            build_packages)
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
@@ -45,7 +45,6 @@ def gen_setup_cfg() -> None:
     build_packages(config, pyproject)
     build_package_data(config, pyproject)
     build_entry_points(config, pyproject)
-    build_extras_require(config, pyproject)
 
     with open('setup.cfg', 'w+') as f:
         config.write(f)
