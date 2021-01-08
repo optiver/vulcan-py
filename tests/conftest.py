@@ -67,13 +67,15 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
     (tmp_path / 'testproject/__init__.py').touch()
+    with (tmp_path / 'testproject/VERSION').open('w+') as f:
+        f.write('1.2.3\n')
     test_lockfile = (Path(__file__).parent / 'data/test_application_poetry.lock')
     shutil.copy(test_lockfile, tmp_path / 'poetry.lock')
     with (tmp_path / 'pyproject.toml').open('w+') as f:
         f.write("""\
 [tool.poetry]
 name = "testproject"
-version = "1.2.3"
+version = "0.0.0"  # this needs to be here to make poetry happy, but we prefer VERSION file if availible
 description = "an example test project for testing vulcan builds"
 authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
 packages = [ { include="testpkg" } ]
@@ -99,6 +101,9 @@ build-backend="vulcan.build_backend"
 
 [tool.poetry.scripts]
 myep = "vulcan.test_ep:main"
+
+[tool.poetry.plugins.testplugin]
+someplugin = "some.import:spec"
 """)
 
     return tmp_path

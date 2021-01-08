@@ -1,9 +1,11 @@
 import configparser
 import os
-from typing import List
+from pathlib import Path
+from typing import List, Optional
 
 from vulcan.metadata import build_metadata
-from vulcan.options import build_entry_points, build_packages, build_package_data
+from vulcan.options import (build_entry_points, build_package_data,
+                            build_packages)
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
@@ -31,6 +33,13 @@ def gen_setup_cfg() -> None:
 
     # guarenteed to be here by the check_required_files above
     pyproject = toml.load('pyproject.toml')
+
+    version_file = find_version_file()
+    if version_file is not None:
+        with version_file.open() as version_f:
+            build_version = version_f.read().strip()
+            pyproject['tool']['poetry']['version'] = build_version
+
     # all of these modify config in-place
     build_metadata(config, pyproject)
     build_packages(config, pyproject)
@@ -44,6 +53,13 @@ def gen_setup_cfg() -> None:
         # purely for debug purposes, pip will hide the output of this if -v is not provided
         print("Generated setup.cfg:")
         print(f.read())
+
+
+def find_version_file() -> Optional[Path]:
+    try:
+        return next(Path().rglob('VERSION'))
+    except StopIteration:
+        return None
 
 
 def check_required_files() -> None:
@@ -67,18 +83,20 @@ class ApplicationBuildMetaBackend(_BuildMetaBackend):  # type: ignore
             with open('setup.cfg') as f:
                 _old_setup = f.read()
         # generate setup.cfg from pyproject.toml
-        gen_setup_cfg()
-        # run setup
-        res = super().run_setup(setup_script)
-        # remove/undo any generated configs in setup.cfg (so we're back to clean checkout if we're under tox)
-        if _old_setup is not None:
-            print("Recreating old setup.cfg")
-            with open('setup.cfg', 'w+') as f:
-                f.write(_old_setup)
-        else:
-            print("Removing generated setup.cfg")
-            os.remove('setup.cfg')
-        return str(res)
+        try:
+            gen_setup_cfg()
+            # run setup
+            return str(super().run_setup(setup_script))
+        finally:
+            # remove/undo any generated configs in setup.cfg (so we're back to clean
+            # checkout if we're under tox)
+            if _old_setup is not None:
+                print("Recreating old setup.cfg")
+                with open('setup.cfg', 'w+') as f:
+                    f.write(_old_setup)
+            else:
+                print("Removing generated setup.cfg")
+                os.remove('setup.cfg')
 
     def build_sdist(self, sdist_directory: str, config_settings: str = None) -> str:
         # just here to show that they are here
