@@ -2,6 +2,7 @@ import configparser
 import os
 from pathlib import Path
 from typing import List, Optional
+from io import StringIO
 
 from vulcan.metadata import build_metadata
 from vulcan.options import (build_entry_points, build_package_data,
@@ -48,7 +49,15 @@ def gen_setup_cfg() -> None:
     check_unsupported(config, pyproject)
 
     with open('setup.cfg', 'w+') as f:
-        config.write(f)
+        # configparser is really dumb and frustrating.
+        # basically by default it tries to interpolate '%' signs, and will error if that doesn't work. This
+        # can be disabled (see above), but it is not in setuptools. Therefore, we must escape the %.
+        # Of course, configparser _also_ doesn't give us a way to just turn it directly into a string, hence
+        # the hacky stringIO thing
+        tmp = StringIO()
+        config.write(tmp)
+        tmp.seek(0)
+        f.write(tmp.read().replace('%', '%%'))
 
     with open('setup.cfg') as f:
         # purely for debug purposes, pip will hide the output of this if -v is not provided

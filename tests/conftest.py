@@ -78,7 +78,7 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
 [tool.poetry]
 name = "testproject"
 version = "0.0.0"  # this needs to be here to make poetry happy, but we prefer VERSION file if availible
-description = "an example test project for testing vulcan builds"
+description = "an example test project for testing vulcan builds, %"
 authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
 packages = [ { include="testpkg" } ]
 keywords = [ "build", "testing" ]

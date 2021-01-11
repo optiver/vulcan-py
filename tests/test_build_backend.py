@@ -79,7 +79,7 @@ class TestMetadata:
 
     def test_entry_points(self, test_built_application_wheel: Path, wheel_metadata: pkginfo.Wheel) -> None:
         with ZipFile(test_built_application_wheel) as zf:
-            config = ConfigParser()
+            config = ConfigParser(interpolation=None)
             with zf.open(f'{wheel_metadata.name}-{wheel_metadata.version}.dist-info/entry_points.txt') as eps:
                 config.read_string(eps.read().decode())
 
