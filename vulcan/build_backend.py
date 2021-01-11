@@ -25,7 +25,7 @@ def gen_setup_cfg() -> None:
     # importing here rather than at top level because toml is not built-in
     import toml
     check_required_files()
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(interpolation=None)
     # here we read it in, even if we don't expect it to be there, because we only support basic param
     # generation from pyproject.toml so if someone wants to do something more interesting they will still need
     # to have both files
