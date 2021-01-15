@@ -80,7 +80,7 @@ name = "testproject"
 version = "0.0.0"  # this needs to be here to make poetry happy, but we prefer VERSION file if availible
 description = "an example test project for testing vulcan builds, %"
 authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
-packages = [ { include="testpkg" } ]
+packages = [ { include="testproject" } ]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -115,6 +115,7 @@ someplugin = "some.import:spec"
 @pytest.fixture(scope='session')
 def test_built_application(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'sdist', tmp_path_factory.mktemp('build'))
+
 
 @pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
