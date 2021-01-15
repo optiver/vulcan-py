@@ -1,4 +1,5 @@
 import os
+import shutil
 import shlex
 import subprocess
 from contextlib import contextmanager
@@ -106,7 +107,7 @@ class Wheel(Dist):
             print("Repacking wheel")
             subprocess.run(['wheel', 'pack', shlex.quote(str(unpacked))],
                            encoding='utf-8', check=True)
-            unpacked.unlink()
+            shutil.rmtree(unpacked)
 
 
 class SDist(Dist):
@@ -125,4 +126,4 @@ class SDist(Dist):
             yield cls(Path(unpacked))
             subprocess.run(['tar', '-zcf', shlex.quote(str(target)), shlex.quote(str(unpacked))],
                            encoding='utf-8', check=True)
-            unpacked.unlink()
+            shutil.rmtree(unpacked)
