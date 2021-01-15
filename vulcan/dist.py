@@ -100,6 +100,7 @@ class Wheel(Dist):
     @contextmanager
     def unpack(cls: Type[T], target: Path) -> Generator[T, None, None]:
         with chdir(target.parent):
+            print("Unpacking wheel")
             subprocess.run(['wheel', 'unpack', shlex.quote(str(target))],
                            encoding='utf-8', check=True)
             unpacked = next((i for i in Path().iterdir() if i.is_dir()))
@@ -119,11 +120,12 @@ class SDist(Dist):
     @contextmanager
     def unpack(cls: Type[T], target: Path) -> Generator[T, None, None]:
         with chdir(target.parent):
-            print("MEMEMEMEMEMEME", target, os.listdir())
+            print("Unpacking tarball")
             subprocess.run(['tar', '-xf', shlex.quote(str(target))],
                            encoding='utf-8', check=True, stdout=subprocess.PIPE)
             unpacked = next((i for i in Path().iterdir() if i.is_dir()))
             yield cls(Path(unpacked))
+            print("Repacking tarball")
             subprocess.run(['tar', '-zcf', shlex.quote(str(target)), shlex.quote(str(unpacked))],
                            encoding='utf-8', check=True)
             shutil.rmtree(unpacked)
