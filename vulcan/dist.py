@@ -126,6 +126,6 @@ class SDist(Dist):
             unpacked = next((i for i in Path().iterdir() if i.is_dir()))
             yield cls(Path(unpacked))
             print("Repacking tarball")
-            subprocess.run(['tar', '-zcf', shlex.quote(str(target)), shlex.quote(str(unpacked))],
+            subprocess.run(['tar', '-zcf', shlex.quote(str(target.name)), shlex.quote(str(unpacked))],
                            encoding='utf-8', check=True)
             shutil.rmtree(unpacked)
