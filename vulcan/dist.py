@@ -101,7 +101,7 @@ class Wheel(Dist):
     def unpack(cls: Type[T], target: Path) -> Generator[T, None, None]:
         with chdir(target.parent):
             print("Unpacking wheel")
-            subprocess.run(['wheel', 'unpack', shlex.quote(str(target))],
+            subprocess.run(['wheel', 'unpack', shlex.quote(target.name)],
                            encoding='utf-8', check=True)
             unpacked = next((i for i in Path().iterdir() if i.is_dir()))
             yield cls(unpacked)
@@ -121,7 +121,7 @@ class SDist(Dist):
     def unpack(cls: Type[T], target: Path) -> Generator[T, None, None]:
         with chdir(target.parent):
             print("Unpacking tarball")
-            subprocess.run(['tar', '-xf', shlex.quote(str(target))],
+            subprocess.run(['tar', '-xf', shlex.quote(target.name)],
                            encoding='utf-8', check=True, stdout=subprocess.PIPE)
             unpacked = next((i for i in Path().iterdir() if i.is_dir()))
             yield cls(Path(unpacked))
