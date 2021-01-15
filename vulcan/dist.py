@@ -1,6 +1,6 @@
 import os
-import shutil
 import shlex
+import shutil
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
@@ -21,6 +21,9 @@ def gen_reqs() -> List[pkg_resources.Requirement]:
         print("Raw output from poetry:", e.output)
         raise
     # Lockfile is out of date with pyproject.toml, this is also a failure condition
+    if out.startswith('The lock file does not exist. Locking'):
+        raise RuntimeError(f'Lock file not found in {os.getcwd()}, only {os.listdir()!r}')
+
     if out.startswith('Warning: The lock file is not up to date with the latest changes in pyproject.toml.'
                       ' You may be getting outdated dependencies. Run update to update them.'):
         raise RuntimeError(
