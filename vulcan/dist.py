@@ -134,3 +134,10 @@ class SDist(Dist):
             subprocess.run(['tar', '-zcf', shlex.quote(str(target.name)), shlex.quote(str(unpacked))],
                            encoding='utf-8', check=True)
             shutil.rmtree(unpacked)
+
+    def patch_lockfile(self, content: str) -> None:
+        with open(self._unpacked / 'poetry.lock', 'w+') as f:
+            f.write(content)
+
+    def remove_setuppy(self) -> None:
+        (self._unpacked / 'setup.py').unlink()

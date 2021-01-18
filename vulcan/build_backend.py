@@ -47,10 +47,17 @@ def build_sdist(sdist_directory: str, config_settings: str = None) -> str:
     pv = nullcontext()
     if version is not None:
         pv = patch_version(version)
+    with open('poetry.lock') as f:
+        lockfile = f.read()
     with pv:
         built_sdist = str(api.build_sdist(sdist_directory, config_settings))
         with SDist.unpack(Path(sdist_directory, built_sdist)) as sdist:
             sdist.fix_metadata(desired_reqs)
+            # when poetry makes an sdist, it very helpfully removes the lockfile and adds a setup.py. This is
+            # bad though, because the setup.py doesn't actually pin according to the lockfile
+            # and so we remove the setup.py and add back the lockfile
+            sdist.patch_lockfile(lockfile)
+            sdist.remove_setuppy()
         return built_sdist
 
 
