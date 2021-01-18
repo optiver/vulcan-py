@@ -35,9 +35,9 @@ default = true
 setuptools = "^51.0.0"
 
 [build-system]
-# in other build systems, this would says "requires=['vulcan']" and that is all that is needed
+# in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=[]
+requires=['setuptools']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 

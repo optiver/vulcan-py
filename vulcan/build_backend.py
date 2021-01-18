@@ -1,6 +1,19 @@
-from contextlib import contextmanager
+import configparser
+import os
 from pathlib import Path
-from typing import Generator, List, Optional
+from typing import List, Optional
+from io import StringIO
+
+from vulcan.metadata import build_metadata
+from vulcan.options import (build_entry_points, build_package_data,
+                            build_packages, check_unsupported)
+
+# importing setuptools here rather than at point of use forces user to specify setuptools in their
+# [build-system][requires] section
+try:
+    from setuptools.build_meta import _BuildMetaBackend  # type: ignore
+except ImportError as e:
+    raise ImportError(str(e) + '\nPlease add setuptools to [build-system] requires in pyproject.toml') from e
 
 __all__ = ['get_requires_for_build_sdist',
            'get_requires_for_build_wheel',
@@ -9,87 +22,117 @@ __all__ = ['get_requires_for_build_sdist',
            'build_sdist']
 
 
-def get_version() -> Optional[str]:
+def gen_setup_cfg() -> None:
+    # importing here rather than at top level because toml is not built-in
+    import toml
+    check_required_files()
+    config = configparser.ConfigParser(interpolation=None)
+    # here we read it in, even if we don't expect it to be there, because we only support basic param
+    # generation from pyproject.toml so if someone wants to do something more interesting they will still need
+    # to have both files
+    config.read('setup.cfg')  # fine even if the file doesn't exist
+
+    # guarenteed to be here by the check_required_files above
+    pyproject = toml.load('pyproject.toml')
+
+    version_file = find_version_file()
+    if version_file is not None:
+        with version_file.open() as version_f:
+            build_version = version_f.read().strip()
+            pyproject['tool']['poetry']['version'] = build_version
+
+    # all of these modify config in-place
+    build_metadata(config, pyproject)
+    build_packages(config, pyproject)
+    build_package_data(config, pyproject)
+    build_entry_points(config, pyproject)
+    check_unsupported(config, pyproject)
+
+    with open('setup.cfg', 'w+') as f:
+        # configparser is really dumb and frustrating.
+        # basically by default it tries to interpolate '%' signs, and will error if that doesn't work. This
+        # can be disabled (see above), but it is not in setuptools. Therefore, we must escape the %.
+        # Of course, configparser _also_ doesn't give us a way to just turn it directly into a string, hence
+        # the hacky stringIO thing
+        tmp = StringIO()
+        config.write(tmp)
+        tmp.seek(0)
+        f.write(tmp.read().replace('%', '%%'))
+
+    with open('setup.cfg') as f:
+        # purely for debug purposes, pip will hide the output of this if -v is not provided
+        print("Generated setup.cfg:")
+        print(f.read())
+
+
+def find_version_file() -> Optional[Path]:
     try:
-        with next(Path().rglob('VERSION')).open() as f:
-            return f.read().strip() or None
+        return next(Path().rglob('VERSION'))
     except StopIteration:
         return None
 
 
-@contextmanager
-def patch_version(version: str) -> Generator[None, None, None]:
-    import toml
-    with open('pyproject.toml') as f:
-        old_config = f.read()
-        config = toml.loads(old_config)
-        config['tool']['poetry']['version'] = version
-    with open('pyproject.toml', 'w+') as f:
-        toml.dump(config, f)
-    yield
-    with open('pyproject.toml', 'w+') as f:
-        f.write(old_config)
+def check_required_files() -> None:
+    for f in ('pyproject.toml', 'poetry.lock'):
+        if not os.path.exists(f):
+            raise RuntimeError(f"No {f} found in {os.getcwd()}. This file is required")
 
-
-@contextmanager
-def nullcontext() -> Generator[None, None, None]:
-    yield
 
 # For docs on the hooks: https://www.python.org/dev/peps/pep-0517/#build-backend-interface
+class ApplicationBuildMetaBackend(_BuildMetaBackend):  # type: ignore
+
+    def run_setup(self, setup_script: str = 'setup.py') -> str:
+        _old_setup = None
+        if os.path.exists('setup.cfg'):
+            print("Existant setup.cfg found, saving to recreate after generated setup is complete")
+            # we need to do this because tox does not correctly change working directory when building, which
+            # means the generated setup.cfg when run under tox ends up in the toxinidir. See:
+            # https://github.com/tox-dev/tox/blob/master/src/tox/helper/build_isolated.py
+
+            # This is NOT true for pip, which correctly creates a working directory in /tmp
+            with open('setup.cfg') as f:
+                _old_setup = f.read()
+        # generate setup.cfg from pyproject.toml
+        try:
+            gen_setup_cfg()
+            # run setup
+            return str(super().run_setup(setup_script))
+        finally:
+            # remove/undo any generated configs in setup.cfg (so we're back to clean
+            # checkout if we're under tox)
+            if _old_setup is not None:
+                print("Recreating old setup.cfg")
+                with open('setup.cfg', 'w+') as f:
+                    f.write(_old_setup)
+            else:
+                print("Removing generated setup.cfg")
+                os.remove('setup.cfg')
+
+    def build_sdist(self, sdist_directory: str, config_settings: str = None) -> str:
+        # just here to show that they are here
+        return str(super().build_sdist(sdist_directory, config_settings))
+
+    def build_wheel(self, wheel_directory: str, config_settings: str = None, metadata_directory: str = None
+                    ) -> str:
+        # just here to show that they are here
+        return str(super().build_wheel(wheel_directory, config_settings, metadata_directory))
+
+    def prepare_metadata_for_build_wheel(self, metadata_directory: str, config_settings: str = None) -> str:
+        # just here to show that they are here
+        return str(super().prepare_metadata_for_build_wheel(metadata_directory, config_settings))
+
+    def get_requires_for_build_wheel(self, config_settings: str = None) -> List[str]:
+        return ['setuptools', 'wheel >= 0.25', 'poetry', 'toml']
+
+    def get_requires_for_build_sdist(self, config_settings: str = None) -> List[str]:
+        return ['setuptools', 'poetry', 'toml']
 
 
-def build_sdist(sdist_directory: str, config_settings: str = None) -> str:
-    # just here to show that they are here
-    import poetry.core.masonry.api as api  # type: ignore
-    from vulcan.dist import SDist, gen_reqs
-    desired_reqs = gen_reqs()
-    version = get_version()
-    pv = nullcontext()
-    if version is not None:
-        pv = patch_version(version)
-    with open('poetry.lock') as f:
-        lockfile = f.read()
-    with pv:
-        built_sdist = str(api.build_sdist(sdist_directory, config_settings))
-        with SDist.unpack(Path(sdist_directory, built_sdist)) as sdist:
-            sdist.fix_metadata(desired_reqs)
-            # when poetry makes an sdist, it very helpfully removes the lockfile and adds a setup.py. This is
-            # bad though, because the setup.py doesn't actually pin according to the lockfile
-            # and so we remove the setup.py and add back the lockfile
-            sdist.patch_lockfile(lockfile)
-            sdist.remove_setuppy()
-        return built_sdist
+# The primary backend
+_BACKEND = ApplicationBuildMetaBackend()
 
-
-def build_wheel(wheel_directory: str, config_settings: str = None, metadata_directory: str = None
-                ) -> str:
-    import poetry.core.masonry.api as api
-    from vulcan.dist import Wheel, gen_reqs
-    desired_reqs = gen_reqs()
-    version = get_version()
-    pv = nullcontext()
-    if version is not None:
-        pv = patch_version(version)
-    with pv:
-        built_wheel = str(api.build_wheel(wheel_directory, config_settings, metadata_directory))
-        with Wheel.unpack(Path(wheel_directory, built_wheel)) as wheel:
-            wheel.fix_metadata(desired_reqs)
-        return built_wheel
-
-
-def prepare_metadata_for_build_wheel(metadata_directory: str, config_settings: str = None) -> str:
-    import poetry.core.masonry.api as api
-    version = get_version()
-    pv = nullcontext()
-    if version is not None:
-        pv = patch_version(version)
-    with pv:
-        return str(api.prepare_metadata_for_build_wheel(metadata_directory, config_settings))
-
-
-def get_requires_for_build_wheel(config_settings: str = None) -> List[str]:
-    return ['wheel >= 0.36.2', 'poetry', 'setuptools', 'toml']
-
-
-def get_requires_for_build_sdist(config_settings: str = None) -> List[str]:
-    return ['poetry', 'setuptools', 'toml']
+get_requires_for_build_wheel = _BACKEND.get_requires_for_build_wheel
+get_requires_for_build_sdist = _BACKEND.get_requires_for_build_sdist
+prepare_metadata_for_build_wheel = _BACKEND.prepare_metadata_for_build_wheel
+build_wheel = _BACKEND.build_wheel
+build_sdist = _BACKEND.build_sdist

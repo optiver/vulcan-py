@@ -1,2 +1,3 @@
-graft vulcan
-include README.md poetry.lock pyproject.toml
+include README.md
+include poetry.lock
+include vulcan/VERSION

@@ -7,8 +7,8 @@ from zipfile import ZipFile
 
 import pkginfo  # type: ignore
 import pytest
+import vulcan.options
 from pkg_resources import Requirement
-import vulcan.dist
 
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
@@ -65,8 +65,14 @@ class TestMetadata:
         assert wheel_metadata.version == '1.2.3'
 
     def test_requirements(self, wheel_metadata: pkginfo.Wheel, sdist_metadata: pkginfo.SDist) -> None:
+        # This is a "bug" in setuptools, see: https://github.com/pypa/setuptools/issues/1716
+        # if this test fails with an error that looks like "5 != 0", delete the below 2 lines and uncomment
+        # the third, as that will mean the bug has been fixed.
+        assert len(sdist_metadata.requires_dist) == 0, \
+            "It is unexpected to correctly parse sdist requirements, see comment"
+        assert len(wheel_metadata.requires_dist) == 5
         assert {Requirement.parse(spec) for spec in wheel_metadata.requires_dist} == EXPECTED_REQS
-        assert len(sdist_metadata.requires_dist) == len(wheel_metadata.requires_dist) == 5
+        # assert len(sdist_metadata.requires_dist) == len(wheel_metadata.requires_dist) == 5
 
     def test_python_requires(self, wheel_metadata: pkginfo.Wheel, sdist_metadata: pkginfo.SDist) -> None:
         assert wheel_metadata.requires_python == sdist_metadata.requires_python == '>=3.6'
@@ -85,5 +91,5 @@ class TestMetadata:
 class TestOptions:
     def test_gen_reqs(self, test_application: Path) -> None:
         with cd(test_application):
-            reqs = vulcan.dist.gen_reqs()
+            reqs = vulcan.options.gen_reqs()
             assert set(reqs) == EXPECTED_REQS
