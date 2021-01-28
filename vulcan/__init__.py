@@ -77,7 +77,7 @@ class Vulcan:
             classifiers=config.get("classifiers"),
             license=config.get("license"),
             keywords=config.get("keywords"),
-            patforms=config.get("patforms"),
+            platforms=config.get("platforms"),
             packages=config.get("packages"),
             )
         setuptools_options = dict(
