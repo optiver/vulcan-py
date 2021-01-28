@@ -5,6 +5,13 @@ from typing import Any, Dict, List, Optional
 import toml
 
 
+def find_version_file(source_dir: Path) -> Optional[Path]:
+    try:
+        return next(source_dir.rglob('VERSION'))
+    except StopIteration:
+        return None
+
+
 @dataclass
 class Metadata:
     name: str
@@ -60,9 +67,11 @@ class Vulcan:
     def from_source(cls, source_path: Path) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
             config = toml.load(f)['tool']['vulcan']
+        version_file = find_version_file(source_path)
+        version = version_file.read_text().strip() if version_file is not None else config.get('version')
         distutils_options = dict(
             name=config["name"],
-            version=config["version"],
+            version=version,
             description=config.get("description"),
             long_description=Path(source_path / config.get("readme")
                                   ).read_text() if config.get("readme") is not None else None,
