@@ -16,6 +16,8 @@ def hashes(directory: Path) -> Dict[Path, str]:
             continue
         if 'build' in file.parts:
             continue
+        if 'dist' in file.parts:
+            continue
         if not file.is_file():
             continue
         with file.open('rb') as f:

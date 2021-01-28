@@ -47,6 +47,7 @@ def build_sdist(sdist_directory: str,
         return rel_dist.name
 
 
+# tox requires these two fro some reason :(
 def get_requires_for_build_sdist(config_settings: Dict[str, str] = None) -> List[str]:
     return []
 
