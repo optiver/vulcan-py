@@ -28,7 +28,7 @@ class Metadata:
     classifiers: Optional[List[str]] = None
     license: Optional[str] = None
     keywords: Optional[List[str]] = None
-    patforms: Optional[str] = None
+    platforms: Optional[str] = None
 
     packages: Optional[List[str]] = None
 
