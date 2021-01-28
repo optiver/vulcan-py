@@ -14,7 +14,7 @@ def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
     if isinstance(req, str):
         # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
         return f'{lib}{req}'
-    extras = f'[{req["extras"]}]' if 'extras' in req else ''
+    extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
     # "options_sdk", {"version": "~=1.2.3", "extras="networkx,git"} -> "options_sdk[networkx,git]~=1.2.3"
     return f'{lib}{extras}{req["version"]}'
 
