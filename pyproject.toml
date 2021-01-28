@@ -16,7 +16,20 @@ classifiers = [  # same with these
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
+[tool.vulcan.entry_points.console_scripts]
+vulcan="vulcan.cli:main"
 
+[tool.vulcan.shiv]
+bin_name="vulcan"
+console_script="vulcan"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+[tool.vulcan.dependencies]
+toml='~=0.10'
+setuptools='~=52.0.0'
+wheel='~=0.36.2'
+dataclasses='~=0.8'
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed

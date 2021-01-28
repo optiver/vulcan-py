@@ -34,13 +34,27 @@ class Metadata:
 
     install_requires: Optional[List[str]] = None
 
+    entry_points: Optional[Dict[str, List[str]]] = None
+
     def asdict(self) -> Dict[str, Any]:
         return asdict(self)
 
 
 @dataclass
+class ShivOpts:
+    bin_name: str
+    console_script: Optional[str] = None
+    entry_point: Optional[str] = None
+    interpreter: Optional[str] = None
+    extra_args: str = ''
+
+
+@dataclass
 class Vulcan:
     metadata: Metadata
+    shiv_options: ShivOpts
+    lockfile: Path
+    configured_dependencies: List[str]
 
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
@@ -67,13 +81,31 @@ class Vulcan:
             packages=config.get("packages"),
             )
         setuptools_options = dict(
-            install_requires=get_requires(source_path / config.get('lockfile', 'vulcan.lock'))
+            install_requires=get_requires(source_path / config.get('lockfile', 'vulcan.lock')),
+            entry_points={section: [f'{k}={v}' for k, v in section_vals.items()]
+                          for section, section_vals in config.get('entry_points', {}).items()}
             )
         options = {**distutils_options, **setuptools_options}
-        return cls(metadata=Metadata(**options))
+
+        metadata = Metadata(**options)
+
+        lockfile = source_path / config.get('lockfile', 'vulcan.lock')
+        configured_deps = config.get('dependencies', {})
+
+        shiv_config = config.get('shiv', {})
+        shiv_opts = ShivOpts(
+            bin_name=shiv_config.get('bin_name', metadata.name),
+            console_script=shiv_config.get('console_script'),
+            entry_point=shiv_config.get('entry_point'),
+            interpreter=shiv_config.get('interpreter'),
+            extra_args=shiv_config.get('extra_args', ''),
+        )
+
+        return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_opts,
+                   configured_dependencies=configured_deps)
 
 
 def get_requires(lockfile: Path) -> List[str]:
     if not lockfile.exists():
         return []
-    return lockfile.read_text().strip().split('\n')
+    return [line for line in lockfile.read_text().strip().split('\n') if line]
