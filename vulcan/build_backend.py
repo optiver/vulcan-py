@@ -28,6 +28,8 @@ def build_wheel(wheel_directory: str, config_settings: Dict[str, str] = None,
                 metadata_directory: str = None) -> str:
     config = Vulcan.from_source(Path().absolute())
     with patch_argv(['bdist_wheel']):
+        # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
+        # https://docs.python.org/3/distutils/apiref.html
         dist = setup(**config.metadata.asdict(),
                      include_package_data=True)
         rel_dist = Path(dist.dist_files[0][-1])

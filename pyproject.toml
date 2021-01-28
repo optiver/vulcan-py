@@ -24,6 +24,9 @@ console_script="vulcan"
 interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"
 
+[tool.vulcan.extras]
+cli=["shiv~=0.1.0","build~=0.1.0"]
+
 [tool.vulcan.dependencies]
 toml='~=0.10'
 setuptools='~=52.0.0'

@@ -49,6 +49,7 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument('-o', '--outdir', default='dist/', type=Path)
 
     lock = subparsers.add_parser('lock')
+    lock.add_argument('--with-extras', nargs="+")
     lock.set_defaults(subcommand='lock')
     return parser
 
@@ -77,6 +78,10 @@ def main(argv: List[str] = None) -> None:
         with builder as pipenv:
             print("Installing to a temporary isolated environment")
             pipenv.install([to_pep508(lib, req) for lib, req in config.configured_dependencies.items()])
+            if args.with_extras and config.metadata.extras_require is not None:
+                for extra, reqs in config.metadata.extras_require.items():
+                    if extra in args.with_extras:
+                        pipenv.install(reqs)
             site_pkgs = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
             frozen = subprocess.check_output(
                 [pipenv.executable, '-m', 'pip', 'list', '--format=freeze', '--path', site_pkgs],
