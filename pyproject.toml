@@ -30,6 +30,7 @@ toml='~=0.10'
 setuptools='~=52.0.0'
 wheel='~=0.36.2'
 dataclasses='~=0.8'
+build='~=0.1.0'
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
