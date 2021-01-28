@@ -3,11 +3,20 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Union
 
 import build
 import build.env
 from vulcan import Vulcan
+
+
+def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
+    if isinstance(req, str):
+        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
+        return f'{lib}{req}'
+    extras = f'[{req["extras"]}]' if 'extras' in req else ''
+    # "options_sdk", {"version": "~=1.2.3", "extras="networkx,git"} -> "options_sdk[networkx,git]~=1.2.3"
+    return f'{lib}{extras}{req["version"]}'
 
 
 def build_shiv_app(from_dist: str, vulcan: Vulcan, outdir: Path) -> Path:
@@ -67,7 +76,7 @@ def main(argv: List[str] = None) -> None:
         builder = build.env.IsolatedEnvBuilder()
         with builder as pipenv:
             print("Installing to a temporary isolated environment")
-            pipenv.install(config.configured_dependencies)
+            pipenv.install([to_pep508(lib, req) for lib, req in config.configured_dependencies.items()])
             site_pkgs = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
             frozen = subprocess.check_output(
                 [pipenv.executable, '-m', 'pip', 'list', '--format=freeze', '--path', site_pkgs],

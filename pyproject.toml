@@ -1,6 +1,5 @@
 [tool.vulcan]
 name = "vulcan"
-version = "0.0.1"  # do not change this, we take VERSION instead from the file. poetry is just stubborn
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 # poetry says this should be "name <email>" setuptools has those in seperate fields. I don't care a ton about
 # this one

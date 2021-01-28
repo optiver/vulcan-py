@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import toml
 
@@ -61,7 +61,7 @@ class Vulcan:
     metadata: Metadata
     shiv_options: ShivOpts
     lockfile: Path
-    configured_dependencies: List[str]
+    configured_dependencies: Dict[str, Union[str, Dict[str, str]]]
 
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
