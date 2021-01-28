@@ -45,3 +45,11 @@ def build_sdist(sdist_directory: str,
         rel_dist = Path(dist.dist_files[0][-1])
         rel_dist.rename(Path(sdist_directory) / rel_dist.name)
         return rel_dist.name
+
+
+def get_requires_for_build_sdist(config_settings: Dict[str, str] = None) -> List[str]:
+    return []
+
+
+def get_requires_for_build_wheel(config_settings: Dict[str, str] = None) -> List[str]:
+    return []
