@@ -1,0 +1,47 @@
+[tool.vulcan]
+name = "vulcan"
+description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
+# poetry says this should be "name <email>" setuptools has those in seperate fields. I don't care a ton about
+# this one
+author = "Joel Christiansen"
+author_email =  "joelchristiansen@optiver.com"
+url = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
+packages = [ "vulcan" ]
+readme = "README.md"
+# I think nobody in optiver uses these, but we get them for free with almost no work so hey
+keywords = [ "build", "tooling" ] 
+classifiers = [  # same with these
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[tool.vulcan.entry_points.console_scripts]
+vulcan="vulcan.cli:main"
+
+[tool.vulcan.shiv]
+bin_name="vulcan"
+console_script="vulcan"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+[tool.vulcan.extras]
+cli=["shiv~=0.1.0","build~=0.1.0"]
+
+[tool.vulcan.dependencies]
+toml='~=0.10'
+setuptools='~=52.0.0'
+wheel='~=0.36.2'
+dataclasses='~=0.8'
+build='~=0.1.0'
+
+[build-system]
+# in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
+# to correctly install and use this tool
+requires=['setuptools', 'toml', 'dataclasses', 'wheel']
+build-backend="vulcan.build_backend"
+backend-path=["."]  # and this line should be removed for all other projects
+
+[tool.pytest.ini_options]
+filterwarnings = [ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning" ]
+junit_family="xunit1"
+testpaths = [ "tests", ]

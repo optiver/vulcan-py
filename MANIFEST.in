@@ -1,0 +1,3 @@
+graft vulcan
+include README.md vulcan.lock pyproject.toml
+global-exclude *.swp
