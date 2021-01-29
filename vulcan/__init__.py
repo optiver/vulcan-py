@@ -41,6 +41,7 @@ class Metadata:
 
     install_requires: Optional[List[str]] = None
     extras_require: Optional[Dict[str, List[str]]] = None
+    python_requires: Optional[str] = None
 
     entry_points: Optional[Dict[str, List[str]]] = None
 
@@ -90,6 +91,7 @@ class Vulcan:
             platforms=config.get("platforms"),
             packages=config.get("packages"),
             extras_require=config.get("extras"),
+            python_requires=config.get("python_requires")
             )
         setuptools_options = dict(
             install_requires=get_requires(source_path / config.get('lockfile', 'vulcan.lock')),
