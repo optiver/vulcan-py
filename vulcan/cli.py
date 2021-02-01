@@ -87,7 +87,7 @@ def main(argv: List[str] = None) -> None:
                         pipenv.install(reqs)
             site_pkgs = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
             frozen = subprocess.check_output(
-                [pipenv.executable, '-m', 'pip', 'list', '--format=freeze', '--path', site_pkgs],
+                [pipenv._pip_executable, '-m', 'pip', 'list', '--format=freeze', '--path', site_pkgs],  # type: ignore  # noqa: E501
                 encoding='utf-8')
             deps = [dep for dep in frozen.split('\n') if not dep.startswith(config.metadata.name)]
         with open(config.lockfile, 'w+') as f:
