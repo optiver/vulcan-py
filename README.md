@@ -8,11 +8,9 @@ explicit.
 
 # Quickstart
 
-1. `git clone ssh://git@stash.ams.optiver.com:7999/~joelchristiansen/vulcan.git`
-2. Ensure pip >=19.0
-3. `pip install .`  
-Or, to create the wheel without actually installing:
-3. `pip wheel .  -w build/ --no-deps`
+## To create a shiv app that has been configured in pyproject.toml:
+1. `pip install vulcan`
+2. `vulcan build --shiv -o dist`
 
 
 That's it. Pip and this project will deal with:
@@ -23,14 +21,12 @@ That's it. Pip and this project will deal with:
 4. Creating the wheel/sdist
 
 
-If you are using shiv to create the application, you can then directly use the generated wheel to create an
-application, e.g. `shiv -p '/usr/bin/env python3.6' -c your_entry_point  -o {distdir}/your_bin_name -E --compile-pyc appname-1.2.3-py3-none-any.whl`
-
-
 ## To convert a project currently using setup.py or setup.cfg:
 
-1. Convert the values in the setup.py to pyproject.toml (such that poetry is happy to run `poetry lock` without
-complaint, see [here](https://python-poetry.org/docs/pyproject/) for more specific instructions).
+1. Convert the values in the setup.py to pyproject.toml (all keys can be copy/pasted to the toml syntax with
+   the exception of dependencies and long\_description). long\_description has been replaced with the `readme` 
+   key, which points to your readme file. Dependencies have their own section `[tool.vulcan.dependencies]` and
+   are only used to create the lockfile.
 
 2. Add the following block to the pyproject.toml
 
@@ -40,7 +36,7 @@ requires=['setuptools', 'vulcan']
 build-backend="vulcan.build_backend"
 ```
 
-3. Run `poetry lock` and commit `poetry.lock` if you have not already.
+3. Run `vulcan lock` and commit `vulcan.lock` if you have not already.
 
 4. That should be it. The created files and packages should be entirely compatabile (indistinguishable except
    for the install requirements) with setup.py packages.
