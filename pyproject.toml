@@ -1,16 +1,16 @@
 [tool.vulcan]
 name = "vulcan"
+# NOTE: version is NOT required with vulcan, if there is a VERSION file anywhere within the project.
+#       Then we'll just take whatever is in that.
+# version = "0.1.1"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-# poetry says this should be "name <email>" setuptools has those in seperate fields. I don't care a ton about
-# this one
 author = "Joel Christiansen"
 author_email =  "joelchristiansen@optiver.com"
 url = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
 packages = [ "vulcan" ]
 readme = "README.md"
-# I think nobody in optiver uses these, but we get them for free with almost no work so hey
 keywords = [ "build", "tooling" ] 
-classifiers = [  # same with these
+classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
@@ -18,18 +18,23 @@ classifiers = [  # same with these
 [tool.vulcan.entry_points.console_scripts]
 vulcan="vulcan.cli:main"
 
+# there is no point in a vulcan shiv application really, although you _can_ throw it in ~/.local/bin if you
+# really want to
 [[tool.vulcan.shiv]]
 bin_name="vulcan"
 console_script="vulcan"
 interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"
 
+# there's definitely no point to a second vulcan shiv application that is literally identical to the first,
+# this is here only to show that you can configure multiple shiv applications to be built
 [[tool.vulcan.shiv]]
 bin_name="vulcan2"
-console_script="vulcan"
+entry_point="vulcan.cli:main"
 interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"
 
+# e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
 cli=["shiv~=0.1.0","build~=0.1.0"]
 
