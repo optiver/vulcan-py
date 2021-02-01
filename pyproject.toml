@@ -18,8 +18,14 @@ classifiers = [  # same with these
 [tool.vulcan.entry_points.console_scripts]
 vulcan="vulcan.cli:main"
 
-[tool.vulcan.shiv]
+[[tool.vulcan.shiv]]
 bin_name="vulcan"
+console_script="vulcan"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+[[tool.vulcan.shiv]]
+bin_name="vulcan2"
 console_script="vulcan"
 interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"

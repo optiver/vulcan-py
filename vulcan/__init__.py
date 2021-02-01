@@ -60,7 +60,7 @@ class ShivOpts:
 @dataclass
 class Vulcan:
     metadata: Metadata
-    shiv_options: ShivOpts
+    shiv_options: List[ShivOpts]
     lockfile: Path
     configured_dependencies: Dict[str, Union[str, Dict[str, str]]]
 
@@ -103,16 +103,18 @@ class Vulcan:
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
         configured_deps = config.get('dependencies', {})
 
-        shiv_config = config.get('shiv', {})
-        shiv_opts = ShivOpts(
-            bin_name=shiv_config.get('bin_name', metadata.name),
-            console_script=shiv_config.get('console_script'),
-            entry_point=shiv_config.get('entry_point'),
-            interpreter=shiv_config.get('interpreter'),
-            extra_args=shiv_config.get('extra_args', ''),
-        )
+        shiv_ops = []
+        shiv_config = config.get('shiv', [])
+        for conf in shiv_config:
+            shiv_ops.append(ShivOpts(
+                bin_name=conf.get('bin_name', metadata.name),
+                console_script=conf.get('console_script'),
+                entry_point=conf.get('entry_point'),
+                interpreter=conf.get('interpreter'),
+                extra_args=conf.get('extra_args', ''),
+            ))
 
-        return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_opts,
+        return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
                    configured_dependencies=configured_deps)
 
 

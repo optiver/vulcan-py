@@ -19,21 +19,24 @@ def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
     return f'{lib}{extras}{req["version"]}'
 
 
-def build_shiv_app(from_dist: str, vulcan: Vulcan, outdir: Path) -> Path:
-    try:
-        cmd = ['shiv', from_dist, '-o', str(outdir / vulcan.shiv_options.bin_name)]
-        if vulcan.shiv_options.console_script:
-            cmd += ['-c', vulcan.shiv_options.console_script]
-        if vulcan.shiv_options.entry_point:
-            cmd += ['-e', vulcan.shiv_options.entry_point]
-        if vulcan.shiv_options.interpreter:
-            cmd += ['-p', vulcan.shiv_options.interpreter]
-        if vulcan.shiv_options.extra_args:
-            cmd += shlex.split(vulcan.shiv_options.extra_args)
-        subprocess.run(cmd)
-        return outdir / vulcan.shiv_options.bin_name
-    except KeyError as e:
-        raise KeyError('missing config value in pyproject.toml: {e}') from e
+def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
+    results = []
+    for app in vulcan.shiv_options:
+        try:
+            cmd = ['shiv', from_dist, '-o', str(outdir / app.bin_name)]
+            if app.console_script:
+                cmd += ['-c', app.console_script]
+            if app.entry_point:
+                cmd += ['-e', app.entry_point]
+            if app.interpreter:
+                cmd += ['-p', app.interpreter]
+            if app.extra_args:
+                cmd += shlex.split(app.extra_args)
+            subprocess.run(cmd)
+            results.append(outdir / app.bin_name)
+        except KeyError as e:
+            raise KeyError('missing config value in pyproject.toml: {e}') from e
+    return results
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -71,7 +74,7 @@ def main(argv: List[str] = None) -> None:
             project.build('wheel', str(args.outdir))
             dist = next(iter(set(args.outdir.iterdir()) - before))
         if args.shiv:
-            build_shiv_app(dist, config, args.outdir)
+            build_shiv_apps(dist, config, args.outdir)
             os.remove(dist)
     elif args.subcommand == 'lock':
         builder = build.env.IsolatedEnvBuilder()
