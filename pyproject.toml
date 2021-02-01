@@ -14,6 +14,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+python_requires = ">=3.6"
 
 [tool.vulcan.entry_points.console_scripts]
 vulcan="vulcan.cli:main"
