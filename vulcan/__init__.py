@@ -56,6 +56,7 @@ class ShivOpts:
     console_script: Optional[str] = None
     entry_point: Optional[str] = None
     interpreter: Optional[str] = None
+    with_extras: Optional[List[str]] = None
     extra_args: str = ''
 
 
@@ -118,6 +119,7 @@ class Vulcan:
                 console_script=conf.get('console_script'),
                 entry_point=conf.get('entry_point'),
                 interpreter=conf.get('interpreter'),
+                with_extras=conf.get('with_extras', []),
                 extra_args=conf.get('extra_args', ''),
             ))
 

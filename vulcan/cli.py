@@ -25,7 +25,11 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
     results = []
     for app in vulcan.shiv_options:
         try:
-            cmd = ['shiv', from_dist, '-o', str(outdir / app.bin_name)]
+            if not app.with_extras:
+                dist = from_dist
+            else:
+                dist = f'{from_dist}[{",".join(app.with_extras)}]'
+            cmd = ['shiv', dist, '-o', str(outdir / app.bin_name)]
             if app.console_script:
                 cmd += ['-c', app.console_script]
             if app.entry_point:
