@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, Tuple
+import warnings
 
 import toml
 
@@ -126,7 +127,8 @@ class Vulcan:
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     if not lockfile.exists():
-        raise FileNotFoundError(f'No file {lockfile} found')
+        warnings.warn(f"No lockfile {lockfile} found")
+        return [], {}
     with lockfile.open() as f:
         content = toml.load(f)
     return content['install_requires'], content['extras_require']
