@@ -2,7 +2,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, Tuple
 
-import json
 import toml
 
 
@@ -129,5 +128,5 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     if not lockfile.exists():
         raise FileNotFoundError(f'No file {lockfile} found')
     with lockfile.open() as f:
-        content = json.load(f)
+        content = toml.load(f)
     return content['install_requires'], content['extras_require']

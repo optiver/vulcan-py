@@ -1,10 +1,10 @@
 import argparse
-import json
 import os
 import shlex
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Union
+import toml
 
 import build
 import build.env
@@ -82,6 +82,6 @@ def main(argv: List[str] = None) -> None:
             [to_pep508(k, v) for k, v in config.configured_dependencies.items()],
             config.configured_extras or {})
         with open(config.lockfile, 'w+') as f:
-            json.dump({'install_requires': install_requires, 'extras_require': extras_require}, f, indent=2)
+            toml.dump({'install_requires': install_requires, 'extras_require': extras_require}, f)
     else:
         raise ValueError('unknown subcommand {args.subcommand!r}')
