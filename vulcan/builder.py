@@ -53,9 +53,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
         all_installed = get_freeze(pipenv, site_packages)
 
     consolidated = {}
-    names = set()
     for extra, resolved_reqs in all_resolved_extras.items():
-        names |= set(resolved_reqs)
         consolidated[extra] = sorted([str(all_installed[name]) for name in resolved_reqs])
 
     return sorted([str(all_installed[name]) for name in base_deps]), consolidated
