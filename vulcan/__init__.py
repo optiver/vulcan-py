@@ -1,7 +1,8 @@
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
+import json
 import toml
 
 
@@ -64,6 +65,7 @@ class Vulcan:
     shiv_options: List[ShivOpts]
     lockfile: Path
     configured_dependencies: Dict[str, Union[str, Dict[str, str]]]
+    configured_extras: Dict[str, List[str]]
 
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
@@ -71,6 +73,10 @@ class Vulcan:
             config = toml.load(f)['tool']['vulcan']
         version_file = find_version_file(source_path)
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
+        lockfile = source_path / config.get('lockfile', 'vulcan.lock')
+
+        install_requires, extras_require = get_requires(lockfile)
+
         distutils_options = dict(
             name=config["name"],
             version=version,
@@ -90,11 +96,11 @@ class Vulcan:
             keywords=config.get("keywords"),
             platforms=config.get("platforms"),
             packages=config.get("packages"),
-            extras_require=config.get("extras"),
+            extras_require=extras_require,
             python_requires=config.get("python_requires")
             )
         setuptools_options = dict(
-            install_requires=get_requires(source_path / config.get('lockfile', 'vulcan.lock')),
+            install_requires=install_requires,
             entry_points={section: [f'{k}={v}' for k, v in section_vals.items()]
                           for section, section_vals in config.get('entry_points', {}).items()}
             )
@@ -102,7 +108,6 @@ class Vulcan:
 
         metadata = Metadata(**options)
 
-        lockfile = source_path / config.get('lockfile', 'vulcan.lock')
         configured_deps = config.get('dependencies', {})
 
         shiv_ops = []
@@ -117,10 +122,12 @@ class Vulcan:
             ))
 
         return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
-                   configured_dependencies=configured_deps)
+                   configured_dependencies=configured_deps, configured_extras=config.get('extras', {}))
 
 
-def get_requires(lockfile: Path) -> List[str]:
+def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     if not lockfile.exists():
-        return []
-    return [line for line in lockfile.read_text().strip().split('\n') if line]
+        raise FileNotFoundError(f'No file {lockfile} found')
+    with lockfile.open() as f:
+        content = json.load(f)
+    return content['install_requires'], content['extras_require']

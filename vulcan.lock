@@ -1,15 +1,29 @@
-build==0.1.0
-click==7.1.2
-dataclasses==0.8
-importlib-metadata==3.4.0
-importlib-resources==5.1.0
-packaging==20.8
-pep517==0.9.1
-pip==21.0
-pyparsing==2.4.7
-setuptools==52.0.0
-shiv==0.1.3
-toml==0.10.2
-typing-extensions==3.7.4.3
-wheel==0.36.2
-zipp==3.4.0
+{
+  "install_requires": [
+    "pyparsing==2.4.7",
+    "typing-extensions==3.7.4.3",
+    "build==0.1.0",
+    "pep517==0.9.1",
+    "dataclasses==0.8",
+    "setuptools==52.0.0",
+    "packaging==20.9",
+    "zipp==3.4.0",
+    "toml==0.10.2",
+    "wheel==0.36.2",
+    "importlib-metadata==3.4.0"
+  ],
+  "extras_require": {
+    "cli": [
+      "idna==2.10",
+      "shiv==0.1.3",
+      "chardet==4.0.0",
+      "click==7.1.2",
+      "importlib-resources==5.1.0",
+      "urllib3==1.26.3",
+      "setuptools==53.0.0",
+      "certifi==2020.12.5",
+      "requests==2.25.1",
+      "pip==21.0.1"
+    ]
+  }
+}
