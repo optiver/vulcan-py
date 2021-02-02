@@ -1,10 +1,11 @@
 import hashlib
+import shutil
 from pathlib import Path
 from typing import Dict
+from pkginfo import Wheel  # type: ignore
 
 import build
 import pytest
-import shutil
 
 
 def hashes(directory: Path) -> Dict[Path, str]:
@@ -73,40 +74,39 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     (tmp_path / 'testproject/__init__.py').touch()
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
         f.write('1.2.3\n')
-    test_lockfile = (Path(__file__).parent / 'data/test_application_poetry.lock')
-    shutil.copy(test_lockfile, tmp_path / 'poetry.lock')
+    test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
+    shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
     with (tmp_path / 'pyproject.toml').open('w+') as f:
         f.write("""\
-[tool.poetry]
+[tool.vulcan]
 name = "testproject"
-version = "0.0.0"  # this needs to be here to make poetry happy, but we prefer VERSION file if availible
 description = "an example test project for testing vulcan builds, %"
-authors = ["Joel Christiansen <joelchristiansen@optiver.com>"]
-packages = [ { include="testproject" } ]
+author = "Joel Christiansen"
+author_email =  "joelchristiansen@optiver.com"
+packages = [ "testproject" ]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
+python_requires = ">=3.6"
 
-[tool.poetry.dependencies]
-python = ">=3.6"
-requests = "^2.25.1"
+[tool.vulcan.dependencies]
+requests = "~=2.25.1"
 
-[[tool.poetry.source]]
-# semi-mandatory, needed for poetry but doesn't help with pip. Not super nice.
-name = "optiver"
-url = "http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple"
-default = true
+[tool.vulcan.extras]
+test1 = ["requests", "build"]
+test2 = ["requests~=2.22", "setuptools"]
+test3 = ["requests>=2.0.0", "wheel"]
 
 [build-system]
 requires=['setuptools', 'vulcan']
 build-backend="vulcan.build_backend"
 
-[tool.poetry.scripts]
+[tool.vulcan.entry_points.console_scripts]
 myep = "vulcan.test_ep:main"
 
-[tool.poetry.plugins.testplugin]
+[tool.poetry.entry_points.testplugin]
 someplugin = "some.import:spec"
 
 """)
@@ -118,6 +118,12 @@ someplugin = "some.import:spec"
 def test_built_application(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'sdist', tmp_path_factory.mktemp('build'))
 
+
 @pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
+
+
+@pytest.fixture(scope='session')
+def wheel_pkg_info(test_built_application_wheel: Path) -> Wheel:
+    return Wheel(str(test_built_application_wheel))
