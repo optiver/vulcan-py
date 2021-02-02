@@ -1,10 +1,11 @@
 import hashlib
+import shutil
 from pathlib import Path
 from typing import Dict
+from pkginfo import Wheel  # type: ignore
 
 import build
 import pytest
-import shutil
 
 
 def hashes(directory: Path) -> Dict[Path, str]:
@@ -117,6 +118,12 @@ someplugin = "some.import:spec"
 def test_built_application(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'sdist', tmp_path_factory.mktemp('build'))
 
+
 @pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
+
+
+@pytest.fixture(scope='session')
+def wheel_pkg_info(test_built_application_wheel: Path) -> Wheel:
+    return Wheel(str(test_built_application_wheel))
