@@ -24,7 +24,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
         pipenv.install(install_requires)
         base_deps = get_freeze(pipenv, site_packages)
         if not extras:
-            return [str(req) for req in base_deps], {}
+            return [str(req) for req in base_deps.values()], {}
         elif len(extras) <= 1:
             # if there are 0 or 1 extras, we can get away with only a single venv
             # extras is guarenteed to only have one key now
