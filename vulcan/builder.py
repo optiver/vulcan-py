@@ -1,4 +1,5 @@
 import subprocess
+from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -18,42 +19,38 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
                  ) -> Tuple[List[str], Dict[str, List[str]]]:
     builder = build.env.IsolatedEnvBuilder()
     pipenv: build.env._IsolatedEnvVenvPip
-    all_resolved: Dict[str, Requirement] = {}
+
+    extras_list = list(extras.items())
     with builder as pipenv:  # type: ignore
         site_packages = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
         pipenv.install(install_requires)
-        base_deps = get_freeze(pipenv, site_packages)
-        if not extras:
-            return [str(req) for req in base_deps.values()], {}
-        elif len(extras) <= 1:
-            # if there are 0 or 1 extras, we can get away with only a single venv
-            # extras is guarenteed to only have one key now
-            extra, extra_deps = next(iter(extras.items()))
-            pipenv.install(extra_deps)
-            all_resolved = get_freeze(pipenv, site_packages)
-            extras_only = {name: req for name, req in all_resolved.items() if name not in base_deps}
-            return [str(req) for name, req in all_resolved.items() if name not in extras_only], {
-                extra: [str(all_resolved[req]) for req in extras_only]}
-    # there are 2+ extras, and we have now resolved the base dependencies and none of the extras
-    # (this is the slow path)
-    all_resolved_extras = {}
-    for extra, configured_deps in extras.items():
+        base_freeze = get_freeze(pipenv, site_packages)
+        if not extras_list:
+            # if we have no extras, we are done here.
+            return sorted([str(req) for req in base_freeze.values()]), {}
+        # for the first extra, we can use the virtualenv because the extra_reqs are by definition a superset
+        # of the base reqs
+        extra, extra_reqs = extras_list[0]
+        pipenv.install(extra_reqs)
+        extra_freeze = get_freeze(pipenv, site_packages)
+        resolved_extras = {extra: sorted([str(req) for req in extra_freeze.values()])}
+        if len(extras_list) == 1:
+            # if we have exactly 1 extra, we can get away with only using 1 venv in total
+            return sorted([str(extra_freeze[req]) for req in base_freeze.keys()]), resolved_extras
+
+        # otherwise, we make one last use of this venv to get the total deps of all the extras installed at
+        # the same time ( this will be used to get the actual versions of the reqs )
+        pipenv.install(list(chain.from_iterable(reqs for _, reqs in extras_list[1:])))
+        all_resolved = get_freeze(pipenv, site_packages)
+
+    # skipping the first extra because we've already done that one.
+    for extra, extra_reqs in extras_list[1:]:
         with builder as pipenv:  # type: ignore
+            # this is the expensive bit, because we create a new venv for each extra beyond the first, so
+            # total venvs is max(1, len(extras))
             site_packages = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
-            # base deps instead of install_requires to make sure we're not conflicting
-            pipenv.install(base_deps)
-            pipenv.install(configured_deps)
-            all_resolved_extras[extra] = get_freeze(pipenv, site_packages)
+            pipenv.install(install_requires + extra_reqs)
+            extra_freeze = get_freeze(pipenv, site_packages)
+            resolved_extras[extra] = sorted([str(all_resolved[req]) for req in extra_freeze])
 
-    with builder as pipenv:  # type: ignore
-        pipenv.install(install_requires)
-        for reqs in extras.values():
-            site_packages = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))
-            pipenv.install(reqs)
-        all_installed = get_freeze(pipenv, site_packages)
-
-    consolidated = {}
-    for extra, resolved_reqs in all_resolved_extras.items():
-        consolidated[extra] = sorted([str(all_installed[name]) for name in resolved_reqs])
-
-    return sorted([str(all_installed[name]) for name in base_deps]), consolidated
+    return sorted([str(all_resolved[req]) for req in base_freeze.keys()]), resolved_extras
