@@ -49,6 +49,14 @@ def build_sdist(sdist_directory: str,
         return rel_dist.name
 
 
+# not part of PEP-517, but very useful to have
+def install_develop() -> None:
+    config = Vulcan.from_source(Path().absolute())
+    with patch_argv(['develop']):
+        setup(**config.metadata.asdict(),
+              include_package_data=True)
+
+
 # tox requires these two fro some reason :(
 def get_requires_for_build_sdist(config_settings: Dict[str, str] = None) -> List[str]:
     return []

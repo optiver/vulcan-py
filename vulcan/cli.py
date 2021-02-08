@@ -4,12 +4,13 @@ import shlex
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Union
-import toml
 
 import build
 import build.env
+import toml
 from vulcan import Vulcan
 from vulcan.builder import resolve_deps
+from vulcan.build_backend import install_develop
 
 
 def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
@@ -59,6 +60,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     lock = subparsers.add_parser('lock')
     lock.set_defaults(subcommand='lock')
+
+    develop = subparsers.add_parser('develop')
+    develop.set_defaults(subcommand='develop')
     return parser
 
 
@@ -87,5 +91,14 @@ def main(argv: List[str] = None) -> None:
             config.configured_extras or {})
         with open(config.lockfile, 'w+') as f:
             toml.dump({'install_requires': install_requires, 'extras_require': extras_require}, f)
+    elif args.subcommand == 'develop':
+        # do note that when using this command specifically in this project, you MUST call it as
+        # `python vulcan/cli.py develop` the first time.
+        # All other projects, you can just do `vulcan devleop` and that's fine.
+        install_develop()
     else:
         raise ValueError('unknown subcommand {args.subcommand!r}')
+
+
+if __name__ == '__main__':
+    main()
