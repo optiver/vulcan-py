@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
 
+import pytest
+
 from vulcan import cli
 
 
@@ -14,8 +16,13 @@ def cd(p: Path) -> Generator[None, None, None]:
     os.chdir(old)
 
 
+@pytest.mark.cli
 def test_lockfile_regen_idempotent(test_application: Path) -> None:
-    lockfile_content = (test_application / 'vulcan.lock').read_text()
+
     with cd(test_application):
         cli.main(['lock'])
-    assert (test_application / 'vulcan.lock').read_text() == lockfile_content
+    first_pass = (test_application / 'vulcan.lock').read_text()
+
+    with cd(test_application):
+        cli.main(['lock'])
+    assert (test_application / 'vulcan.lock').read_text() == first_pass
