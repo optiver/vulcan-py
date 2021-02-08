@@ -41,7 +41,7 @@ cli=["shiv~=0.1.0","build~=0.1.0"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
-setuptools='~=52.0.0'
+setuptools='~=53.0.0'
 wheel='~=0.36.2'
 dataclasses='~=0.8'
 
