@@ -8,9 +8,10 @@ from typing import Dict, List, Union
 import build
 import build.env
 import toml
+
 from vulcan import Vulcan
-from vulcan.builder import resolve_deps
 from vulcan.build_backend import install_develop
+from vulcan.builder import resolve_deps
 
 
 def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
@@ -39,7 +40,9 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
                 cmd += ['-p', app.interpreter]
             if app.extra_args:
                 cmd += shlex.split(app.extra_args)
-            subprocess.run(cmd)
+            res = subprocess.run(cmd)
+            if res.returncode != 0:
+                raise SystemExit(res.returncode)
             results.append(outdir / app.bin_name)
         except KeyError as e:
             raise KeyError('missing config value in pyproject.toml: {e}') from e
@@ -83,8 +86,10 @@ def main(argv: List[str] = None) -> None:
             project.build('wheel', str(args.outdir))
             dist = next(iter(set(args.outdir.iterdir()) - before))
         if args.shiv:
-            build_shiv_apps(dist, config, args.outdir)
-            os.remove(dist)
+            try:
+                build_shiv_apps(dist, config, args.outdir)
+            finally:
+                os.remove(dist)
     elif args.subcommand == 'lock':
         install_requires, extras_require = resolve_deps(
             [to_pep508(k, v) for k, v in config.configured_dependencies.items()],
