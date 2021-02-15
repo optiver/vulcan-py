@@ -2,10 +2,11 @@ import hashlib
 import shutil
 from pathlib import Path
 from typing import Dict
-from pkginfo import Wheel  # type: ignore
+from typing import Generator
 
 import build
 import pytest
+from pkginfo import Wheel  # type: ignore
 
 
 def hashes(directory: Path) -> Dict[Path, str]:
@@ -40,6 +41,13 @@ def build_dist(source: Path, dist_type: str, target: Path) -> Path:
     assert hashes_pre == hashes(
         source), 'cwd not clean after build, ensure the build script cleans up any generated files'
     return Path(built)
+
+
+@pytest.fixture(autouse=True)
+def _preserve_lockfile(test_application: Path) -> Generator[None, None, None]:
+    old_content = (test_application / 'vulcan.lock').read_text()
+    yield
+    (test_application / 'vulcan.lock').write_text(old_content)
 
 
 @pytest.fixture

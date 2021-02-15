@@ -20,6 +20,9 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
     builder = build.env.IsolatedEnvBuilder()
     pipenv: build.env._IsolatedEnvVenvPip
 
+    if not install_requires and not extras:
+        return [], {}
+
     extras_list = list(extras.items())
     with builder as pipenv:  # type: ignore
         site_packages = next(iter(Path(str(builder._path)).glob('lib/*/site-packages')))

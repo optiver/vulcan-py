@@ -16,13 +16,7 @@ def cd(p: Path) -> Generator[None, None, None]:
     os.chdir(old)
 
 
-@pytest.fixture(autouse=True)
-def _preserve_lockfile(test_application: Path) -> Generator[None, None, None]:
-    old_content = (test_application / 'vulcan.lock').read_text()
-    yield
-    (test_application / 'vulcan.lock').write_text(old_content)
-
-
+@pytest.mark.cli
 def test_lockfile_regen_idempotent(test_application: Path) -> None:
 
     with cd(test_application):

@@ -22,3 +22,18 @@ class TestResolveDeps:
 
     def test_empty_reqs_empty_deps(self) -> None:
         assert resolve_deps([], {}) == ([], {})
+
+    def test_empty_base_non_empty_extras_empty_base(self) -> None:
+        base, extras = resolve_deps([], {'test': ['requests']})
+        assert base == []
+        assert extras
+
+    def test_non_empty_base_empty_extras_empty_extras(self) -> None:
+        base, extras = resolve_deps(['requests'], {})
+        assert base
+        assert extras == {}
+
+    def test_same_reqs_same_deps(self) -> None:
+        base, extras = resolve_deps(['requests'], {'test': ['requests']})
+        # output should be sorted, so it is good to just test equality here
+        assert base == extras['test']
