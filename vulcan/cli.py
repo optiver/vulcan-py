@@ -3,15 +3,23 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 import build
 import build.env
 import toml
-
 from vulcan import Vulcan
 from vulcan.build_backend import install_develop
 from vulcan.builder import resolve_deps
+
+
+class PrettyTomlEncoder(toml.TomlEncoder):  # type: ignore
+    def dump_list(self, v: List[Any]) -> str:
+        retval = "["
+        for u in v:
+            retval += "\n   " + str(self.dump_value(u)) + ","
+        retval += "]"
+        return retval
 
 
 def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
@@ -95,7 +103,11 @@ def main(argv: List[str] = None) -> None:
             [to_pep508(k, v) for k, v in config.configured_dependencies.items()],
             config.configured_extras or {})
         with open(config.lockfile, 'w+') as f:
-            toml.dump({'install_requires': install_requires, 'extras_require': extras_require}, f)
+            #  toml type annotations claim there is no "encoder" argument.
+            #  toml type annotations lie
+            toml.dump({'install_requires': install_requires,  # type: ignore
+                       'extras_require': extras_require},
+                      f, encoder=PrettyTomlEncoder())
     elif args.subcommand == 'develop':
         # do note that when using this command specifically in this project, you MUST call it as
         # `python vulcan/cli.py develop` the first time.
