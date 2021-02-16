@@ -1,8 +1,10 @@
+import subprocess
 from pathlib import Path
 
 import pytest
 from pkg_resources import Requirement
 from pkginfo import Wheel  # type: ignore
+
 from vulcan.builder import resolve_deps
 
 
@@ -37,3 +39,7 @@ class TestResolveDeps:
         base, extras = resolve_deps(['requests'], {'test': ['requests']})
         # output should be sorted, so it is good to just test equality here
         assert base == extras['test']
+
+    def test_conflicting_deps_raises(self) -> None:
+        with pytest.raises(subprocess.CalledProcessError):
+            resolve_deps(['requests==2.5.0'], {'test': ['requests==2.4.0']})
