@@ -37,7 +37,7 @@ extra_args="-E --compile-pyc"
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
-cli=["shiv~=0.1.0","build~=0.1.0"]
+cli=["shiv~=0.1.0","build~=0.3.0"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
@@ -57,3 +57,6 @@ backend-path=["."]  # and this line should be removed for all other projects
 filterwarnings = [ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning" ]
 junit_family="xunit1"
 testpaths = [ "tests", ]
+markers = [ 
+    "cli: Tests that require full cli dependencies" 
+]
