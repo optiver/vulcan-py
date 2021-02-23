@@ -32,7 +32,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             # otherwise, we make one last use of this venv to get the total deps of all the extras installed
             # at the same time ( this will be used to get the actual versions of the reqs )
             pipenv.install(site_packages,
-                           install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list[1:])))
+                           install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list)))
             all_resolved = pipenv.freeze(site_packages)
 
         # skipping the first extra because we've already done that one.
