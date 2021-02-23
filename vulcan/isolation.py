@@ -33,7 +33,7 @@ class VulcanEnvBuilder(EnvBuilder):
 
     def _setup_pip(self, context: SimpleNamespace) -> None:
         super()._setup_pip(context)
-        cmd = [context.env_exe, '-Im', 'pip', '--upgrade', 'pip']
+        cmd = [context.env_exe, '-Im', 'pip', 'install', '--upgrade', 'pip']
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
     def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'], requirements: List[str]
