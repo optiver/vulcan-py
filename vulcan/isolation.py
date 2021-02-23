@@ -31,6 +31,11 @@ class VulcanEnvBuilder(EnvBuilder):
         self.context = super().ensure_directories(env_dir)
         return self.context
 
+    def _setup_pip(self, context: SimpleNamespace) -> None:
+        super()._setup_pip(context)
+        cmd = [context.env_exe, '-Im', 'pip', '--upgrade', 'pip']
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+
     def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'], requirements: List[str]
                 ) -> None:
         # install Isolated with module pip using pep517
