@@ -41,7 +41,6 @@ class VulcanEnvBuilder(EnvBuilder):
             '-Im',
             'pip',
             'install',
-            '--use-pep517',
             '--target',
             str(deps_dir)] + requirements
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
