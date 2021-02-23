@@ -1,6 +1,7 @@
 import tempfile
 from itertools import chain
 from typing import Dict, List, Tuple
+
 from vulcan.isolation import create_venv
 
 
@@ -21,7 +22,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             # for the first extra, we can use the virtualenv because the extra_reqs are by definition a
             # superset of the base reqs
             extra, extra_reqs = extras_list[0]
-            pipenv.install(site_packages, extra_reqs)
+            pipenv.install(site_packages, install_requires + extra_reqs)
             extra_freeze = pipenv.freeze(site_packages)
             resolved_extras = {extra: sorted([str(req) for req in extra_freeze.values()])}
             if len(extras_list) == 1:
@@ -30,7 +31,8 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
 
             # otherwise, we make one last use of this venv to get the total deps of all the extras installed
             # at the same time ( this will be used to get the actual versions of the reqs )
-            pipenv.install(site_packages, list(chain.from_iterable(reqs for _, reqs in extras_list[1:])))
+            pipenv.install(site_packages,
+                           install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list[1:])))
             all_resolved = pipenv.freeze(site_packages)
 
         # skipping the first extra because we've already done that one.
