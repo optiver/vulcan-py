@@ -1,12 +1,16 @@
 # About
 
-This is a buildtool intended to take advantage of poetry's lockfile capabilities without having to force users
+This is a build tool intended to take advantage of poetry's lockfile capabilities without having to force users
 to deal with a bunch of setup in bamboo and their own projects. The intended workflow is that users will use
 poetry in their dev environments to generate lockfiles, then this tool will use that lockfile to transparently
 set patch-version pinned requirements to avoid incidents like EE-2936 by forcing all dependency upgrades to be
 explicit.
 
-# Minimal starting config
+## Note:
+It is possible that the config elements may change to be in compliance with
+https://www.python.org/dev/peps/pep-0621
+
+# Minimal starting configuration
 
 ```toml
 [tool.vulcan]
@@ -37,7 +41,7 @@ optional arguments:
 Vulcan build gives a way to create wheels, sdists, and shiv applications. Instead of having the following in
 tox.ini:
 ```
-shiv -p '/usr/bin/env python3.6' -e your_application.__main__:run  -o {distdir}/binary_name" -E --compile-pyc .
+shiv -p '/usr/bin/env python3.6' -e your_application.__main__:run  -o {distdir}/binary_name" --compile-pyc .
 ```
 
 You can instead have only 
@@ -51,12 +55,12 @@ and have the actual  configuration for that command in your pyproject.toml:
 bin_name="binary_name"
 entry_point="your_application.__main__:run"
 interpreter="/usr/bin/env python3.6"
-extra_args="-E --compile-pyc"
+extra_args="--compile-pyc"
 ```
 
 This section may be repeated, in which case `build` will create all the specified binaries.
 
-`build` also supports outputing wheel and sdists, which can be used to distribute your application as a pip
+`build` also supports outputting wheel and sdists, which can be used to distribute your application as a pip
 package as well as a shiv binary if desired.
 
 ## `vulcan lock`
@@ -89,7 +93,7 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-`develop` is a convienence tool intended to replicate the effects of `pip install -e .` when developing an
+`develop` is a convenience tool intended to replicate the effects of `pip install -e .` when developing an
 application, as that command was [removed in pep 517](https://www.python.org/dev/peps/pep-0517/#get-requires-for-build-sdist).
 
 If you did not previously use `pip install -e .`, this command may be safely ignored. If you did, follow these
