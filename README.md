@@ -10,7 +10,31 @@ explicit.
 It is possible that the config elements may change to be in compliance with
 https://www.python.org/dev/peps/pep-0621
 
-# Minimal starting configuration
+## Warn:
+
+This project is NOT an example project, do not blindly copy/paste from any files in this project except the
+README.md. This project builds itself and therefor requires some special configurations.
+
+# Getting started
+
+## Pre-existing vulcan project
+
+```bash
+$ mkvirtualenv -p /usr/bin/python3.6 project_name  # 1. create a virtualenv
+$ pip install -U pip                               # 2. upgrade pip
+$ pip install -U vulcan[cli]                       # 3. install vulcan with cli extra
+$ vulcan develop                                   # 4. make an editable installation of your project
+$ vulcan build -o dist/                            # 5. create a distirbution
+```
+
+## Brand new project
+
+Steps 1-3 from above, then:
+
+Create your project as normal, ensuring that MANIFEST.in contains the files you want
+
+
+## Minimal starting configuration (pyproject.toml)
 
 ```toml
 [tool.vulcan]
@@ -21,6 +45,18 @@ name = "package_name"
 requires = ['setuptools', 'vulcan']
 build-backend = "vulcan.build_backend"
 ```
+
+## Dependencies 
+
+```toml
+[tool.vulcan.dependencies]
+toml='~=0.10'
+setuptools='~=53.0.0'
+wheel='~=0.36.2'
+dataclasses='~=0.8'
+```
+
+Specify dependencies using the form: `package_name='{pep-508-spec}'`. Extras are supported in the package name.
 
 # Command Overview
 
