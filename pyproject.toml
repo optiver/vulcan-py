@@ -1,8 +1,5 @@
 [tool.vulcan]
 name = "vulcan"
-# NOTE: version is NOT required with vulcan, if there is a VERSION file anywhere within the project.
-#       Then we'll just take whatever is in that.
-# version = "0.1.1"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 author = "Joel Christiansen"
 author_email =  "joelchristiansen@optiver.com"
