@@ -53,8 +53,8 @@ def build_sdist(sdist_directory: str,
 def install_develop(setuptools_args: List[str] = None) -> None:
     config = Vulcan.from_source(Path().absolute())
     extra_args = setuptools_args or []
-    if '--index-url' not in extra_args:
-        extra_args += ['--index-url', 'http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple']
+    extra_args = ['--index-url',
+                  'http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple'] + (extra_args or [])
     with patch_argv(['develop'] + extra_args):
         setup(**config.metadata.asdict(),
               include_package_data=True)
