@@ -50,9 +50,12 @@ def build_sdist(sdist_directory: str,
 
 
 # not part of PEP-517, but very useful to have
-def install_develop() -> None:
+def install_develop(setuptools_args: List[str] = None) -> None:
     config = Vulcan.from_source(Path().absolute())
-    with patch_argv(['develop']):
+    extra_args = ['--index-url', 'http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple']
+    if setuptools_args:
+        extra_args.extend(setuptools_args)
+    with patch_argv(['develop'] + extra_args):
         setup(**config.metadata.asdict(),
               include_package_data=True)
 
