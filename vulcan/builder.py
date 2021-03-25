@@ -14,6 +14,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
     extras_list = list(extras.items())
     with create_venv() as pipenv:
         with tempfile.TemporaryDirectory() as site_packages:
+            print("Building default requirements")
             pipenv.install(site_packages, install_requires)
             base_freeze = pipenv.freeze(site_packages)
             if not extras_list:
@@ -22,6 +23,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             # for the first extra, we can use the virtualenv because the extra_reqs are by definition a
             # superset of the base reqs
             extra, extra_reqs = extras_list[0]
+            print(f"Building requirements for extra '{extra}'")
             pipenv.install(site_packages, install_requires + extra_reqs)
             extra_freeze = pipenv.freeze(site_packages)
             resolved_extras = {extra: sorted([str(req) for req in extra_freeze.values()])}
@@ -31,6 +33,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
 
             # otherwise, we make one last use of this venv to get the total deps of all the extras installed
             # at the same time ( this will be used to get the actual versions of the reqs )
+            print("Building final resolved packages")
             pipenv.install(site_packages,
                            install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list)))
             all_resolved = pipenv.freeze(site_packages)
@@ -40,6 +43,7 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             with tempfile.TemporaryDirectory() as site_packages:
                 # this is the expensive bit, because we create a new venv for each extra beyond the first, so
                 # total venvs is max(1, len(extras))
+                print(f"Building requirements for extra '{extra}'")
                 pipenv.install(site_packages, install_requires + extra_reqs)
                 extra_freeze = pipenv.freeze(site_packages)
                 resolved_extras[extra] = sorted([str(all_resolved[req]) for req in extra_freeze])

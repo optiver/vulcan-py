@@ -34,7 +34,7 @@ extra_args="-E --compile-pyc"
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
-cli=["shiv~=0.1.0","build~=0.3.0"]
+cli=["shiv~=0.1.0","build[virtualenv]~=0.3.0"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
