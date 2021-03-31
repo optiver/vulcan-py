@@ -28,11 +28,9 @@ def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             all_resolved = pipenv.freeze(site_packages)
 
         resolved_extras = {}
-        # skipping the first extra because we've already done that one.
         for extra, extra_reqs in extras_list:
             with tempfile.TemporaryDirectory() as site_packages:
-                # this is the expensive bit, because we create a new venv for each extra beyond the first, so
-                # total venvs is max(1, len(extras))
+                # this is the expensive bit, because we create a new venv for each extra
                 print(f"Building requirements for extra '{extra}'")
                 pipenv.install(site_packages, install_requires + extra_reqs)
                 extra_freeze = pipenv.freeze(site_packages)
