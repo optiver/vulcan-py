@@ -16,19 +16,26 @@ README.md. This project builds itself and therefor requires some special configu
 
 # Getting started
 
+## Install vulcan (recommended)
+I recommend using pipx to avoid the dependencies in vulcan conflicting with the dependencies in your
+application:
+
+```bash
+$ pip install --user pipx  # if you don't already have pipx installed
+$ pipx install vulcan[cli]
+```
+
 ## Pre-existing vulcan project
 
 ```bash
 $ mkvirtualenv -p /usr/bin/python3.6 project_name  # 1. create a virtualenv
 $ pip install -U pip                               # 2. upgrade pip
-$ pip install -U vulcan[cli]                       # 3. install vulcan with cli extra
-$ vulcan develop                                   # 4. make an editable installation of your project
-$ vulcan build -o dist/                            # 5. create a distirbution
+$ vulcan build -o dist/                            # 3. create a distirbution
 ```
 
 ## Brand new project
 
-Steps 1-3 from above, then:
+Steps 1 & 2 from above, then:
 
 Create your project as normal, ensuring that MANIFEST.in contains the files you want
 
