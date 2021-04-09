@@ -4,15 +4,91 @@ This document will detail migrating to vulcan from various other applications.
 
 Table of Contents:
 
-- [Poetry](#Poetry)
 - [setuptools (setup.py)](#Setuptools)
+- [Poetry](#Poetry)
+
+## Setuptools
+
+Based on [setup.cfg metadata](https://setuptools.readthedocs.io/en/latest/userguide/declarative_config.html#metadata).
+
+Also note that "Not supported" does not mean that support would be difficult/impossible to add (many of them
+would be trivial, e.x. project_urls, licence_file and licence_files, but haven't been needed yet). Please
+contact one of the maintainers of vulcan if you would like one of these fields added.
+
+If you are migrating from setuptools, you will have your config in either a setup.py or a setup.cfg. These
+values will need to be moved to a pyproject.toml.  You can find a minimal starting configuration in the
+[readme.md](./readme.md), then transfer the values from the old file to the pyproject.toml as described here.
+
+### version
+
+Can be copied over, or may be dropped entirely. If this tag is present vulcan will use it, otherwise the
+version will be taken from a VERSION file if present. 
+
+### project_urls
+
+Not supported.
+
+### license_file, license_files
+
+Not supported.
+
+### long_description
+
+Replaced by readme tag. The file specified by this tag will be read, and the contents used as the
+long_description.
+
+### long_description_content_type
+
+Not supported.
+
+### provides, requires, obsoletes
+
+Not supported.
+
+### zip_safe
+
+Not supported.
+
+### setup_requires
+
+Not supported (deprecated by the concept of PEP517 build-backends in general).
+
+### install_requires, extras_require
+
+See Poetry -> vulcan section above for how to specify dependencies and extras in vulcan .
+
+### use_2to3, use_2to3_fixers, use_2to3_exclude_fixters, convert_2to3_doctests
+
+Not supported.
+
+### scripts
+
+Not supported.
+
+### eager_resources, dependency_links, tests_require, namespace_packages, py_modules, data_files
+
+Not supported.
+
+### include_package_data
+
+Not supported, always True. Use the MANIFEST.in to control what data files are included in the final built
+wheel/shiv/sdist.
+
+### package_data, exclude_package_data
+
+Not supported, use MANIFEST.in.
+
 
 ## Poetry
+
+Same deal here, any tags not explicitly mentioned can be copied 1-to-1. 
 
 Migrating from poetry is the most complicated migration. This is because vulcan's metadata tags are based on
 setuptools, while poetry chose to invent a separate standard. 
 
 Metadata tags not explicitly mentioned below can be copied directly from `[tool.poetry]` to `[tool.vulcan]`
+
+If you are using poetry, you are already using pyproject.toml so there is no need to change files.
 
 ### version
 
@@ -149,69 +225,3 @@ pgsql = ["psycopg2~=2.7"]
 
 Not supported.
 
-## Setuptools
-
-Same deal here, any tags not explicitly mentioned can be copied 1-to-1. Based on [setup.cfg metadata](https://setuptools.readthedocs.io/en/latest/userguide/declarative_config.html#metadata).
-
-Also note that "Not supported" does not mean that support would be difficult/impossible to add (many of them
-would be trivial, e.x. project_urls, licence_file and licence_files, but haven't been needed yet). Please
-contact one of the maintainers of vulcan if you would like one of these fields added.
-
-### version
-
-Can be copied over, or may be dropped entirely. If this tag is present vulcan will use it, otherwise the
-version will be taken from a VERSION file if present. 
-
-### project_urls
-
-Not supported.
-
-### license_file, license_files
-
-Not supported.
-
-### long_description
-
-Replaced by readme tag. The file specified by this tag will be read, and the contents used as the
-long_description.
-
-### long_description_content_type
-
-Not supported.
-
-### provides, requires, obsoletes
-
-Not supported.
-
-### zip_safe
-
-Not supported.
-
-### setup_requires
-
-Not supported (deprecated by the concept of PEP517 build-backends in general).
-
-### install_requires, extras_require
-
-See Poetry -> vulcan section above for how to specify dependencies and extras in vulcan .
-
-### use_2to3, use_2to3_fixers, use_2to3_exclude_fixters, convert_2to3_doctests
-
-Not supported.
-
-### scripts
-
-Not supported.
-
-### eager_resources, dependency_links, tests_require, namespace_packages, py_modules, data_files
-
-Not supported.
-
-### include_package_data
-
-Not supported, always True. Use the MANIFEST.in to control what data files are included in the final built
-wheel/shiv/sdist.
-
-### package_data, exclude_package_data
-
-Not supported, use MANIFEST.in.
