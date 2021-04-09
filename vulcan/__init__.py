@@ -1,7 +1,7 @@
+import warnings
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Tuple
-import warnings
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import toml
 
@@ -134,3 +134,12 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     with lockfile.open() as f:
         content = toml.load(f)
     return content['install_requires'], content['extras_require']
+
+
+def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
+    if isinstance(req, str):
+        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
+        return f'{lib}{req}'
+    extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
+    # "options_sdk", {"version": "~=1.2.3", "extras="networkx,git"} -> "options_sdk[networkx,git]~=1.2.3"
+    return f'{lib}{extras}{req["version"]}'

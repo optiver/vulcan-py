@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, List
 
-from vulcan import Vulcan
+from vulcan import Vulcan, to_pep508
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
@@ -27,11 +27,16 @@ def patch_argv(argv: List[str]) -> Generator[None, None, None]:
 def build_wheel(wheel_directory: str, config_settings: Dict[str, str] = None,
                 metadata_directory: str = None) -> str:
     config = Vulcan.from_source(Path().absolute())
+    options = config.metadata.asdict()
+    if config_settings and config_settings.get('no-lock') == 'true':
+        options['install_requires'] = [to_pep508(lib, req)
+                                       for lib, req in config.configured_dependencies.items()]
+        options['extras_require'] = config.configured_extras
+
     with patch_argv(['bdist_wheel']):
         # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
         # https://docs.python.org/3/distutils/apiref.html
-        dist = setup(**config.metadata.asdict(),
-                     include_package_data=True)
+        dist = setup(**options, include_package_data=True)
         rel_dist = Path(dist.dist_files[0][-1])
         rel_dist.rename(Path(wheel_directory) / rel_dist.name)
         return rel_dist.name
@@ -41,9 +46,13 @@ def build_sdist(sdist_directory: str,
                 config_settings: Dict[str, str] = None,
                 ) -> str:
     config = Vulcan.from_source(Path().absolute())
+    options = config.metadata.asdict()
+    if config_settings and config_settings.get('no-lock'):
+        options['install_requires'] = [to_pep508(lib, req)
+                                       for lib, req in config.configured_dependencies.items()]
+        options['extras_require'] = config.configured_extras
     with patch_argv(['sdist']):
-        dist = setup(**config.metadata.asdict(),
-                     include_package_data=True)
+        dist = setup(**options, include_package_data=True)
         rel_dist = Path(dist.dist_files[0][-1])
         rel_dist.rename(Path(sdist_directory) / rel_dist.name)
         return rel_dist.name
