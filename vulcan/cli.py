@@ -82,15 +82,13 @@ def main(argv: List[str] = None) -> None:
         if args.no_lock:
             config_settings['no-lock'] = 'true'
         if args.sdist:
-            before = set(args.outdir.iterdir())
-            project.build('sdist', str(args.outdir), config_settings=config_settings)
-            dist = next(iter(set(args.outdir.iterdir()) - before))
-        if args.wheel or args.shiv:
+            dist = project.build('sdist', str(args.outdir), config_settings=config_settings)
+        elif args.wheel or args.shiv:
             if args.shiv and args.no_lock:
                 parser.error("May not specify both --shiv and --no-lock; shiv builds must be locked")
-            before = set(args.outdir.iterdir())
-            project.build('wheel', str(args.outdir), config_settings=config_settings)
-            dist = next(iter(set(args.outdir.iterdir()) - before))
+            dist = project.build('wheel', str(args.outdir), config_settings=config_settings)
+        else:
+            parser.error("Must supply one of --sdist, --wheel, or --shiv")
         if args.shiv:
             try:
                 build_shiv_apps(dist, config, args.outdir)

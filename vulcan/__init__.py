@@ -39,6 +39,7 @@ class Metadata:
     platforms: Optional[str] = None
 
     packages: Optional[List[str]] = None
+    package_dir: Optional[Dict[str, str]] = None
 
     install_requires: Optional[List[str]] = None
     extras_require: Optional[Dict[str, List[str]]] = None
@@ -97,6 +98,7 @@ class Vulcan:
             keywords=config.get("keywords"),
             platforms=config.get("platforms"),
             packages=config.get("packages"),
+            package_dir=config.get("package_dir"),
             extras_require=extras_require,
             python_requires=config.get("python_requires")
             )
