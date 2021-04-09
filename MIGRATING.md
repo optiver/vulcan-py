@@ -154,7 +154,7 @@ Not supported.
 Same deal here, any tags not explicitly mentioned can be copied 1-to-1. Based on [setup.cfg metadata](https://setuptools.readthedocs.io/en/latest/userguide/declarative_config.html#metadata).
 
 Also note that "Not supported" does not mean that support would be difficult/impossible to add (many of them
-would be trivial, e.x. project_urls, licence_file and licence_fiels, but haven't been needed yet). Please
+would be trivial, e.x. project_urls, licence_file and licence_files, but haven't been needed yet). Please
 contact one of the maintainers of vulcan if you would like one of these fields added.
 
 ### version
