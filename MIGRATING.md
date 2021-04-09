@@ -48,12 +48,11 @@ accept a list if the use case for having separate homepages and repository links
 
 ### packages
 
-Now just a list of include-strings. Alternative source directories are not currently supported, but could be
-added if requested.
+Now just a list of include-strings. 
 
 ```toml
 packages = [
-   { include = "vulcan" }
+   { include = "vulcan", from="lib" }
 ]
 ```
 
@@ -61,6 +60,7 @@ becomes
 
 ```toml
 packages = ["vulcan"]
+package_dir = {"" = "lib"}
 ```
 
 ### include and exclude
