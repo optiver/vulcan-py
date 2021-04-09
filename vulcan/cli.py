@@ -87,13 +87,11 @@ def main(argv: List[str] = None) -> None:
         if not args.outdir.exists():
             args.outdir.mkdir()
         if args.sdist:
-            before = set(args.outdir.iterdir())
-            project.build('sdist', str(args.outdir))
-            dist = next(iter(set(args.outdir.iterdir()) - before))
-        if args.wheel or args.shiv:
-            before = set(args.outdir.iterdir())
-            project.build('wheel', str(args.outdir))
-            dist = next(iter(set(args.outdir.iterdir()) - before))
+            dist = project.build('sdist', str(args.outdir))
+        elif args.wheel or args.shiv:
+            dist = project.build('wheel', str(args.outdir))
+        else:
+            parser.error("Must supply one of --sdist, --wheel, or --shiv")
         if args.shiv:
             try:
                 build_shiv_apps(dist, config, args.outdir)
