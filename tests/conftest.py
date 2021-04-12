@@ -107,6 +107,13 @@ test1 = ["requests", "build"]
 test2 = ["requests~=2.22", "setuptools"]
 test3 = ["requests>=2.0.0", "wheel"]
 
+[[tool.vulcan.shiv]]
+bin_name="testproject"
+console_script="myep"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+
 [build-system]
 requires=['setuptools', 'vulcan']
 build-backend="vulcan.build_backend"
