@@ -2,6 +2,7 @@ install_requires = [
    "dataclasses==0.8",
    "setuptools==53.0.0",
    "toml==0.10.2",
+   "typing-extensions==3.7.4.3",
    "wheel==0.36.2",]
 
 [extras_require]

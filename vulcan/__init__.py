@@ -1,9 +1,10 @@
+import warnings
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Tuple
-import warnings
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import toml
+from typing_extensions import TypedDict
 
 
 def find_version_file(source_dir: Path) -> Optional[Path]:
@@ -11,6 +12,15 @@ def find_version_file(source_dir: Path) -> Optional[Path]:
         return next(source_dir.rglob('VERSION'))
     except StopIteration:
         return None
+
+
+class VulcanConfigError(Exception):
+    pass
+
+
+class VersionDict(TypedDict, total=False):
+    version: str
+    extras: List[str]
 
 
 @dataclass
@@ -66,7 +76,7 @@ class Vulcan:
     metadata: Metadata
     shiv_options: List[ShivOpts]
     lockfile: Path
-    configured_dependencies: Dict[str, Union[str, Dict[str, str]]]
+    configured_dependencies: Dict[str, Union[str, VersionDict]]
     configured_extras: Dict[str, List[str]]
 
     @classmethod
@@ -136,3 +146,19 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     with lockfile.open() as f:
         content = toml.load(f)
     return content['install_requires'], content['extras_require']
+
+
+def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:
+    if not isinstance(req, (str, dict)):
+        raise VulcanConfigError(f"Invalid requirement {req} -- must be a dict or a string")
+    if isinstance(req, str):
+        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
+        return f'{lib}{req}'
+    try:
+        extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
+        # "options_sdk", {"version": "~=1.2.3", "extras"=["networkx","git"]}
+        #                           -> "options_sdk[networkx,git]~=1.2.3"
+        # "options_sdk", {"version": "~=1.2.3"} -> "options_sdk~=1.2.3"
+        return f'{lib}{extras}{req["version"]}'
+    except KeyError as e:
+        raise VulcanConfigError(f'invalid requirement {lib} ({req}) -- {e}') from e

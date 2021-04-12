@@ -3,12 +3,12 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, List
 
 import build
 import build.env
 import toml
-from vulcan import Vulcan
+from vulcan import Vulcan, to_pep508
 from vulcan.build_backend import install_develop
 from vulcan.builder import resolve_deps
 
@@ -20,15 +20,6 @@ class PrettyTomlEncoder(toml.TomlEncoder):  # type: ignore
             retval += "\n   " + str(self.dump_value(u)) + ","
         retval += "]"
         return retval
-
-
-def to_pep508(lib: str, req: Union[str, Dict[str, str]]) -> str:
-    if isinstance(req, str):
-        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
-        return f'{lib}{req}'
-    extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
-    # "options_sdk", {"version": "~=1.2.3", "extras="networkx,git"} -> "options_sdk[networkx,git]~=1.2.3"
-    return f'{lib}{extras}{req["version"]}'
 
 
 def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
@@ -68,6 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     dist_types.add_argument('--wheel', action='store_true')
     dist_types.add_argument('--shiv', action='store_true')
     build.add_argument('-o', '--outdir', default='dist/', type=Path)
+    build.add_argument('--no-lock', action='store_true')
 
     lock = subparsers.add_parser('lock')
     lock.set_defaults(subcommand='lock')
@@ -86,10 +78,15 @@ def main(argv: List[str] = None) -> None:
         project = build.ProjectBuilder('.')
         if not args.outdir.exists():
             args.outdir.mkdir()
+        config_settings = {}
+        if args.no_lock:
+            config_settings['no-lock'] = 'true'
         if args.sdist:
-            dist = project.build('sdist', str(args.outdir))
+            dist = project.build('sdist', str(args.outdir), config_settings=config_settings)
         elif args.wheel or args.shiv:
-            dist = project.build('wheel', str(args.outdir))
+            if args.shiv and args.no_lock:
+                parser.error("May not specify both --shiv and --no-lock; shiv builds must be locked")
+            dist = project.build('wheel', str(args.outdir), config_settings=config_settings)
         else:
             parser.error("Must supply one of --sdist, --wheel, or --shiv")
         if args.shiv:
