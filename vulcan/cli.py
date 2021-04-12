@@ -4,6 +4,7 @@ import shlex
 import subprocess
 from pathlib import Path
 from typing import Any, List
+import sys
 
 import build
 import build.env
@@ -30,7 +31,7 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
                 dist = from_dist
             else:
                 dist = f'{from_dist}[{",".join(app.with_extras)}]'
-            cmd = ['shiv', dist, '-o', str(outdir / app.bin_name)]
+            cmd = [sys.executable, '-m', 'shiv', dist, '-o', str(outdir / app.bin_name)]
             if app.console_script:
                 cmd += ['-c', app.console_script]
             if app.entry_point:
