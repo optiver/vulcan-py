@@ -76,7 +76,7 @@ class Vulcan:
     metadata: Metadata
     shiv_options: List[ShivOpts]
     lockfile: Path
-    configured_dependencies: Dict[str, VersionDict]
+    configured_dependencies: Dict[str, Union[str, VersionDict]]
     configured_extras: Dict[str, List[str]]
 
     @classmethod
