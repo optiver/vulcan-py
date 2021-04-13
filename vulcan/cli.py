@@ -108,7 +108,7 @@ def main(argv: List[str] = None) -> None:
         # do note that when using this command specifically in this project, you MUST call it as
         # `python vulcan/cli.py develop` the first time.
         # All other projects, you can just do `vulcan devleop` and that's fine.
-        install_develop(args.setuptools_args)
+        install_develop()
     else:
         raise ValueError('unknown subcommand {args.subcommand!r}')
 

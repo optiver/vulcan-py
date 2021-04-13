@@ -1,4 +1,8 @@
+import json
+import os
+import subprocess
 import sys
+import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, List
@@ -59,14 +63,30 @@ def build_sdist(sdist_directory: str,
 
 
 # not part of PEP-517, but very useful to have
-def install_develop(setuptools_args: List[str] = None) -> None:
+def install_develop() -> None:
     config = Vulcan.from_source(Path().absolute())
-    extra_args = ['--index-url', 'http://artifactory.ams.optiver.com/artifactory/api/pypi/pypi/simple']
-    if setuptools_args:
-        extra_args.extend(setuptools_args)
-    with patch_argv(['develop'] + extra_args):
-        setup(**config.metadata.asdict(),
-              include_package_data=True)
+    options = config.metadata.asdict()
+    virtual_env = os.environ.get('VIRTUAL_ENV')
+    if virtual_env is None:
+        exit('may not use vulcan develop outside of a virtualenv')
+
+    setup = Path('setup.py')
+    if setup.exists():
+        exit('may not use vulcan develop when setup.py is present')
+    try:
+        with tempfile.NamedTemporaryFile(suffix='.json', mode="w+") as mdata_file:
+            mdata_file.write(json.dumps(options))
+            mdata_file.flush()
+            with setup.open('w+') as setup_file:
+                setup_file.write(f"""\
+from setuptools import setup
+import json, pathlib
+setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
+""")
+            subprocess.check_call([
+                Path(virtual_env, 'bin', 'python'), '-m', 'pip', 'install', '-e', Path().absolute()])
+    finally:
+        setup.unlink()
 
 
 # tox requires these two fro some reason :(
