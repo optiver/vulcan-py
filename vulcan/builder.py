@@ -8,7 +8,6 @@ from vulcan.isolation import create_venv
 def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
                  ) -> Tuple[List[str], Dict[str, List[str]]]:
 
-    print("HELLO")
     if not install_requires and not extras:
         return [], {}
 

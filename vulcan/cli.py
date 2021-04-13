@@ -66,7 +66,6 @@ def build_parser() -> argparse.ArgumentParser:
 
     develop = subparsers.add_parser('develop')
     develop.set_defaults(subcommand='develop')
-    develop.add_argument('setuptools_args', nargs='*')
     return parser
 
 
