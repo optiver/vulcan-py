@@ -6,6 +6,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, List
+import shutil
 
 from vulcan import Vulcan, to_pep508
 
@@ -42,7 +43,7 @@ def build_wheel(wheel_directory: str, config_settings: Dict[str, str] = None,
         # https://docs.python.org/3/distutils/apiref.html
         dist = setup(**options, include_package_data=True)
         rel_dist = Path(dist.dist_files[0][-1])
-        rel_dist.rename(Path(wheel_directory) / rel_dist.name)
+        shutil.move(str(rel_dist), Path(wheel_directory) / rel_dist.name)
         return rel_dist.name
 
 
@@ -58,7 +59,7 @@ def build_sdist(sdist_directory: str,
     with patch_argv(['sdist']):
         dist = setup(**options, include_package_data=True)
         rel_dist = Path(dist.dist_files[0][-1])
-        rel_dist.rename(Path(sdist_directory) / rel_dist.name)
+        shutil.move(str(rel_dist), Path(sdist_directory) / rel_dist.name)
         return rel_dist.name
 
 
