@@ -149,3 +149,25 @@ steps (assuming you have already created the lockfile) to update your developmen
 $ pip uninstall your_package_name
 $ vulcan develop
 ```
+
+# Tips
+
+## Pinning vulcan deps
+As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
+a bug. If you would like to eliminate this possability, you can add an extra to your application that pinns
+vulcan, which will lock in the dependencies of vulcan itself. Something along the lines of:
+
+```toml
+[tool.vulcan.extras]
+build = ["vulcan~=1.2"]
+```
+
+And then install your tox build job with a configuration that includes the line:
+
+```ini
+[toxenv:build]
+extras = 
+    build
+```
+
+And this will ensure that vulcan and all its depndencies are pinned in your lockfile and used while building.
