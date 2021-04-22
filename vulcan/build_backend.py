@@ -62,6 +62,10 @@ def install_develop() -> None:
     config = Vulcan.from_source(Path().absolute())
     options = config.metadata.asdict()
 
+    if config.no_lock:
+        options['install_requires'] = flatten_reqs(config.configured_dependencies)
+        options['extras_require'] = config.configured_extras
+
     virtual_env = os.environ.get('VIRTUAL_ENV')
     if virtual_env is None:
         exit('may not use vulcan develop outside of a virtualenv')
