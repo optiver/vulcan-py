@@ -85,7 +85,7 @@ def main(argv: List[str] = None) -> None:
         if args.sdist:
             dist = project.build('sdist', str(args.outdir), config_settings=config_settings)
         elif args.wheel or args.shiv:
-            if args.shiv and args.no_lock:
+            if args.shiv and (args.no_lock or config.no_lock):
                 parser.error("May not specify both --shiv and --no-lock; shiv builds must be locked")
             dist = project.build('wheel', str(args.outdir), config_settings=config_settings)
         else:
