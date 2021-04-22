@@ -32,7 +32,6 @@ def patch_argv(argv: List[str]) -> Generator[None, None, None]:
 def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
     config = Vulcan.from_source(Path().absolute())
     options = config.metadata.asdict()
-    print(config.no_lock)
     if config.no_lock or (config_settings and config_settings.get('no-lock') == 'true'):
         options['install_requires'] = flatten_reqs(config.configured_dependencies)
         options['extras_require'] = config.configured_extras
