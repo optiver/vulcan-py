@@ -2,14 +2,15 @@ import argparse
 import os
 import shlex
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, List
-import sys
 
 import build
 import build.env
 import toml
-from vulcan import Vulcan, to_pep508
+
+from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import install_develop
 from vulcan.builder import resolve_deps
 
@@ -84,7 +85,7 @@ def main(argv: List[str] = None) -> None:
         if args.sdist:
             dist = project.build('sdist', str(args.outdir), config_settings=config_settings)
         elif args.wheel or args.shiv:
-            if args.shiv and args.no_lock:
+            if args.shiv and (args.no_lock or config.no_lock):
                 parser.error("May not specify both --shiv and --no-lock; shiv builds must be locked")
             dist = project.build('wheel', str(args.outdir), config_settings=config_settings)
         else:
@@ -95,9 +96,8 @@ def main(argv: List[str] = None) -> None:
             finally:
                 os.remove(dist)
     elif args.subcommand == 'lock':
-        install_requires, extras_require = resolve_deps(
-            [to_pep508(k, v) for k, v in config.configured_dependencies.items()],
-            config.configured_extras or {})
+        install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
+                                                        config.configured_extras or {})
         with open(config.lockfile, 'w+') as f:
             #  toml type annotations claim there is no "encoder" argument.
             #  toml type annotations lie

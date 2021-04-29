@@ -23,6 +23,13 @@ class VersionDict(TypedDict, total=False):
     extras: List[str]
 
 
+VersionSpecs = Dict[str, Union[str, VersionDict]]
+
+
+def flatten_reqs(versions: VersionSpecs) -> List[str]:
+    return [to_pep508(lib, req) for lib, req in versions.items()]
+
+
 @dataclass
 class Metadata:
     name: str
@@ -76,8 +83,9 @@ class Vulcan:
     metadata: Metadata
     shiv_options: List[ShivOpts]
     lockfile: Path
-    configured_dependencies: Dict[str, Union[str, VersionDict]]
+    configured_dependencies: VersionSpecs
     configured_extras: Dict[str, List[str]]
+    no_lock: bool = False
 
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
@@ -122,6 +130,7 @@ class Vulcan:
         metadata = Metadata(**options)
 
         configured_deps = config.get('dependencies', {})
+        no_lock = config.get('no-lock', False)
 
         shiv_ops = []
         shiv_config = config.get('shiv', [])
@@ -136,7 +145,8 @@ class Vulcan:
             ))
 
         return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
-                   configured_dependencies=configured_deps, configured_extras=config.get('extras', {}))
+                   configured_dependencies=configured_deps, configured_extras=config.get('extras', {}),
+                   no_lock=no_lock)
 
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
