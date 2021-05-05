@@ -6,16 +6,43 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Generator, List
+from typing import Any, Dict, Generator, List
+
+import toml
 
 from vulcan import Vulcan, flatten_reqs
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
 try:
-    from setuptools import setup  # type: ignore
+    import setuptools  # type: ignore
 except ImportError as e:
     raise ImportError(str(e) + '\nPlease add setuptools to [build-system] requires in pyproject.toml') from e
+
+
+try:
+    from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
+
+    def setup(**kwargs: Any) -> Any:
+
+        with open('pyproject.toml', 'r') as pptoml:
+            pyproject_data = toml.load(pptoml)
+
+        if 'project' in pyproject_data:
+            if 'dependencies' in pyproject_data['project']:
+                raise RuntimeError("May not use [project]:dependencies key with vulcan")
+            if 'optional-dependencies' in pyproject_data['project']:
+                raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
+            parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
+            parsed_kwargs.update({k: v for k, v in kwargs.items() if v is not None})
+            parsed_kwargs = {k: v for k, v in parsed_kwargs.items() if v is not None}
+            return setuptools.setup(**parsed_kwargs)
+        else:
+            return setuptools.setup(**{k: v for k, v in kwargs.items() if v is not None})
+
+
+except ImportError:
+    setup = setuptools.setup
 
 __all__ = ['build_wheel',
            'build_sdist']

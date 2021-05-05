@@ -98,7 +98,7 @@ class Vulcan:
         install_requires, extras_require = get_requires(lockfile)
 
         distutils_options = dict(
-            name=config["name"],
+            name=config.get('name'),
             version=version,
             description=config.get("description"),
             long_description=Path(source_path / config.get("readme")

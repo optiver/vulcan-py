@@ -1,12 +1,15 @@
 import os
+import zipfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
-
-from pkg_resources import Requirement
-from vulcan import VulcanConfigError, to_pep508
+import build
 
 import pytest
+from pkg_resources import Requirement
+from vulcan import VulcanConfigError, to_pep508
+from .conftest import build_dist
+
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
 EXPECTED_REQS = {
@@ -36,6 +39,9 @@ class TestFixturesOutput:
     def test_built_wheel_final_output_format(self, built_wheel: Path) -> None:
         assert built_wheel.suffix == '.whl'
 
+    def test_built_sdist_final_output_format_pep621(self, test_built_application_sdist_pep621: Path) -> None:
+        assert test_built_application_sdist_pep621.suffix == '.gz'
+
 
 class TestConfig:
 
@@ -61,3 +67,27 @@ class TestConfig:
         with pytest.raises(VulcanConfigError, match="must be a dict or a string"):
             # totally wrong type
             to_pep508('somelib', ['someextra', 'someextra2'])  # type: ignore
+
+    def test_pep621_vulcan_equivilent(self, test_built_application_wheel: Path,
+                                      test_built_application_wheel_pep621: Path) -> None:
+        with zipfile.ZipFile(test_built_application_wheel) as old:
+            with old.open('testproject-1.2.3.dist-info/METADATA') as old_metadata:
+                old_data = old_metadata.read().decode()
+
+        with zipfile.ZipFile(test_built_application_wheel_pep621) as new:
+            with new.open('testproject-1.2.3.dist-info/METADATA') as new_metadata:
+                new_data = new_metadata.read().decode()
+
+        def remove_authors(mdata: str) -> str:
+            # bug with the ppsetuptools library means that when there is both name and email in "authors"
+            # field, they are set in the metadata with the Author directive rather than Author-email
+            return '\n'.join(line for line in mdata.split('\n') if not line.startswith('Author'))
+
+        assert remove_authors(old_data) == remove_authors(new_data)
+
+    def test_pep621_dependencies_key_forbidden(self,
+                                               test_application_pep621_forbidden_keys: Path,
+                                               tmp_path_factory: pytest.TempPathFactory) -> None:
+
+        with pytest.raises(build.BuildBackendException):
+            build_dist(test_application_pep621_forbidden_keys, 'wheel', tmp_path_factory.mktemp('build'))

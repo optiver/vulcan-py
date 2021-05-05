@@ -1,6 +1,8 @@
-[tool.vulcan]
+[project]
 name = "vulcan"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
+
+[tool.vulcan]
 author = "Joel Christiansen"
 author_email =  "joelchristiansen@optiver.com"
 url = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
@@ -20,6 +22,7 @@ vulcan="vulcan.cli:main"
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
 cli=["shiv<0.5.0","build[virtualenv]~=0.3.0"]
+pep621=["ppsetuptools~=2.0"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
@@ -27,6 +30,7 @@ setuptools='~=53.0.0'
 wheel='~=0.36.2'
 dataclasses='~=0.8'
 typing_extensions='~=3.7'
+
 
 
 [build-system]
