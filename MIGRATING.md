@@ -7,6 +7,15 @@ Table of Contents:
 - [setuptools (setup.py)](#Setuptools)
 - [Poetry](#Poetry)
 
+## If you're not interested in the details: 
+
+In the root directory of the project to be converted, run: 
+
+```bash
+$ convert_setuptools
+```
+
+
 ## Setuptools
 
 Based on [setup.cfg metadata](https://setuptools.readthedocs.io/en/latest/userguide/declarative_config.html#metadata).
