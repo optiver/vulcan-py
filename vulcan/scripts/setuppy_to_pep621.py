@@ -107,7 +107,7 @@ def convert() -> None:
 
     pyproject['build-system'] = {}
     pyproject['build-system']['requires'] = ['vulcan']
-    pyproject['build-system']['build_backen'] = 'vulcan.build_backend'
+    pyproject['build-system']['build-backend'] = 'vulcan.build_backend'
 
     with open('./pyproject.toml', 'w+') as f:
         toml.dump(pyproject, f)
