@@ -36,7 +36,7 @@ typing_extensions='~=3.7'
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools', 'toml', 'dataclasses', 'wheel', 'typing_extensions']
+requires=['setuptools', 'toml', 'dataclasses', 'wheel', 'typing_extensions', 'ppsetuptools==2.0.0']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
