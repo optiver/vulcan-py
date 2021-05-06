@@ -21,6 +21,8 @@ except ImportError as e:
 
 
 try:
+    # Remove this whole  block when https://github.com/psf/fundable-packaging-improvements/issues/25 is
+    # finalized
     from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
     def setup(**kwargs: Any) -> Any:
