@@ -1,23 +1,23 @@
 [project]
 name = "vulcan"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-
-[tool.vulcan]
-author = "Joel Christiansen"
-author_email =  "joelchristiansen@optiver.com"
-url = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
-packages = [ "vulcan" ]
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"]
+urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
-python_requires = ">=3.6"
-no-lock = true
+requires-python = ">=3.6"
 
 [project.scripts]
 vulcan="vulcan.cli:main"
+
+[tool.vulcan]
+packages = [ "vulcan" ]
+no-lock = true
+
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
