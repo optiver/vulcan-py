@@ -47,7 +47,7 @@ Create your project as normal, ensuring that MANIFEST.in contains the files you 
 ## Minimal starting configuration (pyproject.toml)
 
 ```toml
-[tool.vulcan]
+[package]
 name = "package_name"
 
 # This section is mandatory and may be blindly copy/pasted

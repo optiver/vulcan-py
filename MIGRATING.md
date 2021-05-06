@@ -26,7 +26,7 @@ version will be taken from a VERSION file if present.
 
 ### project_urls
 
-Not supported.
+Becomes `urls`
 
 ### license_file, license_files
 
@@ -99,18 +99,19 @@ version will be taken from a VERSION file if present.
 
 In poetry this is a list of strings of the form `name <email>`, e.g. `joelchristiansen <joelchristiansen@optiver.com>`
 
-In vulcan, this is instead two tags, `author` and `author_email` which are both optional and expect a single
+In PEP621, this is a list of tables, which have 2 keys: `name` and `email`
 string if present. So:
 
 ```toml
+[tool.poetry]
 authors = ["joelchristiansen <joelchristiansen@optiver.com>"]
 ```
 
 becomes
 
 ```toml
-author = "joelchristiansen"
-author_email = "joelchristiansen@optiver.com"
+[project]
+authors = [{name="joelchristiansen", email="joelchristiansen@optiver.com"}]
 ```
 
 ### maintainers
@@ -119,14 +120,15 @@ Exactly the same as authors, `maintainers` goes to `maintainer` and `maintainer_
 
 ### homepage, repository, documentation
 
-Change to `url`. No other changes. `url` currently only accepts a single string, this could be changed to
-accept a list if the use case for having separate homepages and repository links is compelling.
+Change to `urls`. No other changes. `urls` accepts a table, with the key being what the url is for and the
+value being the url
 
 ### packages
 
 Now just a list of include-strings. 
 
 ```toml
+[tool.poetry]
 packages = [
    { include = "vulcan", from="lib" }
 ]
@@ -135,6 +137,7 @@ packages = [
 becomes
 
 ```toml
+[tool.vulcan]
 packages = ["vulcan"]
 package_dir = {"" = "lib"}
 ```
@@ -169,7 +172,7 @@ for locking and building.
 
 ### scripts, plugins
 
-Poetry treats console\_scripts entry points specially, and gives them a specific section. Vulcan does not.
+The semantics for PEP621 and poetry entry points are identical, the only change is the name of the table.
 
 ```toml
 [tools.poetry.scripts]
@@ -182,10 +185,10 @@ something = "vulcan.something:thing"
 becomes
 
 ```toml
-[tools.vulcan.entry_points.console_scripts]
+[project.scripts]
 vulcan = "vulcan.cli:main"
 
-[tools.vulcan.entry_points.some_other_ep]
+[project.entry-points.some_other_ep]
 something = "vulcan.something:thing"
 ```
 
@@ -210,7 +213,7 @@ pgsql = ["psycopg2"]
 becomes
 
 ```toml
-[tool.vulcan]
+[package]
 name = "awesome"
 
 [tool.vulcan.depedencies]
@@ -220,8 +223,4 @@ mandatory = "~=1.0"
 mysql = ["mysqlclient~=1.3"]
 pgsql = ["psycopg2~=2.7"]
 ```
-
-### urls
-
-Not supported.
 
