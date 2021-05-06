@@ -15,16 +15,19 @@ from pkg_resources import Requirement
 def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]]]:
 
     with tempfile.TemporaryDirectory(suffix='.vulcan-migrate') as tmp:
-        subprocess.run(['python', 'setup.py', 'bdist_wheel', '-d', tmp])
+        subprocess.run(['pip', 'wheel', '--no-deps', '-w', tmp, '.'])
         whl = pkginfo.Wheel(next(Path(tmp).glob('*.whl')))
         eps: Dict[str, Dict[str, str]] = defaultdict(dict)
-        with zipfile.ZipFile(whl.filename) as zf:
-            with zf.open(f'{whl.name.replace("-", "_")}-{whl.version}.dist-info/entry_points.txt') as f:
-                cp = ConfigParser()
-                cp.read_file(StringIO(f.read().decode()))
-                for section in cp.sections():
-                    for key in cp[section]:
-                        eps[section][key] = cp[section][key]
+        try:
+            with zipfile.ZipFile(whl.filename) as zf:
+                with zf.open(f'{whl.name.replace("-", "_")}-{whl.version}.dist-info/entry_points.txt') as f:
+                    cp = ConfigParser()
+                    cp.read_file(StringIO(f.read().decode()))
+                    for section in cp.sections():
+                        for key in cp[section]:
+                            eps[section][key] = cp[section][key]
+        except KeyError:
+            eps = {}
 
     return whl, eps
 
@@ -101,6 +104,10 @@ def convert() -> None:
         del entry_points['gui_scripts']
     if entry_points:
         project['entry-points'] = entry_points
+
+    pyproject['build-system'] = {}
+    pyproject['build-system']['requires'] = ['vulcan']
+    pyproject['build-system']['build_backen'] = ['vulcan.build_backend']
 
     with open('./pyproject.toml', 'w+') as f:
         toml.dump(pyproject, f)
