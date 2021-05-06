@@ -64,7 +64,7 @@ def convert() -> None:
     if whl.summary:
         project['description'] = whl.summary
     if whl.keywords:
-        project['keywords'] = list(whl.keywords)
+        project['keywords'] = whl.keywords.split(',')
     if whl.license:
         project['license'] = whl.license
     if whl.project_urls:
