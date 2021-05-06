@@ -1,7 +1,7 @@
 [project]
 name = "vulcan"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"]
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
