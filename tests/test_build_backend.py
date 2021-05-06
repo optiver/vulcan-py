@@ -69,7 +69,12 @@ class TestConfig:
             # totally wrong type
             to_pep508('somelib', ['someextra', 'someextra2'])  # type: ignore
 
-    @pytest.mark.parametrize('mdata_file', ['METADATA', 'entry_points.txt'])
+    @pytest.mark.parametrize('mdata_file',
+                             ['METADATA',
+                              'entry_points.txt',
+                              'RECORD',
+                              'top_level.txt',
+                              'WHEEL'])
     def test_pep621_vulcan_equivilent(self, test_built_application_wheel: Path,
                                       test_built_application_wheel_pep621: Path, mdata_file: str) -> None:
         with zipfile.ZipFile(test_built_application_wheel) as old:
