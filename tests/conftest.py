@@ -201,6 +201,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
 requires-python = ">=3.6"
+# vulcan forbids this key in [project], so building from this fixture should raise an error.
 dependencies = ["requests~=2.2.2"]
 
 [tool.vulcan]
