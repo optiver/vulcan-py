@@ -75,7 +75,7 @@ class TestConfig:
                               'RECORD',
                               'top_level.txt',
                               'WHEEL'])
-    def test_pep621_vulcan_equivilent(self, test_built_application_wheel: Path,
+    def test_pep621_vulcan_equivalent(self, test_built_application_wheel: Path,
                                       test_built_application_wheel_pep621: Path, mdata_file: str) -> None:
         with zipfile.ZipFile(test_built_application_wheel) as old:
             with old.open(f'testproject-1.2.3.dist-info/{mdata_file}') as old_metadata:
