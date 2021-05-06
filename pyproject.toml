@@ -25,6 +25,7 @@ no-lock = true
 cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0"]
 # remove when https://github.com/psf/fundable-packaging-improvements/issues/25 is complete.
 pep621=["ppsetuptools==2.0.2"]
+convert=["pkginfo~=1.7"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
