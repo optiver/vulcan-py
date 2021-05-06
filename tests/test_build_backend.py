@@ -40,8 +40,8 @@ class TestFixturesOutput:
     def test_built_wheel_final_output_format(self, built_wheel: Path) -> None:
         assert built_wheel.suffix == '.whl'
 
-    def test_built_sdist_final_output_format_pep621(self, test_built_application_sdist_pep621: Path) -> None:
-        assert test_built_application_sdist_pep621.suffix == '.gz'
+    def test_built_sdist_final_output_format_pep621(self, test_built_application_pep621: Path) -> None:
+        assert test_built_application_pep621.suffix == '.gz'
 
 
 class TestConfig:

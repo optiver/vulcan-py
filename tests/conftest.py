@@ -88,7 +88,7 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
 [tool.vulcan]
 name = "testproject"
 description = "an example test project for testing vulcan builds, %"
-author_email =  "Joel Christiansen <joelchristiansen@optiver.com>"
+author_email = "Joel Christiansen <joelchristiansen@optiver.com>"
 packages = [ "testproject" ]
 keywords = [ "build", "testing" ]
 classifiers = [
@@ -251,12 +251,6 @@ def test_built_application_pep621(
 @pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
-
-
-@pytest.fixture(scope='session')
-def test_built_application_sdist_pep621(test_application_pep621: Path,
-                                        tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return build_dist(test_application_pep621, 'sdist', tmp_path_factory.mktemp('build'))
 
 
 @pytest.fixture(scope='session')
