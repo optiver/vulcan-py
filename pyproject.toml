@@ -13,6 +13,7 @@ requires-python = ">=3.6"
 
 [project.scripts]
 vulcan="vulcan.cli:main"
+convert_setuptools="vulcan.scripts.setuppy_to_pep621:convert"
 
 [tool.vulcan]
 packages = [ "vulcan" ]
