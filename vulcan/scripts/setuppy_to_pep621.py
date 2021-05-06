@@ -93,5 +93,14 @@ def convert() -> None:
     if whl.requires_python:
         project['requires-python'] = whl.requires_python
 
+    if 'console_scripts' in entry_points:
+        project['scripts'] = entry_points['console_scripts']
+        del entry_points['console_scripts']
+    if 'gui_scripts' in entry_points:
+        project['gui-scripts'] = entry_points['gui_scripts']
+        del entry_points['gui_scripts']
+    if entry_points:
+        project['entry-points'] = entry_points
+
     with open('./pyproject.toml', 'w+') as f:
         toml.dump(pyproject, f)
