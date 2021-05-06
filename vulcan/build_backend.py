@@ -36,6 +36,18 @@ try:
             parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
             parsed_kwargs.update({k: v for k, v in kwargs.items() if v is not None})
             parsed_kwargs = {k: v for k, v in parsed_kwargs.items() if v is not None}
+            # ppsetuptools doesn't handle entry points correctly
+            if 'scripts' in parsed_kwargs:
+                if 'entry_points' not in parsed_kwargs:
+                    parsed_kwargs['entry_points'] = {}
+                parsed_kwargs['entry_points']['console_scripts'] = parsed_kwargs['scripts']
+                del parsed_kwargs['scripts']
+            if 'gui-scripts' in parsed_kwargs:
+                parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
+                del parsed_kwargs['gui-scripts']
+            for k in list(parsed_kwargs['entry_points']):
+                parsed_kwargs['entry_points'][k] = [
+                    f'{k}={v}' for k, v in parsed_kwargs['entry_points'][k].items()]
             return setuptools.setup(**parsed_kwargs)
         else:
             return setuptools.setup(**{k: v for k, v in kwargs.items() if v is not None})

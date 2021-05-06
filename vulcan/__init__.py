@@ -123,7 +123,7 @@ class Vulcan:
         setuptools_options = dict(
             install_requires=install_requires,
             entry_points={section: [f'{k}={v}' for k, v in section_vals.items()]
-                          for section, section_vals in config.get('entry_points', {}).items()}
+                          for section, section_vals in config.get('entry_points', {}).items()} or None
             )
         options = {**distutils_options, **setuptools_options}
 

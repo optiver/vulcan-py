@@ -16,7 +16,7 @@ classifiers = [
 python_requires = ">=3.6"
 no-lock = true
 
-[tool.vulcan.entry_points.console_scripts]
+[project.scripts]
 vulcan="vulcan.cli:main"
 
 # e.g. if these are specified, like `pip install vulcan[cli]
@@ -26,7 +26,7 @@ pep621=["ppsetuptools~=2.0"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
-setuptools='~=53.0.0'
+setuptools='~=56.0'
 wheel='~=0.36.2'
 dataclasses='~=0.8'
 typing_extensions='~=3.7'

@@ -118,10 +118,8 @@ build-backend="vulcan.build_backend"
 
 [tool.vulcan.entry_points.console_scripts]
 myep = "vulcan.test_ep:main"
-
-[tool.poetry.entry_points.testplugin]
-someplugin = "some.import:spec"
-
+[tool.vulcan.entry_points.test_eps]
+myep = "vulcan.test_ep:main"
 """)
 
     return tmp_path
@@ -149,6 +147,12 @@ classifiers = [
     ]
 requires-python = ">=3.6"
 
+[project.scripts]
+myep = "vulcan.test_ep:main"
+
+[project.entry-points.test_eps]
+myep = "vulcan.test_ep:main"
+
 [tool.vulcan]
 packages = [ "testproject" ]
 
@@ -170,12 +174,6 @@ extra_args="-E --compile-pyc"
 [build-system]
 requires=['setuptools', 'vulcan']
 build-backend="vulcan.build_backend"
-
-[tool.vulcan.entry_points.console_scripts]
-myep = "vulcan.test_ep:main"
-
-[tool.poetry.entry_points.testplugin]
-someplugin = "some.import:spec"
 
 """)
 
@@ -230,12 +228,13 @@ build-backend="vulcan.build_backend"
 [tool.vulcan.entry_points.console_scripts]
 myep = "vulcan.test_ep:main"
 
-[tool.poetry.entry_points.testplugin]
+[tool.vulcan.entry_points.testplugin]
 someplugin = "some.import:spec"
 
 """)
 
     return tmp_path
+
 
 @pytest.fixture(scope='session')
 def test_built_application(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
