@@ -6,7 +6,7 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, List, Optional
 
 import toml
 
@@ -25,6 +25,9 @@ try:
     # finalized
     from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
+    def _filter_nones(vals_dict: Dict[str, Optional[Any]]) -> Dict[str, Any]:
+        return {k: v for k, v in vals_dict.items() if v is not None}
+
     def setup(**kwargs: Any) -> Any:
 
         with open('pyproject.toml', 'r') as pptoml:
@@ -36,8 +39,8 @@ try:
             if 'optional-dependencies' in pyproject_data['project']:
                 raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
             parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
-            parsed_kwargs.update({k: v for k, v in kwargs.items() if v is not None})
-            parsed_kwargs = {k: v for k, v in parsed_kwargs.items() if v is not None}
+            parsed_kwargs.update(_filter_nones(kwargs))
+            parsed_kwargs = _filter_nones(parsed_kwargs)
             # ppsetuptools doesn't handle entry points correctly
             if 'scripts' in parsed_kwargs:
                 if 'entry_points' not in parsed_kwargs:
@@ -52,7 +55,7 @@ try:
                     f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
             return setuptools.setup(**parsed_kwargs)
         else:
-            return setuptools.setup(**{k: v for k, v in kwargs.items() if v is not None})
+            return setuptools.setup(**_filter_nones(kwargs))
 
 
 except ImportError:
