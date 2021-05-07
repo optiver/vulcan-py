@@ -11,6 +11,11 @@ import pkginfo  # type: ignore
 import toml
 from pkg_resources import Requirement
 
+try:
+    import ppsetuptools as _  # type: ignore  # noqa
+except ImportError:
+    exit("Can not run conversion script without pep621 extra installed. Please install `vulcan[pep621]`")
+
 
 def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]]]:
 
