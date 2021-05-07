@@ -17,24 +17,31 @@ except ImportError:
     exit("Can not run conversion script without pep621 extra installed. Please install `vulcan[pep621]`")
 
 
-def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]]]:
+def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]], List[str]]:
 
     with tempfile.TemporaryDirectory(suffix='.vulcan-migrate') as tmp:
         subprocess.run(['pip', 'wheel', '--no-deps', '-w', tmp, '.'])
         whl = pkginfo.Wheel(next(Path(tmp).glob('*.whl')))
         eps: Dict[str, Dict[str, str]] = defaultdict(dict)
-        try:
-            with zipfile.ZipFile(whl.filename) as zf:
-                with zf.open(f'{whl.name.replace("-", "_")}-{whl.version}.dist-info/entry_points.txt') as f:
+        with zipfile.ZipFile(whl.filename) as zf:
+            dist_info = f'{whl.name.replace("-", "_")}-{whl.version}.dist-info'
+            try:
+                with zf.open(f'{dist_info}/entry_points.txt') as f:
                     cp = ConfigParser()
                     cp.read_file(StringIO(f.read().decode()))
                     for section in cp.sections():
                         for key in cp[section]:
                             eps[section][key] = cp[section][key]
-        except KeyError:
-            eps = {}
+            except KeyError:
+                eps = {}
+            try:
+                with zf.open(f'{dist_info}/top_level.txt') as f:
+                    data = f.read().decode()
+                    packages = [line.strip() for line in data.split('\n') if line.strip()]
+            except KeyError:
+                packages = []
 
-    return whl, eps
+    return whl, eps, packages
 
 
 def contributors(author: Optional[str], author_email: Optional[str]) -> List[Dict[str, str]]:
@@ -53,11 +60,11 @@ def convert() -> None:
         pyproject = {}
     if 'project' in pyproject:
         exit('refusing to overwrite current project configuration')
-    whl, entry_points = wheel()
+    whl, entry_points, packages = wheel()
     project: Dict[str, Any] = {}
     vulcan: Dict[str, Any] = {}
     pyproject['project'] = project
-    pyproject['tool'] = {}
+    pyproject['tool'] = pyproject.get('tool', {})
     pyproject['tool']['vulcan'] = vulcan
     project['name'] = whl.name
     if whl.author or whl.author_email:
@@ -98,6 +105,8 @@ def convert() -> None:
                     # extra, swing back to this
                     continue
                 vulcan['extras'][extra].append(f'{parsed_req.name}{parsed_req.specifier}')  # type: ignore
+    if packages:
+        vulcan['packages'] = packages
     if whl.requires_python:
         project['requires-python'] = whl.requires_python
 
