@@ -6,16 +6,60 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Generator, List
+from typing import Any, Dict, Generator, List, Optional
+
+import toml
 
 from vulcan import Vulcan, flatten_reqs
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
 try:
-    from setuptools import setup  # type: ignore
+    import setuptools  # type: ignore
 except ImportError as e:
     raise ImportError(str(e) + '\nPlease add setuptools to [build-system] requires in pyproject.toml') from e
+
+
+try:
+    # Remove this whole  block when https://github.com/psf/fundable-packaging-improvements/issues/25 is
+    # finalized
+    from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
+
+    def _filter_nones(vals_dict: Dict[str, Optional[Any]]) -> Dict[str, Any]:
+        return {k: v for k, v in vals_dict.items() if v is not None}
+
+    def setup(**kwargs: Any) -> Any:
+
+        with open('pyproject.toml', 'r') as pptoml:
+            pyproject_data = toml.load(pptoml)
+
+        if 'project' in pyproject_data:
+            if 'dependencies' in pyproject_data['project']:
+                raise RuntimeError("May not use [project]:dependencies key with vulcan")
+            if 'optional-dependencies' in pyproject_data['project']:
+                raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
+            parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
+            parsed_kwargs.update(_filter_nones(kwargs))
+            parsed_kwargs = _filter_nones(parsed_kwargs)
+            # ppsetuptools doesn't handle entry points correctly
+            if 'scripts' in parsed_kwargs:
+                if 'entry_points' not in parsed_kwargs:
+                    parsed_kwargs['entry_points'] = {}
+                parsed_kwargs['entry_points']['console_scripts'] = parsed_kwargs['scripts']
+                del parsed_kwargs['scripts']
+            if 'gui-scripts' in parsed_kwargs:
+                parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
+                del parsed_kwargs['gui-scripts']
+            for ep_group in list(parsed_kwargs['entry_points']):
+                parsed_kwargs['entry_points'][ep_group] = [
+                    f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
+            return setuptools.setup(**parsed_kwargs)
+        else:
+            return setuptools.setup(**_filter_nones(kwargs))
+
+
+except ImportError:
+    setup = setuptools.setup
 
 __all__ = ['build_wheel',
            'build_sdist']

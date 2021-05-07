@@ -1,8 +1,7 @@
 import hashlib
 import shutil
 from pathlib import Path
-from typing import Dict
-from typing import Generator
+from typing import Dict, Generator
 
 import build
 import pytest
@@ -89,8 +88,7 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
 [tool.vulcan]
 name = "testproject"
 description = "an example test project for testing vulcan builds, %"
-author = "Joel Christiansen"
-author_email =  "joelchristiansen@optiver.com"
+author_email = "Joel Christiansen <joelchristiansen@optiver.com>"
 packages = [ "testproject" ]
 keywords = [ "build", "testing" ]
 classifiers = [
@@ -120,8 +118,118 @@ build-backend="vulcan.build_backend"
 
 [tool.vulcan.entry_points.console_scripts]
 myep = "vulcan.test_ep:main"
+[tool.vulcan.entry_points.test_eps]
+myep = "vulcan.test_ep:main"
+""")
 
-[tool.poetry.entry_points.testplugin]
+    return tmp_path
+
+
+@pytest.fixture(scope='session')
+def test_application_pep621(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    tmp_path = tmp_path_factory.mktemp('build_testproject')
+    (tmp_path / 'testproject').mkdir()
+    (tmp_path / 'testproject/__init__.py').touch()
+    with (tmp_path / 'testproject/VERSION').open('w+') as f:
+        f.write('1.2.3\n')
+    test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
+    shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
+    with (tmp_path / 'pyproject.toml').open('w+') as f:
+        f.write("""\
+[project]
+name = "testproject"
+description = "an example test project for testing vulcan builds, %"
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
+keywords = [ "build", "testing" ]
+classifiers = [
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+    ]
+requires-python = ">=3.6"
+
+[project.scripts]
+myep = "vulcan.test_ep:main"
+
+[project.entry-points.test_eps]
+myep = "vulcan.test_ep:main"
+
+[tool.vulcan]
+packages = [ "testproject" ]
+
+[tool.vulcan.dependencies]
+requests = "~=2.25.1"
+
+[tool.vulcan.extras]
+test1 = ["requests", "build"]
+test2 = ["requests~=2.22", "setuptools"]
+test3 = ["requests>=2.0.0", "wheel"]
+
+[[tool.vulcan.shiv]]
+bin_name="testproject"
+console_script="myep"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+
+[build-system]
+requires=['setuptools', 'vulcan']
+build-backend="vulcan.build_backend"
+
+""")
+
+    return tmp_path
+
+
+@pytest.fixture(scope='session')
+def test_application_pep621_forbidden_keys(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    tmp_path = tmp_path_factory.mktemp('build_testproject')
+    (tmp_path / 'testproject').mkdir()
+    (tmp_path / 'testproject/__init__.py').touch()
+    with (tmp_path / 'testproject/VERSION').open('w+') as f:
+        f.write('1.2.3\n')
+    test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
+    shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
+    with (tmp_path / 'pyproject.toml').open('w+') as f:
+        f.write("""\
+[project]
+name = "testproject"
+description = "an example test project for testing vulcan builds, %"
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
+keywords = [ "build", "testing" ]
+classifiers = [
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+    ]
+requires-python = ">=3.6"
+# vulcan forbids this key in [project], so building from this fixture should raise an error.
+dependencies = ["requests~=2.2.2"]
+
+[tool.vulcan]
+packages = [ "testproject" ]
+
+[tool.vulcan.dependencies]
+requests = "~=2.25.1"
+
+[tool.vulcan.extras]
+test1 = ["requests", "build"]
+test2 = ["requests~=2.22", "setuptools"]
+test3 = ["requests>=2.0.0", "wheel"]
+
+[[tool.vulcan.shiv]]
+bin_name="testproject"
+console_script="myep"
+interpreter="/usr/bin/env python3.6"
+extra_args="-E --compile-pyc"
+
+
+[build-system]
+requires=['setuptools', 'vulcan']
+build-backend="vulcan.build_backend"
+
+[tool.vulcan.entry_points.console_scripts]
+myep = "vulcan.test_ep:main"
+
+[tool.vulcan.entry_points.testplugin]
 someplugin = "some.import:spec"
 
 """)
@@ -135,8 +243,21 @@ def test_built_application(test_application: Path, tmp_path_factory: pytest.Temp
 
 
 @pytest.fixture(scope='session')
+def test_built_application_pep621(
+        test_application_pep621: Path,
+        tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return build_dist(test_application_pep621, 'sdist', tmp_path_factory.mktemp('build'))
+
+
+@pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
+
+
+@pytest.fixture(scope='session')
+def test_built_application_wheel_pep621(test_application_pep621: Path,
+                                        tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return build_dist(test_application_pep621, 'wheel', tmp_path_factory.mktemp('build'))
 
 
 @pytest.fixture(scope='session')

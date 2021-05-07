@@ -98,7 +98,7 @@ class Vulcan:
         install_requires, extras_require = get_requires(lockfile)
 
         distutils_options = dict(
-            name=config["name"],
+            name=config.get('name'),
             version=version,
             description=config.get("description"),
             long_description=Path(source_path / config.get("readme")
@@ -123,7 +123,7 @@ class Vulcan:
         setuptools_options = dict(
             install_requires=install_requires,
             entry_points={section: [f'{k}={v}' for k, v in section_vals.items()]
-                          for section, section_vals in config.get('entry_points', {}).items()}
+                          for section, section_vals in config.get('entry_points', {}).items()} or None
             )
         options = {**distutils_options, **setuptools_options}
 

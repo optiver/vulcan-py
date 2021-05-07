@@ -1,38 +1,45 @@
-[tool.vulcan]
+[project]
 name = "vulcan"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
-author = "Joel Christiansen"
-author_email =  "joelchristiansen@optiver.com"
-url = "http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"
-packages = [ "vulcan" ]
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
+urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
-python_requires = ">=3.6"
+requires-python = ">=3.6"
+
+[project.scripts]
+vulcan="vulcan.cli:main"
+convert_pep621="vulcan.scripts.setuppy_to_pep621:convert"
+
+[tool.vulcan]
+packages = [ "vulcan" ]
 no-lock = true
 
-[tool.vulcan.entry_points.console_scripts]
-vulcan="vulcan.cli:main"
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
 cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0"]
+# remove when https://github.com/psf/fundable-packaging-improvements/issues/25 is complete.
+pep621=["ppsetuptools==2.0.2"]
+convert=["pkginfo~=1.7"]
 
 [tool.vulcan.dependencies]
 toml='~=0.10'
-setuptools='~=53.0.0'
+setuptools='~=56.0'
 wheel='~=0.36.2'
 dataclasses='~=0.8'
 typing_extensions='~=3.7'
 
 
+
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools', 'toml', 'dataclasses', 'wheel', 'typing_extensions']
+requires=['setuptools', 'toml', 'dataclasses', 'wheel', 'typing_extensions', 'ppsetuptools==2.0.0']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
