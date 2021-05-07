@@ -111,7 +111,7 @@ def convert() -> None:
         project['entry-points'] = entry_points
 
     pyproject['build-system'] = {}
-    pyproject['build-system']['requires'] = ['vulcan']
+    pyproject['build-system']['requires'] = ['vulcan[pep621]>=1.7.0']
     pyproject['build-system']['build-backend'] = 'vulcan.build_backend'
 
     with open('./pyproject.toml', 'w+') as f:
