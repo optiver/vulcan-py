@@ -42,7 +42,7 @@ Once all issues are closed and the release is ready:
 ## Setting up dev environment
 Unfortunately, because pep-517 disabled editable installs, and because vulcan builds itself, it is not 
 possible to correctly do "vulcan develop" for vulcan project. Therefor, you need to `pip install .` any time
-you want to run test any changes. Al Note that this does not apply to tox commands, as those will always rebuild
+you want to run test any changes. Note that this does not apply to tox commands, as those will always rebuild
 vulcan. To set up a basic vulcan install, therefore:
 
 ```bash
@@ -117,8 +117,8 @@ my_project-1.2.3.dist-info/top_level.txt
 my_project-1.2.3.dist-info/RECORD
 ```
 
-That is, it will contain (at the top level) any python packages you have configured, as well as a metadata
-directory. Within this metadata directory are (typically) 5 files as specified above. Of these, 3 are defined
+That is, it will contain (at the top level) any python packages you have configured, as well as a dist-info
+directory. Within this dist-info directory are (typically) 5 files as specified above. Of these, 3 are defined
 by PEP-427 and 2 are inherited from the legacy of eggs.
 
 ### METADATA
