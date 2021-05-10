@@ -90,7 +90,7 @@ In general, this should be true of ANY new tool as well.
 Wheels are defined in [PEP-0427](https://www.python.org/dev/peps/pep-0427/). For a full specification please
 read that.
 
-The structure of wheel with packages `my_package_one` and `my_package_too` with name `my_project` and version
+The structure of wheel with packages `my_package_one` and `my_package_two` with name `my_project` and version
 `1.2.3` will look like the following:
 
 ```
@@ -103,7 +103,70 @@ my_package-1.2.3-py3-none-any.whl
 * C: target python version
 * D: abi tag
 * E: platform
-* F: file extensioversion
-* D: abi tag
-* E: platform
 * F: file extension
+
+Wheels are a zipfile with the following contents:
+
+```
+my_package_one/__init__.py  # or any other code here, + whatever is specified in the MANIFEST.in
+my_package_two/__init__.py  # or any other code here, + whatever is specified in the MANIFEST.in
+my_project-1.2.3.dist-info/METADATA
+my_project-1.2.3.dist-info/WHEEL
+my_project-1.2.3.dist-info/entry_points.txt
+my_project-1.2.3.dist-info/top_level.txt
+my_project-1.2.3.dist-info/RECORD
+```
+
+That is, it will contain (at the top level) any python packages you have configured, as well as a metadata
+directory. Within this metadata directory are (typically) 5 files as specified above. Of these, 3 are defined
+by PEP-427 and 2 are inherited from the legacy of eggs.
+
+### METADATA
+This is the most detailed file, as well as the one we are most concerned with. This file specifies the vast
+majority of metadata about the wheel, to the point that it is not worth explicitly listing here. You may take
+it as given that if something is not mentioned in another file, it resides here. You can see
+[here](https://packaging.python.org/specifications/core-metadata) for a full overview of what is available.
+
+### WHEEL
+This file contains metadata about the wheel itself, i.e. the specification of the specification. This almost
+always looks like this:
+
+```
+Wheel-Version: 1.0                   
+Generator: bdist_wheel (0.36.2)      
+Root-Is-Purelib: true                
+Tag: py3-none-any                    
+```
+
+The `bdist_wheel` version may vary, as may the Tag (it will match the filename). Root-Is-Purelib refers to
+platform specific packaging details, and in practice you never need to concern yourself with it (or anything
+else in this file).
+
+### RECORD
+This file contains data about all of the files contained inside the wheel. Specifically, it contains the path
+to the file, the hash of the file, and the size in bytes. The one exception to this being RECORD itself, which
+can not contain its own hash/size.
+
+### entry\_points.txt
+This file contains entry points in an ini-style config. E.g. for vulcan itself, the entry_points.txt looks
+like:
+
+```ini
+[console_scripts]                                                
+convert_setuptools = vulcan.scripts.setuppy_to_pep621:convert    
+vulcan = vulcan.cli:main                                         
+```
+
+The header is the entry point group, the key is the name of the entry point, and the value is the import path
+to it.
+
+### top\_level.txt
+Finally, this file contains a newline-separated list of top-level packages that will be unpacked into the
+site-packages directory.
+
+For our example project above, that file would look like
+
+```
+my_package_one
+my_package_two
+```
