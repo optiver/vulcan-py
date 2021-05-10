@@ -30,7 +30,6 @@ That said, it is still polite to treat the internal semantics in the same way as
 Go to [issues](https://jira.ams.optiver.com/projects/VULCAN/issues) and set `Fix Version` to the version created
 above.
 
-
 ### 3. Release
 Once all issues are closed and the release is ready:
 
@@ -47,7 +46,8 @@ you want to run test any changes. Al Note that this does not apply to tox comman
 vulcan. To set up a basic vulcan install, therefore:
 
 ```bash
-$ mkvirtualenv -p /usr/bin/python3.6 vulcan
+$ python3.6 -m venv vulcan
+$ source vulcan/bin/activate
 $ pip install -U pip
 $ pip install .[pep621,convert,cli]
 ```
