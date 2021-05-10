@@ -93,8 +93,10 @@ read that.
 The structure of wheel with packages `my_package_one` and `my_package_too` with name `my_project` and version
 `1.2.3` will look like the following:
 
-`     A    |  B  | C | D  | E | F `  
-`my_package-1.2.3-py3-none-any.whl`
+```
+     A    |  B  | C | D  | E | F 
+my_package-1.2.3-py3-none-any.whl
+```
 
 * A: package name
 * B: version
