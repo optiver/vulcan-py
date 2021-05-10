@@ -33,11 +33,11 @@ above.
 ### 3. Release
 Once all issues are closed and the release is ready:
 
-1. click [Release] in the upper right corner
-2. Set "Release" = "with new build"
-3. Set "Plan" = "Vulcan"
-4. Click "Promote"
-5. Click "Release"
+1. click `[Release]` in the upper right corner
+2. Set `Release` to `with new build`
+3. Set `Plan` to `Vulcan`
+4. Click `Promote`
+5. Click `Release`
 
 ## Setting up dev environment
 ## Running pytest/flake8/mypy
