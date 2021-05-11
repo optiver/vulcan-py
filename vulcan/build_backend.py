@@ -123,7 +123,7 @@ def install_develop() -> None:
             mdata_file.flush()
             with setup.open('w+') as setup_file:
                 setup_file.write(f"""\
-from setuptools import setup
+from vulcan.build_backend import setup
 import json, pathlib
 setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
 """)
