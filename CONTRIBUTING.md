@@ -18,6 +18,13 @@ page, but in short:
 * If a release fixes a bug without breaking backwards compatibility or adding any new features, that release
   should be a patch version.
 
+To decide what the next version is, be sure to take into account all closed tickets that are associated with
+`vulcan-next`, updating the version that corrosponds to the largest change according to the above
+points. I.e. if you have 20 tickets associated with `vulcan-next` and even 1 breaks backwards compatability, the
+next release MUST be a major version bump.
+
+You can simply rename the release, any associated tickets will be updated for you by jira.
+
 #### Note
 As vulcan is not intended to be used as a library, there are not any guarantees on internal code compatibility
 which may (though probably will not) change dramatically at any time. 
@@ -38,6 +45,13 @@ Once all issues are closed and the release is ready:
 3. Set `Plan` to `Vulcan`
 4. Click `Promote`
 5. Click `Release`
+
+
+## Working on/closing tickets
+
+When you finish a ticket and close it, if you will not be immidiately releasing vulcan then you should
+associate that ticket with `vulcan-next`, creating that release if it doesn't exist. If a ticket does not
+require a release (documentation changes, or similar) then you don't need to associate a fix verison.
 
 ## Setting up dev environment
 Unfortunately, because pep-517 disabled editable installs, and because vulcan builds itself, it is not 
