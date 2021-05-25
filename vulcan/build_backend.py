@@ -50,9 +50,12 @@ try:
             if 'gui-scripts' in parsed_kwargs:
                 parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
                 del parsed_kwargs['gui-scripts']
-            for ep_group in list(parsed_kwargs.get('entry_points', {})):
-                parsed_kwargs['entry_points'][ep_group] = [
-                    f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
+            try:
+                for ep_group in list(parsed_kwargs['entry_points']):
+                    parsed_kwargs['entry_points'][ep_group] = [
+                        f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
+            except KeyError:
+                pass
             return setuptools.setup(**parsed_kwargs)
         else:
             return setuptools.setup(**_filter_nones(kwargs))
