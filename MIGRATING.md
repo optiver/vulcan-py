@@ -245,6 +245,7 @@ authors = [{name="Firstname Lastname", email="firstnamelastname@optiver.com"}]  
 urls = {stash="stash_url"}  # OPTIONAL
 readme = "README.md"  # OPTIONAL
 keywords = [ "vulcan", ]   # OPTIONAL
+# see https://pypi.org/classifiers/ for allowed classifiers
 classifiers = [  # OPTIONAL
     "Programming Language :: Python :: 3.6"
 ]
