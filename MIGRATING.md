@@ -12,7 +12,8 @@ Table of Contents:
 In the root directory of the project to be converted, run: 
 
 ```bash
-$ convert_setuptools
+$ pipx install vulcan[convert,cli,pep621]
+$ convert_pep621
 ```
 
 
@@ -233,3 +234,57 @@ mysql = ["mysqlclient~=1.3"]
 pgsql = ["psycopg2~=2.7"]
 ```
 
+
+# Working pyproject.toml
+
+```toml
+[project]
+name = "package_name"
+description = "Short description"  # OPTIONAL
+authors = [{name="Firstname Lastname", email="firstnamelastname@optiver.com"}]  # OPTIONAL
+urls = {stash="stash_url"}  # OPTIONAL
+readme = "README.md"  # OPTIONAL
+keywords = [ "vulcan", ]   # OPTIONAL
+# see https://pypi.org/classifiers/ for allowed classifiers
+classifiers = [  # OPTIONAL
+    "Programming Language :: Python :: 3.6"
+]
+requires-python = ">=3.6"  # OPTIONAL
+
+
+[project.scripts]  # OPTIONAL
+entry_point="package_name.cli:main"
+entry_point_two="package_name.cli:main2"
+
+[project.entry-points.some_ep]  # OPTIONAL
+another_entry_point="package_name.something:another"
+
+[tool.vulcan.dependencies]  # OPTIONAL
+common_py='*'
+dataclasses='*'
+requests='*'
+
+[tool.vulcan.extras]  # OPTIONAL
+some_extra=["psycopg2"]
+
+[[tool.vulcan.shiv]]
+bin_name="my_app"
+console_script="entry_point"
+interpreter='/usr/bin/env python3.6'
+extra_args="--compile-pyc"
+
+[[tool.vulcan.shiv]]
+bin_name="my_app_two"
+entry_point="package_name.cli:main2"
+interpreter='/usr/bin/env python3.6'
+extra_args="--compile-pyc"
+
+[tool.vulcan]
+packages = [ "package_name" ]
+
+[build-system]
+# in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
+# to correctly install and use this tool
+requires=['vulcan~=1.7']
+build-backend="vulcan.build_backend"
+```
