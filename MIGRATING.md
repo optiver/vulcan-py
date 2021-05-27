@@ -253,6 +253,7 @@ requires-python = ">=3.6"  # OPTIONAL
 
 [project.scripts]  # OPTIONAL
 entry_point="package_name.cli:main"
+entry_point_two="package_name.cli:main2"
 
 [project.entry-points.some_ep]  # OPTIONAL
 another_entry_point="package_name.something:another"
@@ -264,6 +265,18 @@ requests='*'
 
 [tool.vulcan.extras]  # OPTIONAL
 some_extra=["psycopg2"]~=0.3.0"]
+
+[[tool.vulcan.shiv]]
+bin_name="my_app"
+console_script="entry_point"
+interpreter='/usr/bin/env python3.6'
+extra_args="--compile-pyc"
+
+[[tool.vulcan.shiv]]
+bin_name="my_app_two"
+entry_point="package_name.cli:main2"
+interpreter='/usr/bin/env python3.6'
+extra_args="--compile-pyc"
 
 [tool.vulcan]
 packages = [ "package_name" ]
