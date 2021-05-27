@@ -12,7 +12,8 @@ Table of Contents:
 In the root directory of the project to be converted, run: 
 
 ```bash
-$ convert_setuptools
+$ pipx install vulcan[convert,cli,pep621]
+$ convert_pep621
 ```
 
 
