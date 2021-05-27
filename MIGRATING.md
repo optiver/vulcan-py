@@ -265,7 +265,7 @@ dataclasses='*'
 requests='*'
 
 [tool.vulcan.extras]  # OPTIONAL
-some_extra=["psycopg2"]~=0.3.0"]
+some_extra=["psycopg2"]
 
 [[tool.vulcan.shiv]]
 bin_name="my_app"
