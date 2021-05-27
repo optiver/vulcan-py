@@ -234,3 +234,43 @@ mysql = ["mysqlclient~=1.3"]
 pgsql = ["psycopg2~=2.7"]
 ```
 
+
+# Working pyproject.toml
+
+```toml
+[project]
+name = "package_name"
+description = "Short description"  # OPTIONAL
+authors = [{name="Firstname Lastname", email="firstnamelastname@optiver.com"}]  # OPTIONAL
+urls = {stash="stash_url"}  # OPTIONAL
+readme = "README.md"  # OPTIONAL
+keywords = [ "vulcan", ]   # OPTIONAL
+classifiers = [  # OPTIONAL
+    "Programming Language :: Python :: 3.6"
+]
+requires-python = ">=3.6"  # OPTIONAL
+
+
+[project.scripts]  # OPTIONAL
+entry_point="package_name.cli:main"
+
+[project.entry-points.some_ep]  # OPTIONAL
+another_entry_point="package_name.something:another"
+
+[tool.vulcan.dependencies]  # OPTIONAL
+common_py='*'
+dataclasses='*'
+requests='*'
+
+[tool.vulcan.extras]  # OPTIONAL
+some_extra=["psycopg2"]~=0.3.0"]
+
+[tool.vulcan]
+packages = [ "package_name" ]
+
+[build-system]
+# in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
+# to correctly install and use this tool
+requires=['vulcan~=1.7']
+build-backend="vulcan.build_backend"
+```
