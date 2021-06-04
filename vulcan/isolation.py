@@ -5,7 +5,7 @@ import tempfile
 from contextlib import contextmanager
 from os import PathLike
 from types import SimpleNamespace
-from typing import AnyStr, Dict, Generator, List, Union
+from typing import Dict, Generator, List, Union
 from venv import EnvBuilder
 
 from pkg_resources import Requirement
@@ -63,8 +63,7 @@ class VulcanEnvBuilder(EnvBuilder):
         cmd = [context.env_exe, '-Im', 'pip', 'install', '--upgrade', 'pip']
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
-    def install(self,
-                deps_dir: Union[AnyStr, 'PathLike[str]', 'PathLike[bytes]'], requirements: List[str]
+    def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'], requirements: List[str]
                 ) -> None:
         # install Isolated with module pip using pep517
         if not requirements:
@@ -77,7 +76,7 @@ class VulcanEnvBuilder(EnvBuilder):
             '--use-pep517',
             '--target',
             str(deps_dir)] + requirements
-        subprocess.check_output(cmd)
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
     def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
                ) -> Dict[str, Requirement]:
