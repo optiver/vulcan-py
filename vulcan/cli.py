@@ -97,7 +97,8 @@ def main(argv: List[str] = None) -> None:
                 os.remove(dist)
     elif args.subcommand == 'lock':
         install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
-                                                        config.configured_extras or {})
+                                                        config.configured_extras or {},
+                                                        config.python_lock_with)
         with open(config.lockfile, 'w+') as f:
             #  toml type annotations claim there is no "encoder" argument.
             #  toml type annotations lie

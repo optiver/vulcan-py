@@ -1,16 +1,26 @@
 import subprocess
 from pathlib import Path
+from typing import Tuple
 
 import pytest
 from pkg_resources import Requirement
 from pkginfo import Wheel  # type: ignore
-
 from vulcan.builder import resolve_deps
+from vulcan.isolation import get_executable
 
 
 @pytest.fixture
 def wheel_pkg_info(test_built_application_wheel: Path) -> Wheel:
     return Wheel(str(test_built_application_wheel))
+
+
+def versions_exist(*versions: str) -> bool:
+    try:
+        for v in versions:
+            get_executable(v)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 class TestResolveDeps:
@@ -43,3 +53,13 @@ class TestResolveDeps:
     def test_conflicting_deps_raises(self) -> None:
         with pytest.raises(subprocess.CalledProcessError):
             resolve_deps(['requests==2.5.0'], {'test': ['requests==2.4.0']})
+
+    @pytest.mark.skipif(not versions_exist('3.6', '3.4'), reason='missing python version for test')
+    def test_resolve_different_python_versions(self) -> None:
+        spec = 'options-sdk>=4.0.1,<=5.0.0'
+        resolved, _ = resolve_deps([spec], {}, python_version='3.6')
+        print(resolved)
+        assert 'options-sdk==5.0.0' in resolved
+        resolved, _ = resolve_deps([spec], {}, python_version='3.4')
+        print(resolved)
+        assert 'options-sdk==4.0.1' in resolved

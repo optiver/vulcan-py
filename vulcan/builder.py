@@ -5,14 +5,15 @@ from typing import Dict, List, Tuple
 from vulcan.isolation import create_venv
 
 
-def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
+def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]],
+                 python_version: str = None
                  ) -> Tuple[List[str], Dict[str, List[str]]]:
 
     if not install_requires and not extras:
         return [], {}
 
     extras_list = list(extras.items())
-    with create_venv() as pipenv:
+    with create_venv(python_version) as pipenv:
         with tempfile.TemporaryDirectory() as site_packages:
             print("Building default requirements")
             pipenv.install(site_packages, install_requires)

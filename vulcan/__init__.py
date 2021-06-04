@@ -86,6 +86,7 @@ class Vulcan:
     configured_dependencies: VersionSpecs
     configured_extras: Dict[str, List[str]]
     no_lock: bool = False
+    python_lock_with: Optional[str] = None
 
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
@@ -131,6 +132,7 @@ class Vulcan:
 
         configured_deps = config.get('dependencies', {})
         no_lock = config.get('no-lock', False)
+        python_lock_with = config.get('python-lock-with')
 
         shiv_ops = []
         shiv_config = config.get('shiv', [])
@@ -146,7 +148,7 @@ class Vulcan:
 
         return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
                    configured_dependencies=configured_deps, configured_extras=config.get('extras', {}),
-                   no_lock=no_lock)
+                   no_lock=no_lock, python_lock_with=python_lock_with)
 
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
