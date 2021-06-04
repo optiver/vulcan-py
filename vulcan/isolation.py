@@ -32,13 +32,13 @@ def patch_executable(python_version: str = None) -> Generator[None, None, None]:
         old_exe = sys.executable
         try:
             sys.executable = get_executable(python_version)
+            yield
         except subprocess.CalledProcessError as e:
             print(f"Command '{' '.join(shlex.quote(a) for a in e.cmd)}' failed with exit code {e.returncode}")
             print(e.stderr)
             exit(1)
-
-        yield
-        sys.executable = old_exe
+        finally:
+            sys.executable = old_exe
 
 
 class VulcanEnvBuilder(EnvBuilder):
