@@ -94,7 +94,10 @@ def convert() -> None:
             if '; extra == "' in str(parsed_req):
                 # extra, swing back to this
                 continue
-            vulcan['dependencies'][parsed_req.name] = str(parsed_req.specifier)  # type: ignore
+            name = parsed_req.name  # type: ignore
+            if parsed_req.extras:
+                name = f'{name}[{",".join(parsed_req.extras)}]'
+            vulcan['dependencies'][name] = str(parsed_req.specifier)  # type: ignore
     if whl.provides_extras:
         vulcan['extras'] = {}
         for extra in whl.provides_extras:
