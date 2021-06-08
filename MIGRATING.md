@@ -13,6 +13,8 @@ In the root directory of the project to be converted, run:
 
 ```bash
 $ pipx install vulcan[convert,cli,pep621]
+$ source ./venv/bin/activate # or however you prefer to enter a virtualenv
+$ pip install -U pip wheel setuptools
 $ convert_pep621
 ```
 

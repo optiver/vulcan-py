@@ -31,7 +31,7 @@ convert=["pkginfo~=1.7"]
 toml='~=0.10'
 setuptools='~=56.0'
 wheel='~=0.36.2'
-dataclasses='~=0.8'
+dataclasses="~=0.8; python_version<='3.6'"
 typing_extensions='~=3.7'
 
 
