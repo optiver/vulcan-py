@@ -17,7 +17,7 @@ except ImportError:
     exit("Can not run conversion script without pep621 extra installed. Please install `vulcan[pep621]`")
 
 
-def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]], List[str]]:
+def wheel() -> Tuple[pkginfo.Wheel, tomlkit.items.Table, List[str]]:
 
     with tempfile.TemporaryDirectory(suffix='.vulcan-migrate') as tmp:
         subprocess.run(['pip', 'wheel', '--no-deps', '-w', tmp, '.'])
@@ -41,7 +41,13 @@ def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]], List[str]]:
             except KeyError:
                 packages = []
 
-    return whl, eps, packages
+    ep_table = tomlkit.table()
+    ep_table._is_super_table = True
+    for epname, ep in eps.items():
+        t = tomlkit.table()
+        ep_table[epname] = t
+        t.update(ep)  # type: ignore
+    return whl, ep_table, packages
 
 
 def contributors(author: Optional[str], author_email: Optional[str]) -> List[tomlkit.items.Table]:
