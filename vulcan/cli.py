@@ -65,6 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     add = subparsers.add_parser('add')
     add.set_defaults(subcommand='add')
     add.add_argument('reqspec')
+    add.add_argument('--no-lock', action='store_true')
     return parser
 
 
@@ -145,6 +146,8 @@ def main(argv: List[str] = None) -> None:
     if args.subcommand == 'add':
         req = Requirement.parse(args.reqspec)
         add(req)
+        if not config.no_lock and not args.no_lock:
+            lock(config, args, parser)
     elif args.subcommand == 'build':
         build_out(config, args, parser)
     elif args.subcommand == 'lock':
