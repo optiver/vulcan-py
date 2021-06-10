@@ -5,10 +5,10 @@ from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 import pkginfo  # type: ignore
-import toml
+import tomlkit
 from pkg_resources import Requirement
 
 try:
@@ -44,8 +44,8 @@ def wheel() -> Tuple[pkginfo.Wheel, Dict[str, Dict[str, str]], List[str]]:
     return whl, eps, packages
 
 
-def contributors(author: Optional[str], author_email: Optional[str]) -> List[Dict[str, str]]:
-    vals = {}
+def contributors(author: Optional[str], author_email: Optional[str]) -> List[tomlkit.items.Table]:
+    vals = tomlkit.table()
     if author:
         vals['name'] = author
     if author_email:
@@ -55,28 +55,35 @@ def contributors(author: Optional[str], author_email: Optional[str]) -> List[Dic
 
 def convert() -> None:
     try:
-        pyproject = toml.load('./pyproject.toml')
+        with open('./pyproject.toml') as f:
+            pyproject = tomlkit.loads(f.read())
     except FileNotFoundError:
-        pyproject = {}
+        pyproject = tomlkit.document()
     if 'project' in pyproject:
         exit('refusing to overwrite current project configuration')
     whl, entry_points, packages = wheel()
-    project: Dict[str, Any] = {}
-    vulcan: Dict[str, Any] = {}
+    project = tomlkit.table()
+    vulcan = tomlkit.table()
     pyproject['project'] = project
-    pyproject['tool'] = pyproject.get('tool', {})
-    pyproject['tool']['vulcan'] = vulcan
+    if 'tool' not in pyproject:
+        pyproject['tool'] = tomlkit.items.Table(
+            tomlkit.container.Container(),
+            tomlkit.items.Trivia(),
+            False,
+            is_super_table=True)
+    tool = cast(tomlkit.items.Table, pyproject['tool'])
+    tool['vulcan'] = vulcan
     project['name'] = whl.name
     if whl.author or whl.author_email:
         project['authors'] = contributors(whl.author, whl.author_email)
     if whl.maintainer or whl.maintainer_email:
         project['maintainers'] = contributors(whl.maintainer, whl.maintainer_email)
     if whl.classifiers:
-        project['classifiers'] = list(whl.classifiers)
+        project['classifiers'] = tomlkit.array(whl.classifiers).multiline(True)
     if whl.summary:
         project['description'] = whl.summary
     if whl.keywords:
-        project['keywords'] = whl.keywords.split(',')
+        project['keywords'] = tomlkit.array(whl.keywords.split(',')).multiline(True)
     if whl.license:
         project['license'] = whl.license
     if whl.project_urls:
@@ -99,9 +106,10 @@ def convert() -> None:
                 name = f'{name}[{",".join(parsed_req.extras)}]'
             vulcan['dependencies'][name] = str(parsed_req.specifier)  # type: ignore
     if whl.provides_extras:
-        vulcan['extras'] = {}
+        extras = tomlkit.table()
+        vulcan['extras'] = extras
         for extra in whl.provides_extras:
-            vulcan['extras'][extra] = []
+            extras[extra] = []
             for req in whl.requires_dist:
                 parsed_req = Requirement.parse(req)
                 if f'; extra == "{extra}"' not in str(parsed_req):
@@ -122,9 +130,10 @@ def convert() -> None:
     if entry_points:
         project['entry-points'] = entry_points
 
-    pyproject['build-system'] = {}
-    pyproject['build-system']['requires'] = ['vulcan[pep621]>=1.7.0']
-    pyproject['build-system']['build-backend'] = 'vulcan.build_backend'
+    build_system = tomlkit.table()
+    pyproject['build-system'] = build_system
+    build_system['requires'] = ['vulcan[pep621]>=1.7.0']
+    build_system['build-backend'] = 'vulcan.build_backend'
 
     with open('./pyproject.toml', 'w+') as f:
-        toml.dump(pyproject, f)
+        f.write(tomlkit.dumps(pyproject))

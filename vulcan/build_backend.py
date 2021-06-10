@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
 
-import toml
+import tomlkit
 
 from vulcan import Vulcan, flatten_reqs
 
@@ -31,7 +31,7 @@ try:
     def setup(**kwargs: Any) -> Any:
 
         with open('pyproject.toml', 'r') as pptoml:
-            pyproject_data = toml.load(pptoml)
+            pyproject_data = dict(tomlkit.parse(pptoml.read()))
 
         if 'project' in pyproject_data:
             if 'dependencies' in pyproject_data['project']:
@@ -102,6 +102,13 @@ def build_sdist(sdist_directory: str,
         return build(sdist_directory, config_settings)
 
 
+def get_virtualenv_python() -> Path:
+    virtual_env = os.environ.get('VIRTUAL_ENV')
+    if virtual_env is None:
+        raise RuntimeError("No virtualenv active")
+    return Path(virtual_env, 'bin', 'python')
+
+
 # not part of PEP-517, but very useful to have
 def install_develop() -> None:
     config = Vulcan.from_source(Path().absolute())
@@ -109,10 +116,11 @@ def install_develop() -> None:
 
     if config.no_lock:
         options['install_requires'] = flatten_reqs(config.configured_dependencies)
-        options['extras_require'] = config.configured_extras
+        options['extrrs_require'] = config.configured_extras
 
-    virtual_env = os.environ.get('VIRTUAL_ENV')
-    if virtual_env is None:
+    try:
+        virtual_env = get_virtualenv_python()
+    except RuntimeError:
         exit('may not use vulcan develop outside of a virtualenv')
 
     setup = Path('setup.py')
@@ -129,7 +137,7 @@ import json, pathlib
 setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
 """)
             subprocess.check_call([
-                Path(virtual_env, 'bin', 'python'), '-m', 'pip', 'install', '-e', Path().absolute()])
+                virtual_env, '-m', 'pip', 'install', '-e', Path().absolute()])
     finally:
         setup.unlink()
 
