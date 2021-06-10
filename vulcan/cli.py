@@ -67,7 +67,6 @@ def build_parser() -> argparse.ArgumentParser:
     add = subparsers.add_parser('add')
     add.set_defaults(subcommand='add')
     add.add_argument('reqspec')
-    add.add_argument('--noinstall', action='store_true')
     return parser
 
 
@@ -120,18 +119,24 @@ def add(req: Requirement) -> None:
         exit("Must be in a virtualenv to use `vulcan add`")
     subprocess.check_call([venv_python, '-m', 'pip', 'install', str(req)])
     if req.specifier:  # type: ignore
+        # if the user gave a version spec, we blindly take that
         version = str(req.specifier)  # type: ignore
     else:
+        # otherwise, we take a freeze to see what was actually installed
         freeze = subprocess.check_output([venv_python, '-m', 'pip', 'freeze'], encoding='utf-8').strip()
-        line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore
         try:
+            # try and find the thing we just added
+            line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore
+            # and parse it to a version
             spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier  # type: ignore
                                                )[2:])  # remove the == at the start
             if isinstance(spec, packaging.version.LegacyVersion):
+                # this will raise a DeprecationWarning as well, so it will yell at user for us.
                 version = ''
             else:
                 version = f'~={spec.major}.{spec.minor}'
         except StopIteration:
+            # failed to find the thing we just installed, give up.
             version = ''
     with open('pyproject.toml') as f:
         parse = tomlkit.parse(f.read())
@@ -148,8 +153,6 @@ def main(argv: List[str] = None) -> None:
     if args.subcommand == 'add':
         req = Requirement.parse(args.reqspec)
         add(req)
-        if not args.noinstall and os.environ.get('VIRTUAL_ENV') is not None:
-            install_develop()
     elif args.subcommand == 'build':
         build_out(config, args, parser)
     elif args.subcommand == 'lock':
