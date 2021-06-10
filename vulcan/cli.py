@@ -4,7 +4,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable, List, TypeVar, Union
+from typing import List
 
 import build
 import build.env
@@ -15,8 +15,6 @@ from pkg_resources import Requirement
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
-
-T = TypeVar('T')
 
 
 def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
@@ -90,12 +88,6 @@ def build_out(config: Vulcan, args: argparse.Namespace, parser: argparse.Argumen
             build_shiv_apps(dist, config, args.outdir)
         finally:
             os.remove(dist)
-
-
-def _intersperse_nl(vals: Iterable[T]) -> Iterable[Union[T, tomlkit.items.Whitespace]]:
-    for item in vals:
-        yield item
-        yield tomlkit.nl()
 
 
 def lock(config: Vulcan, args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
