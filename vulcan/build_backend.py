@@ -116,7 +116,7 @@ def install_develop() -> None:
 
     if config.no_lock:
         options['install_requires'] = flatten_reqs(config.configured_dependencies)
-        options['extrrs_require'] = config.configured_extras
+        options['extras_require'] = config.configured_extras
 
     try:
         virtual_env = get_virtualenv_python()
