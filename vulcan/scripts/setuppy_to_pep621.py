@@ -6,7 +6,7 @@ from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Tuple, cast
+from typing import Dict, List, NamedTuple, Optional, cast
 
 import pkginfo  # type: ignore
 import tomlkit
