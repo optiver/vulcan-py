@@ -93,7 +93,8 @@ def build_out(config: Vulcan, args: argparse.Namespace, parser: argparse.Argumen
 
 def lock(config: Vulcan, args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
-                                                    config.configured_extras or {})
+                                                    config.configured_extras or {},
+                                                    config.python_lock_with)
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore

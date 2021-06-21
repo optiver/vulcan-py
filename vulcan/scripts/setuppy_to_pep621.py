@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import zipfile
+from argparse import ArgumentParser
 from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
@@ -21,6 +22,12 @@ class BuildData(NamedTuple):
     wheel: pkginfo.Wheel
     table: tomlkit.items.Table
     packages: List[str]
+
+
+def make_parser() -> ArgumentParser:
+    parser = ArgumentParser()
+    parser.add_argument('--shiv-console-scripts', action='store_true')
+    return parser
 
 
 def wheel() -> BuildData:
@@ -65,6 +72,17 @@ def contributors(author: Optional[str], author_email: Optional[str]) -> List[tom
     return [vals]
 
 
+def shiv_from_console_scripts(console_scripts: Dict[str, str]) -> List[Dict[str, str]]:
+    shivs: List[Dict[str, str]] = []
+    for name in console_scripts:
+        shivs.append({
+            'bin_name': name,
+            'console_script': name,
+            'interpreter': '/usr/bin/env python3.6'
+        })
+    return shivs
+
+
 def convert() -> None:
     try:
         with open('./pyproject.toml') as f:
@@ -73,6 +91,7 @@ def convert() -> None:
         pyproject = tomlkit.document()
     if 'project' in pyproject:
         exit('refusing to overwrite current project configuration')
+    args = make_parser().parse_args()
     whl, entry_points, packages = wheel()
     project = tomlkit.table()
     vulcan = tomlkit.table()
@@ -141,6 +160,8 @@ def convert() -> None:
         del entry_points['gui_scripts']
     if entry_points:
         project['entry-points'] = entry_points
+    if args.shiv_console_scripts:
+        vulcan['shiv'] = shiv_from_console_scripts(project['scripts'])
 
     build_system = tomlkit.table()
     pyproject['build-system'] = build_system
