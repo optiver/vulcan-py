@@ -5,7 +5,7 @@ from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, NamedTuple, Optional, Tuple, cast
 
 import pkginfo  # type: ignore
 import tomlkit
@@ -17,7 +17,13 @@ except ImportError:
     exit("Can not run conversion script without pep621 extra installed. Please install `vulcan[pep621]`")
 
 
-def wheel() -> Tuple[pkginfo.Wheel, tomlkit.items.Table, List[str]]:
+class BuildData(NamedTuple):
+    wheel: pkginfo.Wheel
+    table: tomlkit.items.Table
+    packages: List[str]
+
+
+def wheel() -> BuildData:
 
     with tempfile.TemporaryDirectory(suffix='.vulcan-migrate') as tmp:
         subprocess.run(['pip', 'wheel', '--no-deps', '-w', tmp, '.'])
@@ -47,7 +53,7 @@ def wheel() -> Tuple[pkginfo.Wheel, tomlkit.items.Table, List[str]]:
         t = tomlkit.table()
         ep_table[epname] = t
         t.update(ep)  # type: ignore
-    return whl, ep_table, packages
+    return BuildData(whl, ep_table, packages)
 
 
 def contributors(author: Optional[str], author_email: Optional[str]) -> List[tomlkit.items.Table]:
