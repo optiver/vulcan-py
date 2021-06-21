@@ -160,8 +160,8 @@ def convert() -> None:
         del entry_points['gui_scripts']
     if entry_points:
         project['entry-points'] = entry_points
-    if args.shiv_console_scripts:
-        vulcan['shiv'] = shiv_from_console_scripts(project['scripts'])
+    if args.shiv_console_scripts and 'scripts' in project:
+        vulcan['shiv'] = shiv_from_console_scripts(project['scripts'])  # type: ignore
 
     build_system = tomlkit.table()
     pyproject['build-system'] = build_system
