@@ -28,18 +28,16 @@ pep621=["ppsetuptools==2.0.2"]
 convert=["pkginfo~=1.7"]
 
 [tool.vulcan.dependencies]
-toml='~=0.10'
 setuptools='~=56.0'
 wheel='~=0.36.2'
 dataclasses="~=0.8; python_version<='3.6'"
 typing_extensions='~=3.7'
-
-
+tomlkit = "~=0.7"
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools', 'toml', 'dataclasses', 'wheel', 'typing_extensions', 'ppsetuptools==2.0.0']
+requires=['setuptools', 'tomlkit', 'dataclasses', 'wheel', 'typing_extensions', 'ppsetuptools==2.0.0']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 

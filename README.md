@@ -129,6 +129,23 @@ all other package's requirements), and will error if it is not possible to find 
 be done automatically, and should always involve some extra testing when used (since the dependencies are
 being updated and may introduce a bug).
 
+## `vulcan add`
+
+```
+$ vulcan add --help         
+usage: vulcan add [-h] [--no-lock] reqspec                               
+                                                                         
+positional arguments:                                                    
+  reqspec                                                                
+                                                                         
+optional arguments:                                                      
+  -h, --help  show this help message and exit                            
+  --no-lock                                                              
+```
+
+`add` is a convenience tool that will grab the most recent version of a library, add it to the pyprojec.toml,
+and regenerate the lockfile (if applicable)
+
 ## `vulcan develop`
 
 ```

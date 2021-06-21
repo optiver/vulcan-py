@@ -1,9 +1,9 @@
 import warnings
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
-import toml
+import tomlkit
 from typing_extensions import TypedDict
 
 
@@ -23,7 +23,7 @@ class VersionDict(TypedDict, total=False):
     extras: List[str]
 
 
-VersionSpecs = Dict[str, Union[str, VersionDict]]
+VersionSpecs = Mapping[str, Union[str, VersionDict]]
 
 
 def flatten_reqs(versions: VersionSpecs) -> List[str]:
@@ -32,8 +32,8 @@ def flatten_reqs(versions: VersionSpecs) -> List[str]:
 
 @dataclass
 class Metadata:
-    name: str
-    version: str
+    name: Optional[str]
+    version: Optional[str]
 
     description: Optional[str] = None
     long_description: Optional[str] = None
@@ -78,6 +78,23 @@ class ShivOpts:
     extra_args: str = ''
 
 
+class _ContainerStub(tomlkit.container.Container):
+    def get(self, v: str, default: Any = None) -> Any:
+        ...
+
+
+def list_or_none(val: Any) -> Optional[List[str]]:
+    return [str(v) for v in val] if val is not None else None
+
+
+def str_or_none(val: Any) -> Optional[str]:
+    return str(val) if val is not None else None
+
+
+def dict_or_none(val: Any) -> Optional[Dict[str, Any]]:
+    return {str(k): v for k, v in val.items()} if val is not None else None
+
+
 @dataclass
 class Vulcan:
     metadata: Metadata
@@ -91,46 +108,42 @@ class Vulcan:
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
-            config = toml.load(f)['tool']['vulcan']
+            config = tomlkit.loads(f.read())['tool']['vulcan']  # type: ignore
+            config = cast(_ContainerStub, config)
         version_file = find_version_file(source_path)
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
         install_requires, extras_require = get_requires(lockfile)
 
-        distutils_options = dict(
-            name=config.get('name'),
-            version=version,
-            description=config.get("description"),
+        metadata = Metadata(
+            name=str_or_none(config.get('name')),
+            version=str_or_none(version),
+            description=str_or_none(config.get("description")),
             long_description=Path(source_path / config.get("readme")
                                   ).read_text() if config.get("readme") is not None else None,
-            author=config.get("author"),
-            author_email=config.get("author_email"),
-            maintainer=config.get("maintainer"),
+            author=str_or_none(config.get("author")),
+            author_email=str_or_none(config.get("author_email")),
+            maintainer=str_or_none(config.get("maintainer")),
             maintainer_email=config.get("maintainer_email"),
-            url=config.get("url"),
-            download_url=config.get("download_url"),
-            py_modules=config.get("py_modules"),
-            scripts=config.get("scripts"),
-            classifiers=config.get("classifiers"),
-            license=config.get("license"),
-            keywords=config.get("keywords"),
-            platforms=config.get("platforms"),
-            packages=config.get("packages"),
-            package_dir=config.get("package_dir"),
+            url=str_or_none(config.get("url")),
+            download_url=str_or_none(config.get("download_url")),
+            py_modules=list_or_none(config.get("py_modules")),
+            scripts=str_or_none(config.get("scripts")),
+            classifiers=list_or_none(config.get("classifiers")),
+            license=str_or_none(config.get("license")),
+            keywords=list_or_none(config.get("keywords")),
+            platforms=str_or_none(config.get("platforms")),
+            packages=list_or_none(config.get("packages")),
+            package_dir=dict_or_none(config.get("package_dir")),
             extras_require=extras_require,
-            python_requires=config.get("python_requires")
-            )
-        setuptools_options = dict(
+            python_requires=str_or_none(config.get("python_requires")),
             install_requires=install_requires,
             entry_points={section: [f'{k}={v}' for k, v in section_vals.items()]
                           for section, section_vals in config.get('entry_points', {}).items()} or None
             )
-        options = {**distutils_options, **setuptools_options}
 
-        metadata = Metadata(**options)
-
-        configured_deps = config.get('dependencies', {})
+        configured_deps = {str(k): str(v) for k, v in config.get('dependencies', {}).items()}
         no_lock = config.get('no-lock', False)
         python_lock_with = config.get('python-lock-with')
 
@@ -138,12 +151,12 @@ class Vulcan:
         shiv_config = config.get('shiv', [])
         for conf in shiv_config:
             shiv_ops.append(ShivOpts(
-                bin_name=conf.get('bin_name', metadata.name),
-                console_script=conf.get('console_script'),
-                entry_point=conf.get('entry_point'),
-                interpreter=conf.get('interpreter'),
-                with_extras=conf.get('with_extras', []),
-                extra_args=conf.get('extra_args', ''),
+                bin_name=str(conf.get('bin_name', metadata.name)),
+                console_script=str(conf.get('console_script')),
+                entry_point=str(conf.get('entry_point')),
+                interpreter=str(conf.get('interpreter')),
+                with_extras=[str(e) for e in conf.get('with_extras', [])],
+                extra_args=str(conf.get('extra_args', '')),
             ))
 
         return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
@@ -156,8 +169,9 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
         warnings.warn(f"No lockfile {lockfile} found")
         return [], {}
     with lockfile.open() as f:
-        content = toml.load(f)
-    return content['install_requires'], content['extras_require']
+        content = cast(_ContainerStub, tomlkit.loads(f.read()))
+    return (list(content['install_requires']),  # type: ignore
+            {k: list(v) for k, v in content['extras_require'].items()})  # type: ignore
 
 
 def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:
