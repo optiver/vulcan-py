@@ -3,11 +3,13 @@ name = "vulcan"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
+license = {text="Apache License Version 2.0"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Apache Software License"
 ]
 requires-python = ">=3.6"
 
