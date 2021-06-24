@@ -167,6 +167,8 @@ $ vulcan develop
 
 # Tips
 
+---
+
 ## Pinning vulcan deps
 As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
 a bug. If you would like to eliminate this possability, you can add an extra to your application that pinns
@@ -188,6 +190,8 @@ extras =
 And this will ensure that vulcan and all its depndencies are pinned in your lockfile and used while building.
 
 # License
+
+---
 
 vulcan is:
 
