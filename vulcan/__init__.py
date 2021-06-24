@@ -114,7 +114,12 @@ class Vulcan:
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
-        install_requires, extras_require = get_requires(lockfile)
+        no_lock = config.get('no-lock', False)
+        if not no_lock:
+            install_requires, extras_require = get_requires(lockfile)
+        else:
+            install_requires = []
+            extras_require = {}
 
         metadata = Metadata(
             name=str_or_none(config.get('name')),
@@ -144,7 +149,6 @@ class Vulcan:
             )
 
         configured_deps = {str(k): str(v) for k, v in config.get('dependencies', {}).items()}
-        no_lock = config.get('no-lock', False)
         python_lock_with = config.get('python-lock-with')
 
         shiv_ops = []
