@@ -115,11 +115,9 @@ class Vulcan:
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
         no_lock = config.get('no-lock', False)
+        install_requires, extras_require = None, None
         if not no_lock:
             install_requires, extras_require = get_requires(lockfile)
-        else:
-            install_requires = []
-            extras_require = {}
 
         metadata = Metadata(
             name=str_or_none(config.get('name')),
