@@ -21,28 +21,13 @@ README.md. This project builds itself and therefor requires some special configu
 For instructions on how to migrate existing projects to vulcan, see [MIGRATING.md](./MIGRATING.md)
 
 ## Install vulcan (recommended)
-I recommend using pipx to avoid the dependencies in vulcan conflicting with the dependencies in your
-application:
+The recommended installation method is pipx, to avoid the dependencies in vulcan conflicting with the 
+dependencies in your application:
 
 ```bash
 $ pip install --user pipx  # if you don't already have pipx installed
-$ pipx install vulcan[cli]
+$ pipx install vulcan[cli,pep621,convert]
 ```
-
-## Pre-existing vulcan project
-
-```bash
-$ mkvirtualenv -p /usr/bin/python3.6 project_name  # 1. create a virtualenv
-$ pip install -U pip                               # 2. upgrade pip
-$ vulcan build -o dist/                            # 3. create a distirbution
-```
-
-## Brand new project
-
-Steps 1 & 2 from above, then:
-
-Create your project as normal, ensuring that MANIFEST.in contains the files you want
-
 
 ## Minimal starting configuration (pyproject.toml)
 
@@ -68,7 +53,20 @@ dataclasses='~=0.8'
 
 Specify dependencies using the form: `package_name='{pep-508-spec}'`. Extras are supported in the package name.
 
+## Build the package
+
+
+Assuming the above has worked, you should now be able to do the following:
+
+```bash
+$ vulcan build --wheel
+```
+
+And find a wheel in `dist/package_name-0.0.0-py3-none-any.whl`
+
 # Command Overview
+
+---
 
 ## `vulcan build`
 
