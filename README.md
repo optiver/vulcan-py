@@ -18,9 +18,7 @@ README.md. This project builds itself and therefor requires some special configu
 
 ---
 
-## Migrating to vulcan from other projects
-
-See [MIGRATING.md](./MIGRATING.md)
+For instructions on how to migrate existing projects to vulcan, see [MIGRATING.md](./MIGRATING.md)
 
 ## Install vulcan (recommended)
 I recommend using pipx to avoid the dependencies in vulcan conflicting with the dependencies in your
