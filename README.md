@@ -1,20 +1,20 @@
-# About
+# Vulcan
 
-This is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
+---
+
+Vulcan is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
 in bamboo and their own projects. The intended workflow is that users will use create a lockfile with 
-`vulcan lock`, then this tool will use that lockfile to transparently set patch-version pinned requirements 
-to avoid incidents like EE-2936 by forcing all dependency upgrades to be explicit.
-
-## Note:
-It is possible that the config elements may change to be in compliance with
-https://www.python.org/dev/peps/pep-0621
+`vulcan lock`, then vulcan will use that lockfile to transparently set patch-version pinned requirements 
+to avoid incidents related to transiant dependencies being implicitly upgraded.
 
 ## Warn:
 
-This project is NOT an example project, do not blindly copy/paste from any files in this project except the
+Vulcan is NOT an example project, do not blindly copy/paste from any files in this project except the
 README.md. This project builds itself and therefor requires some special configurations.
 
 # Getting started
+
+---
 
 ## Migrating to vulcan from other projects
 
