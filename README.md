@@ -68,7 +68,7 @@ And find a wheel in `dist/package_name-0.0.0-py3-none-any.whl`
 
 ---
 
-## `vulcan build`
+## build
 
 ```
 $ vulcan build --help
