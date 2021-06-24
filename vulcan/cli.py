@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import List
+from textwrap import dedent
 
 import build
 import build.env
@@ -44,10 +45,13 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=dedent("""\
+            Vulcan is a build tool for creating, maintaining, and using lockfiles to create reproducible and
+            deterministic builds.
+    """))
 
     subparsers = parser.add_subparsers()
-    build = subparsers.add_parser('build')
+    build = subparsers.add_parser('build', description="Create wheels, sdists, and shiv executables")
     build.set_defaults(subcommand='build')
     dist_types = build.add_mutually_exclusive_group()
     dist_types.add_argument('--sdist', action='store_true')
@@ -56,13 +60,13 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument('-o', '--outdir', default='dist/', type=Path)
     build.add_argument('--no-lock', action='store_true')
 
-    lock = subparsers.add_parser('lock')
+    lock = subparsers.add_parser('lock', description="Generate and update lockfile")
     lock.set_defaults(subcommand='lock')
 
-    develop = subparsers.add_parser('develop')
+    develop = subparsers.add_parser('develop', description="Install project into current virtualenv as editable")
     develop.set_defaults(subcommand='develop')
 
-    add = subparsers.add_parser('add')
+    add = subparsers.add_parser('add', description="Add new top-level dependency and regenerate lockfile")
     add.set_defaults(subcommand='add')
     add.add_argument('reqspec')
     add.add_argument('--no-lock', action='store_true')
