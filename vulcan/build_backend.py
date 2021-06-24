@@ -111,6 +111,7 @@ def get_virtualenv_python() -> Path:
 
 # not part of PEP-517, but very useful to have
 def install_develop() -> None:
+    "Install project into current virtualenv as editable"
     config = Vulcan.from_source(Path().absolute())
     options = config.metadata.asdict()
 
