@@ -4,8 +4,8 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 from textwrap import dedent
+from typing import List
 
 import build
 import build.env
@@ -63,7 +63,8 @@ def build_parser() -> argparse.ArgumentParser:
     lock = subparsers.add_parser('lock', description="Generate and update lockfile")
     lock.set_defaults(subcommand='lock')
 
-    develop = subparsers.add_parser('develop', description="Install project into current virtualenv as editable")
+    develop = subparsers.add_parser('develop',
+                                    description="Install project into current virtualenv as editable")
     develop.set_defaults(subcommand='develop')
 
     add = subparsers.add_parser('add', description="Add new top-level dependency and regenerate lockfile")
