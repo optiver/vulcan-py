@@ -107,7 +107,7 @@ This section may be repeated, in which case `build` will create all the specifie
 `build` also supports outputting wheel and sdists, which can be used to distribute your application as a pip
 package as well as a shiv binary if desired.
 
-## `vulcan lock`
+## lock
 
 ```
 $ vulcan lock --help
@@ -127,7 +127,7 @@ all other package's requirements), and will error if it is not possible to find 
 be done automatically, and should always involve some extra testing when used (since the dependencies are
 being updated and may introduce a bug).
 
-## `vulcan add`
+## add
 
 ```
 $ vulcan add --help         
@@ -144,7 +144,7 @@ optional arguments:
 `add` is a convenience tool that will grab the most recent version of a library, add it to the pyprojec.toml,
 and regenerate the lockfile (if applicable)
 
-## `vulcan develop`
+## develop
 
 ```
 $ vulcan develop --help
