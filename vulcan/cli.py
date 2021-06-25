@@ -104,7 +104,7 @@ def lock(config: Vulcan) -> None:
 @main.command()
 @click.argument('req', type=Requirement.parse)
 @click.option('--lock/--no-lock', '_lock', default=True)
-@pass_vulcan  # order matters, closest the the function definition comes first
+@pass_vulcan  # order matters, closest to the function definition comes first
 @click.pass_context
 def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> None:
     "Add new top-level dependency and regenerate lockfile"
