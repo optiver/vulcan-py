@@ -2,7 +2,7 @@
 
 ---
 
-![Build Status](http://bamboo.ams.optiver.com/plugins/servlet/wittified/build-status/OP-VUL)
+[//]: # ( TODO: build status indicator here )
 
 Vulcan is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
 in ci systems and their own projects. The intended workflow is that users will use create a lockfile with 
