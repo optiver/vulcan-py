@@ -98,7 +98,7 @@ classifiers = [
 python_requires = ">=3.6"
 
 [tool.vulcan.dependencies]
-requests = "~=2.25.1"
+requests = {version="~=2.25.1", extras=["security"]}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
@@ -157,7 +157,7 @@ myep = "vulcan.test_ep:main"
 packages = [ "testproject" ]
 
 [tool.vulcan.dependencies]
-requests = "~=2.25.1"
+requests = {version="~=2.25.1", extras=["security"]}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
@@ -208,7 +208,7 @@ dependencies = ["requests~=2.2.2"]
 packages = [ "testproject" ]
 
 [tool.vulcan.dependencies]
-requests = "~=2.25.1"
+requests = {version="~=2.25.1", extras=["security"]}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
