@@ -146,7 +146,6 @@ class Vulcan:
                           for section, section_vals in config.get('entry_points', {}).items()} or None
             )
 
-        configured_deps = {str(k): str(v) for k, v in config.get('dependencies', {}).items()}
         python_lock_with = config.get('python-lock-with')
 
         shiv_ops = []
@@ -162,7 +161,8 @@ class Vulcan:
             ))
 
         return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
-                   configured_dependencies=configured_deps, configured_extras=config.get('extras', {}),
+                   configured_dependencies=config.get('dependencies', {}),
+                   configured_extras=config.get('extras', {}),
                    no_lock=no_lock, python_lock_with=python_lock_with)
 
 
