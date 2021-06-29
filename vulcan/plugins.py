@@ -15,7 +15,8 @@ class PluginRunner:
 
     def __post_init__(self) -> None:
         try:
-            self.plugin_configs = tomlkit.loads(self.vulcan.source_path.read_text()  # type: ignore
+            pyproject = self.vulcan.source_path / 'pyproject.toml'
+            self.plugin_configs = tomlkit.loads(pyproject.read_text()  # type: ignore
                                                 )['tool']['vulcan']['plugin']
         except KeyError:
             self.plugin_configs = {}
