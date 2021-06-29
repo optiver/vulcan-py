@@ -6,7 +6,7 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any, Dict, Generator, List, Optional, cast
 
 import tomlkit
 
@@ -32,7 +32,7 @@ try:
     def setup(**kwargs: Any) -> Any:
 
         with open('pyproject.toml', 'r') as pptoml:
-            pyproject_data = dict(tomlkit.parse(pptoml.read()))
+            pyproject_data = cast(Dict[str, Any], tomlkit.parse(pptoml.read()))
 
         if 'project' in pyproject_data:
             if 'dependencies' in pyproject_data['project']:

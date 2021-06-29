@@ -93,3 +93,9 @@ class TestConfig:
 
         with pytest.raises(build.BuildBackendException):
             build_dist(test_application_pep621_forbidden_keys, 'wheel', tmp_path_factory.mktemp('build'))
+
+    def test_plugin_generated_file_exists(self,
+                                          test_built_application_wheel_pep621: Path) -> None:
+        with zipfile.ZipFile(test_built_application_wheel_pep621) as whl:
+            with whl.open('testproject/example.no-hash.py') as nohash:
+                assert nohash.read() == b'Text!'

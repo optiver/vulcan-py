@@ -15,10 +15,12 @@ requires-python = ">=3.6"
 vulcan="vulcan.cli:main"
 convert_pep621="vulcan.scripts.setuppy_to_pep621:convert"
 
+[project.entry-points."vulcan.pre_build"]
+example_plugin="vulcan.plugins:test_plugin"
+
 [tool.vulcan]
 packages = [ "vulcan" ]
 no-lock = true
-
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
