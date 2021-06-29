@@ -143,6 +143,7 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     with open('pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(parse))
     if not config.no_lock and _lock:
+        ctx.obj = Vulcan.from_source(Path().absolute())
         ctx.invoke(lock)
 
 
