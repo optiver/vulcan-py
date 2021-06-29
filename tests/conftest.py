@@ -78,7 +78,10 @@ def class_built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
 def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
-    (tmp_path / 'testproject/__init__.py').touch()
+    (tmp_path / 'testproject/__init__.py').write_text("""\
+def test_ep() -> None:
+    print("Running!")
+""")
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
         f.write('1.2.3\n')
     test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
@@ -117,9 +120,9 @@ requires=['setuptools', 'vulcan']
 build-backend="vulcan.build_backend"
 
 [tool.vulcan.entry_points.console_scripts]
-myep = "vulcan.test_ep:main"
+myep = "testproject:test_ep"
 [tool.vulcan.entry_points.test_eps]
-myep = "vulcan.test_ep:main"
+myep = "testproject:test_ep"
 """)
 
     return tmp_path
@@ -129,7 +132,10 @@ myep = "vulcan.test_ep:main"
 def test_application_pep621(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
-    (tmp_path / 'testproject/__init__.py').touch()
+    (tmp_path / 'testproject/__init__.py').write_text("""\
+def test_ep() -> None:
+    print("Running!")
+""")
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
         f.write('1.2.3\n')
     test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
@@ -148,10 +154,10 @@ classifiers = [
 requires-python = ">=3.6"
 
 [project.scripts]
-myep = "vulcan.test_ep:main"
+myep = "testproject:test_ep"
 
 [project.entry-points.test_eps]
-myep = "vulcan.test_ep:main"
+myep = "testproject:test_ep"
 
 [tool.vulcan]
 packages = [ "testproject" ]
