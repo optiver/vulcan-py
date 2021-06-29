@@ -11,6 +11,7 @@ from typing import Any, Dict, Generator, List, Optional
 import tomlkit
 
 from vulcan import Vulcan, flatten_reqs
+from vulcan.plugins import PluginRunner
 
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
@@ -83,7 +84,8 @@ def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
 
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
     # https://docs.python.org/3/distutils/apiref.html
-    dist = setup(**options, include_package_data=True)
+    with PluginRunner(config):
+        dist = setup(**options, include_package_data=True)
     rel_dist = Path(dist.dist_files[0][-1])
     shutil.move(str(rel_dist), Path(outdir) / rel_dist.name)
     return rel_dist.name

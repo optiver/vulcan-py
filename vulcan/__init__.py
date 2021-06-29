@@ -97,6 +97,7 @@ def dict_or_none(val: Any) -> Optional[Dict[str, Any]]:
 
 @dataclass
 class Vulcan:
+    source_path: Path
     metadata: Metadata
     shiv_options: List[ShivOpts]
     lockfile: Path
@@ -158,7 +159,7 @@ class Vulcan:
                 extra_args=str(conf.get('extra_args', '')),
             ))
 
-        return cls(metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
+        return cls(source_path=source_path, metadata=metadata, lockfile=lockfile, shiv_options=shiv_ops,
                    configured_dependencies=config.get('dependencies', {}),
                    configured_extras=config.get('extras', {}),
                    no_lock=no_lock, python_lock_with=python_lock_with)
