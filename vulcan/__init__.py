@@ -151,9 +151,9 @@ class Vulcan:
         for conf in shiv_config:
             shiv_ops.append(ShivOpts(
                 bin_name=str(conf.get('bin_name', metadata.name)),
-                console_script=str(conf.get('console_script')),
-                entry_point=str(conf.get('entry_point')),
-                interpreter=str(conf.get('interpreter')),
+                console_script=str_or_none(conf.get('console_script')),
+                entry_point=str_or_none(conf.get('entry_point')),
+                interpreter=str_or_none(conf.get('interpreter')),
                 with_extras=[str(e) for e in conf.get('with_extras', [])],
                 extra_args=str(conf.get('extra_args', '')),
             ))
