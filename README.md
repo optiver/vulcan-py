@@ -143,7 +143,7 @@ optional arguments:
   --no-lock                                                              
 ```
 
-`add` is a convenience tool that will grab the most recent version of a library, add it to the pyprojec.toml,
+`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
 and regenerate the lockfile (if applicable)
 
 ## `vulcan develop`
@@ -174,7 +174,7 @@ build process.
 
 ## vulcan.pre_build
 
-Pre-build steps take place immidiately before creating the wheel or sdist output. As an example, you could
+Pre-build steps take place immediately before creating the wheel or sdist output. As an example, you could
 have a plugin that populates a target file with the build time:
 
 ```python
@@ -208,7 +208,7 @@ target = "myproject/__BUILD_TIME__"
 
 ## Pinning vulcan deps
 As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
-a bug. If you would like to eliminate this possability, you can add an extra to your application that pinns
+a bug. If you would like to eliminate this possibility, you can add an extra to your application that pinns
 vulcan, which will lock in the dependencies of vulcan itself. Something along the lines of:
 
 ```toml
@@ -224,4 +224,4 @@ extras =
     build
 ```
 
-And this will ensure that vulcan and all its depndencies are pinned in your lockfile and used while building.
+And this will ensure that vulcan and all its dependencies are pinned in your lockfile and used while building.
