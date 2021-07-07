@@ -19,6 +19,8 @@ def hashes(directory: Path) -> Dict[Path, str]:
             continue
         if 'dist' in file.parts:
             continue
+        if 'no-hash' in str(file):
+            continue
         if not file.is_file():
             continue
         with file.open('rb') as f:
@@ -96,6 +98,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
 python_requires = ">=3.6"
+plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
 requests = {version="~=2.25.1", extras=["security"]}
@@ -120,6 +123,11 @@ build-backend="vulcan.build_backend"
 myep = "vulcan.test_ep:main"
 [tool.vulcan.entry_points.test_eps]
 myep = "vulcan.test_ep:main"
+
+[tool.vulcan.plugin.example_plugin]
+foobar = "barfoo"
+module_dir = "testproject"
+
 """)
 
     return tmp_path
@@ -150,11 +158,17 @@ requires-python = ">=3.6"
 [project.scripts]
 myep = "vulcan.test_ep:main"
 
+[tool.vulcan.plugin.example_plugin]
+foobar = "barfoo"
+module_dir = "testproject"
+
+
 [project.entry-points.test_eps]
 myep = "vulcan.test_ep:main"
 
 [tool.vulcan]
 packages = [ "testproject" ]
+plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
 requests = {version="~=2.25.1", extras=["security"]}
@@ -206,6 +220,7 @@ dependencies = ["requests~=2.2.2"]
 
 [tool.vulcan]
 packages = [ "testproject" ]
+plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
 requests = {version="~=2.25.1", extras=["security"]}
@@ -231,6 +246,10 @@ myep = "vulcan.test_ep:main"
 
 [tool.vulcan.entry_points.testplugin]
 someplugin = "some.import:spec"
+
+[tool.vulcan.plugin.example_plugin]
+foobar = "barfoo"
+module_dir = "testproject"
 
 """)
 
