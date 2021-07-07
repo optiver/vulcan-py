@@ -141,7 +141,7 @@ optional arguments:
   --no-lock                                                              
 ```
 
-`add` is a convenience tool that will grab the most recent version of a library, add it to the pyprojec.toml,
+`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
 and regenerate the lockfile (if applicable)
 
 ## develop
@@ -165,13 +165,50 @@ $ pip uninstall your_package_name
 $ vulcan develop
 ```
 
+# Plugins
+
+Vulcan supports a minimal plugin mechanism, which can be used to trigger arbitrary build steps during the
+build process.
+
+## vulcan.pre_build
+
+Pre-build steps take place immediately before creating the wheel or sdist output. As an example, you could
+have a plugin that populates a target file with the build time:
+
+```python
+# myplugin.py
+from typing import Optional, Dict
+from pathlib import Path
+from datetime import datetime
+def populate_buildtime(config: Optional[Dict[str, str]]) -> None:
+   assert config is not None
+   assert 'target' in config
+   Path(config['target']).write_text(f'{datetime.now():%Y-%m-%d %H:%M}')
+```
+
+```toml
+# in the plugin's pyproject.toml
+[project.entry-points."vulcan.pre_build"]
+myplugin="myplugin:populate_datetime"
+```
+
+```toml
+# in the project's pyproject.toml
+[tool.vulcan]
+plugins = ["myplugin"]
+packages = ["myproject"]
+
+[tool.vulcan.plugin.myplugin]
+target = "myproject/__BUILD_TIME__"
+```
+
 # Tips
 
 ---
 
 ## Pinning vulcan deps
 As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
-a bug. If you would like to eliminate this possability, you can add an extra to your application that pinns
+a bug. If you would like to eliminate this possibility, you can add an extra to your application that pinns
 vulcan, which will lock in the dependencies of vulcan itself. Something along the lines of:
 
 ```toml
@@ -187,7 +224,7 @@ extras =
     build
 ```
 
-And this will ensure that vulcan and all its depndencies are pinned in your lockfile and used while building.
+And this will ensure that vulcan and all its dependencies are pinned in your lockfile and used while building.
 
 # License
 
