@@ -138,8 +138,11 @@ from vulcan.build_backend import setup
 import json, pathlib
 setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
 """)
+            path = str(Path().absolute())
+            if config.configured_extras:
+                path = f'{path}[{",".join(config.configured_extras)}]'
             subprocess.check_call([
-                virtual_env, '-m', 'pip', 'install', '-e', Path().absolute()])
+                virtual_env, '-m', 'pip', 'install', '-e', path])
     finally:
         setup.unlink()
 
