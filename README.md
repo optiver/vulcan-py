@@ -231,6 +231,6 @@ And this will ensure that vulcan and all its dependencies are pinned in your loc
 
 ## External tools and vulcan
 
-To make sure that Vulcan helps during runs of mypy, be sure to add your `vulcan.lock` to your `MANIFEST.in`.  
+To make sure that packages are properly locked in all cases, be sure to add your `vulcan.lock` to your `MANIFEST.in`. This will help for example with tox, when running `mypy`.
 When running tox, tox will build the package and install it, adding `vulcan.lock` to your manifest will add 
 the vulcan dependencies to it.
