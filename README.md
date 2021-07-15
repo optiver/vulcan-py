@@ -229,8 +229,7 @@ extras =
 
 And this will ensure that vulcan and all its dependencies are pinned in your lockfile and used while building.
 
-## External tools and vulcan
+## Tox and vulcan
 
-To make sure that packages are properly locked in all cases, be sure to add your `vulcan.lock` to your `MANIFEST.in`. This will help for example with tox, when running `mypy`.
-When running tox, tox will build the package and install it, adding `vulcan.lock` to your manifest will add 
-the vulcan dependencies to it.
+To make sure that tox and vulcan can interact comfortably, be sure to add your `vulcan.lock` to your `MANIFEST.in`. 
+This will ensure that while building your package, tox also picks up the locked dependencies.
