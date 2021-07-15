@@ -1,4 +1,4 @@
-# About
+# Vulcan
 
 This is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
 in bamboo and their own projects. The intended workflow is that users will use create a lockfile with 
@@ -6,6 +6,7 @@ in bamboo and their own projects. The intended workflow is that users will use c
 to avoid incidents like EE-2936 by forcing all dependency upgrades to be explicit.
 
 ## Note:
+
 It is possible that the config elements may change to be in compliance with
 https://www.python.org/dev/peps/pep-0621
 
@@ -21,6 +22,7 @@ README.md. This project builds itself and therefor requires some special configu
 See [MIGRATING.md](./MIGRATING.md)
 
 ## Install vulcan (recommended)
+
 I recommend using pipx to avoid the dependencies in vulcan conflicting with the dependencies in your
 application:
 
@@ -131,6 +133,9 @@ being updated and may introduce a bug).
 
 ## `vulcan add`
 
+`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
+and regenerate the lockfile (if applicable)
+
 ```
 $ vulcan add --help         
 usage: vulcan add [-h] [--no-lock] reqspec                               
@@ -143,8 +148,6 @@ optional arguments:
   --no-lock                                                              
 ```
 
-`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
-and regenerate the lockfile (if applicable)
 
 ## `vulcan develop`
 
@@ -225,3 +228,7 @@ extras =
 ```
 
 And this will ensure that vulcan and all its dependencies are pinned in your lockfile and used while building.
+
+## External tools and vulcan
+
+To make sure that Vulcan helps during runs of mypy, be sure to add your `vulcan.lock` to your `MANIFEST.in`. This will help for example with tox, when running `mypy`.
