@@ -21,6 +21,7 @@ README.md. This project builds itself and therefor requires some special configu
 For instructions on how to migrate existing projects to vulcan, see [MIGRATING.md](./MIGRATING.md)
 
 ## Install vulcan (recommended)
+
 The recommended installation method is pipx, to avoid the dependencies in vulcan conflicting with the 
 dependencies in your application:
 
@@ -129,6 +130,9 @@ being updated and may introduce a bug).
 
 ## add
 
+`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
+and regenerate the lockfile (if applicable)
+
 ```
 $ vulcan add --help         
 usage: vulcan add [-h] [--no-lock] reqspec                               
@@ -141,8 +145,6 @@ optional arguments:
   --no-lock                                                              
 ```
 
-`add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
-and regenerate the lockfile (if applicable)
 
 ## develop
 
@@ -244,3 +246,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is
 distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
 the License for the specific language governing permissions and limitations under the License.
+
+## Tox and vulcan
+
+To make sure that tox and vulcan can interact comfortably, be sure to add your `vulcan.lock` to your `MANIFEST.in`. 
+This will ensure that while building your package, tox also picks up the locked dependencies.
