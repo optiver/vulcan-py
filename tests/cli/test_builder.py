@@ -54,12 +54,12 @@ class TestResolveDeps:
         with pytest.raises(subprocess.CalledProcessError):
             resolve_deps(['requests==2.5.0'], {'test': ['requests==2.4.0']})
 
-    @pytest.mark.skipif(not versions_exist('3.6', '3.4'), reason='missing python version for test')
+    @pytest.mark.skipif(not versions_exist('3.6', '3.8'), reason='missing python version for test')
     def test_resolve_different_python_versions(self) -> None:
-        spec = 'options-sdk>=4.0.1,<=5.0.0'
+        spec = 'traitlets>=4.0.1,<=5.0.5'
         resolved, _ = resolve_deps([spec], {}, python_version='3.6')
         print(resolved)
-        assert 'options-sdk==5.0.0' in resolved
-        resolved, _ = resolve_deps([spec], {}, python_version='3.4')
+        assert 'traitlets==4.3.3' in resolved
+        resolved, _ = resolve_deps([spec], {}, python_version='3.8')
         print(resolved)
-        assert 'options-sdk==4.0.1' in resolved
+        assert 'traitlets==5.0.5' in resolved
