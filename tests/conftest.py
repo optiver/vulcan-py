@@ -63,7 +63,6 @@ def built_wheel(tmp_path: Path) -> Path:
     return build_dist(Path(), 'wheel', dist_dir)
 
 
-# shouldn't need to do this IMO
 @pytest.fixture(scope='class')
 def class_built_sdist(tmp_path_factory: pytest.TempPathFactory) -> Path:
     dist_dir = (tmp_path_factory.mktemp('build') / 'dist').absolute()
