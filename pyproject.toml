@@ -1,8 +1,8 @@
 [project]
-name = "vulcan"
+name = "vulcan-py"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
-urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
+urls = {github="https://github.com/optiver/vulcan-py"}
 license = {text="Apache License Version 2.0"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
