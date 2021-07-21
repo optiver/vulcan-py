@@ -72,3 +72,5 @@ warn_unused_configs = true
 warn_unused_ignores = true
 warn_unreachable = true
 strict_equality = true
+
+[tool.foobar]
