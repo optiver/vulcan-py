@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 requires-python = ">=3.6"
-dynamic = ["dependencies", "optional-dependencies"]
+dynamic = ["dependencies", "optional-dependencies", "version"]
 
 [project.scripts]
 vulcan="vulcan.cli:main"
