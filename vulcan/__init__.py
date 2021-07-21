@@ -183,13 +183,13 @@ def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:
     if not isinstance(req, (str, dict)):
         raise VulcanConfigError(f"Invalid requirement {req} -- must be a dict or a string")
     if isinstance(req, str):
-        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
+        # e.g. "example_lib", "~=1.2.3" -> "example_lib~=1.2.3"
         return f'{lib}{req}'
     try:
         extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
-        # "options_sdk", {"version": "~=1.2.3", "extras"=["networkx","git"]}
-        #                           -> "options_sdk[networkx,git]~=1.2.3"
-        # "options_sdk", {"version": "~=1.2.3"} -> "options_sdk~=1.2.3"
+        # "example_lib", {"version": "~=1.2.3", "extras"=["networkx","git"]}
+        #                           -> "example_lib[networkx,git]~=1.2.3"
+        # "example_lib", {"version": "~=1.2.3"} -> "example_lib~=1.2.3"
         return f'{lib}{extras}{req["version"]}'
     except KeyError as e:
         raise VulcanConfigError(f'invalid requirement {lib} ({req}) -- {e}') from e
