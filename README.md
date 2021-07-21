@@ -7,12 +7,12 @@
 Vulcan is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
 in ci systems and their own projects. The intended workflow is that users will use create a lockfile with 
 `vulcan lock`, then vulcan will use that lockfile to transparently set patch-version pinned requirements 
-to avoid incidents related to transiant dependencies being implicitly upgraded.
+to avoid incidents related to transitive dependencies being implicitly upgraded.
 
 ## Warn:
 
 Vulcan is NOT an example project, do not blindly copy/paste from any files in this project except the
-README.md. This project builds itself and therefor requires some special configurations.
+README.md. This project builds itself and therefore requires some special configurations.
 
 # Getting started
 
@@ -210,7 +210,7 @@ target = "myproject/__BUILD_TIME__"
 
 ## Pinning vulcan deps
 As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
-a bug. If you would like to eliminate this possibility, you can add an extra to your application that pinns
+a bug. If you would like to eliminate this possibility, you can add an extra to your application that pins
 vulcan, which will lock in the dependencies of vulcan itself. Something along the lines of:
 
 ```toml
