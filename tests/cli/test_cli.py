@@ -39,11 +39,11 @@ class BaseTestCli:
 
     def test_shiv_add_works(self, runner: CliRunner, cli_test_application: Path) -> None:
         config = Vulcan.from_source(cli_test_application)
-        assert 'psycopg2-binary' not in config.configured_dependencies
+        assert 'switch-config-render' not in config.configured_dependencies
         with cd(cli_test_application):
-            successful(runner.invoke(cli.main, ['add', 'psycopg2-binary']))
+            successful(runner.invoke(cli.main, ['add', 'switch-config-render']))
         config = Vulcan.from_source(cli_test_application)
-        assert 'psycopg2-binary' in config.configured_dependencies
+        assert 'switch-config-render' in config.configured_dependencies
 
 
 class TestCli(BaseTestCli):
