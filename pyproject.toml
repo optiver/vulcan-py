@@ -1,15 +1,18 @@
 [project]
-name = "vulcan"
+name = "vulcan-py"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
-urls = {stash="http://stash.ams.optiver.com/users/joelchristiansen/repos/vulcan/browse"}
+urls = {github="https://github.com/optiver/vulcan-py"}
+license = {text="Apache License Version 2.0"}
 readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Apache Software License"
 ]
 requires-python = ">=3.6"
+dynamic = ["dependencies", "optional-dependencies", "version"]
 
 [project.scripts]
 vulcan="vulcan.cli:main"
@@ -24,7 +27,7 @@ no-lock = true
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
-cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0"]
+cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0", "click~=8.0"]
 # remove when https://github.com/psf/fundable-packaging-improvements/issues/25 is complete.
 pep621=["ppsetuptools==2.0.2"]
 convert=["pkginfo~=1.7"]
@@ -50,3 +53,22 @@ testpaths = [ "tests", ]
 markers = [ 
     "cli: Tests that require full cli dependencies" 
 ]
+
+[tool.mypy]
+files = ["vulcan","tests"]
+# the following configs are the equivalent of --strict, with the exception of --no-implicit-optional
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+
+# extra warnings
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true

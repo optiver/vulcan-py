@@ -1,4 +1,3 @@
-import argparse
 import os
 import shlex
 import subprocess
@@ -8,6 +7,7 @@ from typing import List
 
 import build
 import build.env
+import click
 import packaging.version
 import tomlkit
 from pkg_resources import Requirement
@@ -16,15 +16,23 @@ from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
 
+pass_vulcan = click.make_pass_decorator(Vulcan)
+
+
+@click.group()
+@click.pass_context
+def main(ctx: click.Context) -> None:
+    ctx.obj = Vulcan.from_source(Path().absolute())
+
 
 def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
     results = []
     for app in vulcan.shiv_options:
         try:
-            if not app.with_extras:
-                dist = from_dist
-            else:
+            if app.with_extras:
                 dist = f'{from_dist}[{",".join(app.with_extras)}]'
+            else:
+                dist = from_dist
             cmd = [sys.executable, '-m', 'shiv', dist, '-o', str(outdir / app.bin_name)]
             if app.console_script:
                 cmd += ['-c', app.console_script]
@@ -43,55 +51,45 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
     return results
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
+@main.command(name='build')
+@click.option('--outdir', '-o', default='dist/', type=Path)
+@click.option('--lock/--no-lock', '_lock', default=True)
+@click.option('--wheel', is_flag=True, default=False)
+@click.option('--sdist', is_flag=True, default=False)
+@click.option('--shiv', is_flag=True, default=False)
+@pass_vulcan
+def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: bool, shiv: bool) -> None:
+    "Create wheels, sdists, and shiv executables"
+    # for ease of use
+    if len([v for v in (shiv, wheel, sdist) if v]) != 1:
+        raise click.UsageError("Must specify exactly 1 of --shiv, --wheel, or --sdist")
 
-    subparsers = parser.add_subparsers()
-    build = subparsers.add_parser('build')
-    build.set_defaults(subcommand='build')
-    dist_types = build.add_mutually_exclusive_group()
-    dist_types.add_argument('--sdist', action='store_true')
-    dist_types.add_argument('--wheel', action='store_true')
-    dist_types.add_argument('--shiv', action='store_true')
-    build.add_argument('-o', '--outdir', default='dist/', type=Path)
-    build.add_argument('--no-lock', action='store_true')
+    should_lock = _lock and not config.no_lock
 
-    lock = subparsers.add_parser('lock')
-    lock.set_defaults(subcommand='lock')
-
-    develop = subparsers.add_parser('develop')
-    develop.set_defaults(subcommand='develop')
-
-    add = subparsers.add_parser('add')
-    add.set_defaults(subcommand='add')
-    add.add_argument('reqspec')
-    add.add_argument('--no-lock', action='store_true')
-    return parser
-
-
-def build_out(config: Vulcan, args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     project = build.ProjectBuilder('.')
-    if not args.outdir.exists():
-        args.outdir.mkdir()
+    outdir.mkdir(exist_ok=True)
     config_settings = {}
-    if args.no_lock:
+    if not _lock:
         config_settings['no-lock'] = 'true'
-    if args.sdist:
-        dist = project.build('sdist', str(args.outdir), config_settings=config_settings)
-    elif args.wheel or args.shiv:
-        if args.shiv and (args.no_lock or config.no_lock):
-            parser.error("May not specify both --shiv and --no-lock; shiv builds must be locked")
-        dist = project.build('wheel', str(args.outdir), config_settings=config_settings)
+    if sdist:
+        dist = project.build('sdist', str(outdir), config_settings=config_settings)
+    elif wheel or shiv:
+        if shiv and not should_lock:
+            raise click.UsageError("May not specify both --shiv and --no-lock; shiv builds must be locked")
+        dist = project.build('wheel', str(outdir), config_settings=config_settings)
     else:
-        parser.error("Must supply one of --sdist, --wheel, or --shiv")
-    if args.shiv:
+        assert False, 'unreachable because dist_types is required'
+    if shiv:
         try:
-            build_shiv_apps(dist, config, args.outdir)
+            build_shiv_apps(dist, config, outdir)
         finally:
             os.remove(dist)
 
 
-def lock(config: Vulcan, args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+@main.command()
+@pass_vulcan
+def lock(config: Vulcan) -> None:
+    "Generate and update lockfile"
     install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
                                                     config.configured_extras or {},
                                                     config.python_lock_with)
@@ -103,7 +101,13 @@ def lock(config: Vulcan, args: argparse.Namespace, parser: argparse.ArgumentPars
         f.write(tomlkit.dumps(doc))
 
 
-def add(req: Requirement) -> None:
+@main.command()
+@click.argument('req', type=Requirement.parse)
+@click.option('--lock/--no-lock', '_lock', default=True)
+@pass_vulcan  # order matters, closest to the function definition comes first
+@click.pass_context
+def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> None:
+    "Add new top-level dependency and regenerate lockfile"
     name: str = req.name  # type: ignore
     if req.extras:
         name = f'{name}[{",".join(req.extras)}]'
@@ -138,28 +142,15 @@ def add(req: Requirement) -> None:
     deps[name] = version  # type: ignore
     with open('pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(parse))
+    if not config.no_lock and _lock:
+        ctx.obj = Vulcan.from_source(Path().absolute())
+        ctx.invoke(lock)
 
 
-def main(argv: List[str] = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    config = Vulcan.from_source(Path().absolute())
-    if args.subcommand == 'add':
-        req = Requirement.parse(args.reqspec)
-        add(req)
-        if not config.no_lock and not args.no_lock:
-            lock(config, args, parser)
-    elif args.subcommand == 'build':
-        build_out(config, args, parser)
-    elif args.subcommand == 'lock':
-        lock(config, args, parser)
-    elif args.subcommand == 'develop':
-        # do note that when using this command specifically in this project, you MUST call it as
-        # `python vulcan/cli.py develop` the first time.
-        # All other projects, you can just do `vulcan devleop` and that's fine.
-        return install_develop()
-    else:
-        raise ValueError('unknown subcommand {args.subcommand!r}')
+@main.command()
+def develop() -> None:
+    "Install project into current virtualenv as editable"
+    install_develop()
 
 
 if __name__ == '__main__':

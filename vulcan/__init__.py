@@ -116,7 +116,10 @@ class Vulcan:
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
-        install_requires, extras_require = get_requires(lockfile)
+        no_lock = config.get('no-lock', False)
+        install_requires, extras_require = None, None
+        if not no_lock:
+            install_requires, extras_require = get_requires(lockfile)
 
         metadata = Metadata(
             name=str_or_none(config.get('name')),
@@ -145,7 +148,6 @@ class Vulcan:
                           for section, section_vals in config.get('entry_points', {}).items()} or None
             )
 
-        no_lock = config.get('no-lock', False)
         python_lock_with = config.get('python-lock-with')
 
         shiv_ops = []
@@ -181,13 +183,13 @@ def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:
     if not isinstance(req, (str, dict)):
         raise VulcanConfigError(f"Invalid requirement {req} -- must be a dict or a string")
     if isinstance(req, str):
-        # e.g. "options_sdk", "~=1.2.3" -> "options_sdk~=1.2.3"
+        # e.g. "example_lib", "~=1.2.3" -> "example_lib~=1.2.3"
         return f'{lib}{req}'
     try:
         extras = f'[{",".join(req["extras"])}]' if 'extras' in req else ''
-        # "options_sdk", {"version": "~=1.2.3", "extras"=["networkx","git"]}
-        #                           -> "options_sdk[networkx,git]~=1.2.3"
-        # "options_sdk", {"version": "~=1.2.3"} -> "options_sdk~=1.2.3"
+        # "example_lib", {"version": "~=1.2.3", "extras"=["networkx","git"]}
+        #                           -> "example_lib[networkx,git]~=1.2.3"
+        # "example_lib", {"version": "~=1.2.3"} -> "example_lib~=1.2.3"
         return f'{lib}{extras}{req["version"]}'
     except KeyError as e:
         raise VulcanConfigError(f'invalid requirement {lib} ({req}) -- {e}') from e

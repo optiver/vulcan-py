@@ -1,50 +1,34 @@
 # Vulcan
 
-This is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
-in bamboo and their own projects. The intended workflow is that users will use create a lockfile with 
-`vulcan lock`, then this tool will use that lockfile to transparently set patch-version pinned requirements 
-to avoid incidents like EE-2936 by forcing all dependency upgrades to be explicit.
+---
 
-## Note:
+[//]: # ( TODO: build status indicator here )
 
-It is possible that the config elements may change to be in compliance with
-https://www.python.org/dev/peps/pep-0621
+Vulcan is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
+in ci systems and their own projects. The intended workflow is that users will use create a lockfile with 
+`vulcan lock`, then vulcan will use that lockfile to transparently set patch-version pinned requirements 
+to avoid incidents related to transitive dependencies being implicitly upgraded.
 
 ## Warn:
 
-This project is NOT an example project, do not blindly copy/paste from any files in this project except the
-README.md. This project builds itself and therefor requires some special configurations.
+Vulcan is NOT an example project, do not blindly copy/paste from any files in this project except the
+README.md. This project builds itself and therefore requires some special configurations.
 
 # Getting started
 
-## Migrating to vulcan from other projects
+---
 
-See [MIGRATING.md](./MIGRATING.md)
+For instructions on how to migrate existing projects to vulcan, see [MIGRATING.md](./MIGRATING.md)
 
 ## Install vulcan (recommended)
 
-I recommend using pipx to avoid the dependencies in vulcan conflicting with the dependencies in your
-application:
+The recommended installation method is pipx, to avoid the dependencies in vulcan conflicting with the 
+dependencies in your application:
 
 ```bash
 $ pip install --user pipx  # if you don't already have pipx installed
-$ pipx install vulcan[cli]
+$ pipx install vulcan[cli,pep621,convert]
 ```
-
-## Pre-existing vulcan project
-
-```bash
-$ mkvirtualenv -p /usr/bin/python3.6 project_name  # 1. create a virtualenv
-$ pip install -U pip                               # 2. upgrade pip
-$ vulcan build -o dist/                            # 3. create a distirbution
-```
-
-## Brand new project
-
-Steps 1 & 2 from above, then:
-
-Create your project as normal, ensuring that MANIFEST.in contains the files you want
-
 
 ## Minimal starting configuration (pyproject.toml)
 
@@ -70,9 +54,22 @@ dataclasses='~=0.8'
 
 Specify dependencies using the form: `package_name='{pep-508-spec}'`. Extras are supported in the package name.
 
+## Build the package
+
+
+Assuming the above has worked, you should now be able to do the following:
+
+```bash
+$ vulcan build --wheel
+```
+
+And find a wheel in `dist/package_name-0.0.0-py3-none-any.whl`
+
 # Command Overview
 
-## `vulcan build`
+---
+
+## build
 
 ```
 $ vulcan build --help
@@ -111,7 +108,7 @@ This section may be repeated, in which case `build` will create all the specifie
 `build` also supports outputting wheel and sdists, which can be used to distribute your application as a pip
 package as well as a shiv binary if desired.
 
-## `vulcan lock`
+## lock
 
 ```
 $ vulcan lock --help
@@ -131,7 +128,7 @@ all other package's requirements), and will error if it is not possible to find 
 be done automatically, and should always involve some extra testing when used (since the dependencies are
 being updated and may introduce a bug).
 
-## `vulcan add`
+## add
 
 `add` is a convenience tool that will grab the most recent version of a library, add it to the pyproject.toml,
 and regenerate the lockfile (if applicable)
@@ -149,7 +146,7 @@ optional arguments:
 ```
 
 
-## `vulcan develop`
+## develop
 
 ```
 $ vulcan develop --help
@@ -209,9 +206,11 @@ target = "myproject/__BUILD_TIME__"
 
 # Tips
 
+---
+
 ## Pinning vulcan deps
 As vulcan itself is not pinned, it is theoretically possible for an upstream dependency of vulcan to introduce
-a bug. If you would like to eliminate this possibility, you can add an extra to your application that pinns
+a bug. If you would like to eliminate this possibility, you can add an extra to your application that pins
 vulcan, which will lock in the dependencies of vulcan itself. Something along the lines of:
 
 ```toml
@@ -228,6 +227,25 @@ extras =
 ```
 
 And this will ensure that vulcan and all its dependencies are pinned in your lockfile and used while building.
+
+# License
+
+---
+
+vulcan is:
+
+Copyright 2021 Optiver
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+```
+http://www.apache.org/licenses/LICENSE-2.0
+```
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
+the License for the specific language governing permissions and limitations under the License.
 
 ## Tox and vulcan
 
