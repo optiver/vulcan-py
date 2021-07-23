@@ -31,8 +31,11 @@ def patch_executable(python_version: str = None) -> Generator[None, None, None]:
     else:
         try:
             if sys.version_info >= (3, 8):
-                old_exe = sys._base_executable
-                sys._base_executable = get_executable(python_version)
+                # for some reason mypy thinks this is incorrect for 3.8
+                # even though it is definitely correct and I've read the code showing it
+                # So this whole file disables the "warn_unused_ignore" config due to these 2 lines :(
+                old_exe = sys._base_executable  # type: ignore
+                sys._base_executable = get_executable(python_version)  # type: ignore
             else:
                 old_exe = sys.executable
                 sys.executable = get_executable(python_version)
@@ -43,7 +46,7 @@ def patch_executable(python_version: str = None) -> Generator[None, None, None]:
             exit(1)
         finally:
             if sys.version_info >= (3, 8):
-                sys._base_executable = old_exe
+                sys._base_executable = old_exe  # type: ignore
             else:
                 sys.executable = old_exe
 
