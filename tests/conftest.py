@@ -126,7 +126,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python"
+interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"
 
 
@@ -190,7 +190,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python"
+interpreter="/usr/bin/env python3.6"
 extra_args="-E --compile-pyc"
 
 

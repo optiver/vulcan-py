@@ -7,6 +7,16 @@ from typing import Generator
 import pytest
 from click.testing import CliRunner, Result
 from vulcan import Vulcan, cli
+from vulcan.isolation import get_executable
+
+
+def versions_exist(*versions: str) -> bool:
+    try:
+        for v in versions:
+            get_executable(v)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 @pytest.mark.cli
@@ -29,9 +39,11 @@ class TestCli:
         output = test_application / 'dist/testproject'
         assert output.exists()
         assert os.access(output, os.X_OK)
-        assert 'Running!\n' == subprocess.check_output([output],
-                                                       encoding='utf-8',
-                                                       env={'SHIV_ROOT': str(tmp_path)})
+        if versions_exist('3.6'):
+            # shebang there expects 3.6
+            assert 'Running!\n' == subprocess.check_output([output],
+                                                           encoding='utf-8',
+                                                           env={'SHIV_ROOT': str(tmp_path)})
 
     def test_shiv_add_works(self, runner: CliRunner, test_application: Path) -> None:
         config = Vulcan.from_source(test_application)
