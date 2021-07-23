@@ -35,7 +35,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     
     # Runs a single command using the runners shell
-    - name: Run a one-line script
+    - name: Tox
       # env: 
       #   TOXENV: py${{matrix.python-version}}-${{matrix.job}}
       run: |
