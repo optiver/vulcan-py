@@ -5,10 +5,13 @@ import tempfile
 from contextlib import contextmanager
 from os import PathLike
 from types import SimpleNamespace
-from typing import Dict, Generator, List, Union
+from typing import Dict, Generator, List, Union, TYPE_CHECKING, Tuple
 from venv import EnvBuilder
 
 from pkg_resources import Requirement
+
+if TYPE_CHECKING:
+    sys._base_executable: Tuple[int, ...]  # type: ignore
 
 
 @contextmanager
