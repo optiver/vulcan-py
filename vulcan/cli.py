@@ -17,7 +17,7 @@ from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
-if sys.version_info > (3, 7):
+if sys.version_info >= (3, 8):
     from importlib.metadata import version
 else:
     from importlib_metadata import version
