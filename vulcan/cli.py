@@ -11,7 +11,10 @@ import click
 import packaging.version
 import tomlkit
 from pkg_resources import Requirement
-from importlib_metadata import version
+if sys.version_info > (3, 7):
+    from importlib.metadata import version
+else:
+    from importlib_metadata import version
 
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop

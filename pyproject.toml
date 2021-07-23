@@ -39,6 +39,7 @@ dataclasses="~=0.8; python_version<='3.6'"
 typing_extensions='~=3.7'
 tomlkit = "~=0.7"
 ppsetuptools = "==2.0.2"
+importlib_metadata = "~=4.6; python_version<='3.7'"
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
