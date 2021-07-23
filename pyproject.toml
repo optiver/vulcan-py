@@ -75,6 +75,6 @@ warn_unused_ignores = true
 warn_unreachable = true
 strict_equality = true
 
-[tool.mypy]
+[[tool.mypy.overrides]]
 module = ['vulcan.isolation']
 warn_unused_ignores = false
