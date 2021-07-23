@@ -1,4 +1,4 @@
-# Vulcan
+![Vulcan](./images/Vulcan_Logo.png)
 
 ---
 
