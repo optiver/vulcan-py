@@ -155,7 +155,7 @@ setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
         setup.unlink()
 
 
-# tox requires these two fro some reason :(
+# tox requires these two for some reason :(
 def get_requires_for_build_sdist(config_settings: Dict[str, str] = None) -> List[str]:
     return []
 
