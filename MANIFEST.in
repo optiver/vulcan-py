@@ -1,4 +1,4 @@
 graft vulcan
 # technically LICENSE is picked up automatically, but nice to be explicit
-include README.md vulcan.lock pyproject.toml LICENSE
-global-exclude *.swp
+include README.md vulcan.lock pyproject.toml LICENSE 
+global-exclude *.swp *.pyc

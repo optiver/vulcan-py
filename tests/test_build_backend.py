@@ -4,12 +4,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
 
-import build
 import pytest
 from pkg_resources import Requirement
+from pkginfo import Wheel  # type: ignore
 from vulcan import VulcanConfigError, to_pep508
 
-from .conftest import build_dist
 
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
@@ -45,7 +44,6 @@ class TestFixturesOutput:
                                         tmp_path_factory: pytest.TempPathFactory) -> None:
 
         pass
-
 
 
 class TestConfig:
@@ -89,3 +87,8 @@ class TestConfig:
         with zipfile.ZipFile(test_built_application_wheel) as whl:
             with whl.open('testproject/example.no-hash.py') as nohash:
                 assert nohash.read() == b'Text!'
+
+    def test_lockfile_reqs_present(self, test_application: Path, test_built_application_wheel: Path) -> None:
+        whl = Wheel(test_built_application_wheel)
+        assert whl.requires_dist, "No dependencies found"
+        assert any("; extra == 'test1'" in req for req in whl.requires_dist), "no extra dependencies found"
