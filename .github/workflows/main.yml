@@ -41,3 +41,15 @@ jobs:
       run: |
          python -m pip install -U tox
          tox
+
+    - name: Build Wheel
+      run: |
+         python -m pip install build
+         python -m build --wheel -o dist/
+
+    - uses: actions/upload-artifact@v2
+      with:
+          name: vulcan wheel
+          path: dist/vulcan_py-*.whl
+          if-no-files-found: error
+
