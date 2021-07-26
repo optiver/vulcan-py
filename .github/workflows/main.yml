@@ -8,7 +8,6 @@ on:
   # code change
   pull_request:
     branches: [ master ]
-    paths: ['vulcan/*', 'tests/*', 'pyproject.toml']
 
 
   #  also trigger when merged to master (or when pushed directly to master but that should not happen)
