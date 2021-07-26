@@ -4,9 +4,12 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the master branch and only if tests or
+  # code change
   pull_request:
     branches: [ master ]
+    paths: ['vulcan/*', 'tests/*', 'pyproject.toml']
+
 
   #  also trigger when merged to master (or when pushed directly to master but that should not happen)
   push:
