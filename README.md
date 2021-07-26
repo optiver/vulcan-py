@@ -1,4 +1,4 @@
-![Vulcan](./images/Vulcan_Logo.png)
+![Vulcan](https://raw.githubusercontent.com/optiver/vulcan-py/master/images/Vulcan_Logo.png)
 
 ---
 
@@ -27,7 +27,7 @@ dependencies in your application:
 
 ```bash
 $ pip install --user pipx  # if you don't already have pipx installed
-$ pipx install vulcan[cli,convert]
+$ pipx install vulcan-py[cli,convert]
 ```
 
 ## Minimal starting configuration (pyproject.toml)
@@ -38,7 +38,7 @@ name = "package_name"
 
 # This section is mandatory and may be blindly copy/pasted
 [build-system]
-requires = ['setuptools', 'vulcan']
+requires = ['vulcan-py']
 build-backend = "vulcan.build_backend"
 ```
 
