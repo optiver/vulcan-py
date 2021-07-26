@@ -21,47 +21,43 @@ except ImportError as e:
     raise ImportError(str(e) + '\nPlease add setuptools to [build-system] requires in pyproject.toml') from e
 
 
-try:
-    # Remove this whole  block when https://github.com/psf/fundable-packaging-improvements/issues/25 is
-    # finalized
-    from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
-
-    def _filter_nones(vals_dict: Dict[str, Optional[Any]]) -> Dict[str, Any]:
-        return {k: v for k, v in vals_dict.items() if v is not None}
-
-    def setup(**kwargs: Any) -> Any:
-
-        with open('pyproject.toml', 'r') as pptoml:
-            pyproject_data = cast(Dict[str, Any], tomlkit.parse(pptoml.read()))
-
-        if 'project' in pyproject_data:
-            if 'dependencies' in pyproject_data['project']:
-                raise RuntimeError("May not use [project]:dependencies key with vulcan")
-            if 'optional-dependencies' in pyproject_data['project']:
-                raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
-            parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
-            parsed_kwargs.update(_filter_nones(kwargs))
-            parsed_kwargs = _filter_nones(parsed_kwargs)
-            # ppsetuptools doesn't handle entry points correctly
-            if 'scripts' in parsed_kwargs:
-                if 'entry_points' not in parsed_kwargs:
-                    parsed_kwargs['entry_points'] = {}
-                parsed_kwargs['entry_points']['console_scripts'] = parsed_kwargs['scripts']
-                del parsed_kwargs['scripts']
-            if 'gui-scripts' in parsed_kwargs:
-                parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
-                del parsed_kwargs['gui-scripts']
-            if 'entry_points' in parsed_kwargs:
-                for ep_group in list(parsed_kwargs['entry_points']):
-                    parsed_kwargs['entry_points'][ep_group] = [
-                        f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
-            return setuptools.setup(**parsed_kwargs)
-        else:
-            return setuptools.setup(**_filter_nones(kwargs))
+from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
 
-except ImportError:
-    setup = setuptools.setup
+def _filter_nones(vals_dict: Dict[str, Optional[Any]]) -> Dict[str, Any]:
+    return {k: v for k, v in vals_dict.items() if v is not None}
+
+
+def setup(**kwargs: Any) -> Any:
+
+    with open('pyproject.toml', 'r') as pptoml:
+        pyproject_data = cast(Dict[str, Any], tomlkit.parse(pptoml.read()))
+
+    if 'project' in pyproject_data:
+        if 'dependencies' in pyproject_data['project']:
+            raise RuntimeError("May not use [project]:dependencies key with vulcan")
+        if 'optional-dependencies' in pyproject_data['project']:
+            raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
+        parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
+        parsed_kwargs.update(_filter_nones(kwargs))
+        parsed_kwargs = _filter_nones(parsed_kwargs)
+        # ppsetuptools doesn't handle entry points correctly
+        if 'scripts' in parsed_kwargs:
+            if 'entry_points' not in parsed_kwargs:
+                parsed_kwargs['entry_points'] = {}
+            parsed_kwargs['entry_points']['console_scripts'] = parsed_kwargs['scripts']
+            del parsed_kwargs['scripts']
+        if 'gui-scripts' in parsed_kwargs:
+            parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
+            del parsed_kwargs['gui-scripts']
+        if 'entry_points' in parsed_kwargs:
+            for ep_group in list(parsed_kwargs['entry_points']):
+                parsed_kwargs['entry_points'][ep_group] = [
+                    f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
+        return setuptools.setup(**parsed_kwargs)
+    else:
+        return setuptools.setup(**_filter_nones(kwargs))
+
 
 __all__ = ['build_wheel',
            'build_sdist']
@@ -82,9 +78,13 @@ def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
         options['packages'] = config.packages
     if config.version:
         options['version'] = config.version
+
     if config.no_lock or (config_settings and config_settings.get('no-lock') == 'true'):
         options['install_requires'] = flatten_reqs(config.configured_dependencies)
         options['extras_require'] = config.configured_extras
+    else:
+        options['install_requires'] = config.dependencies
+        options['extras_require'] = config.extras
 
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
     # https://docs.python.org/3/distutils/apiref.html
@@ -127,6 +127,9 @@ def install_develop() -> None:
     if config.no_lock:
         options['install_requires'] = flatten_reqs(config.configured_dependencies)
         options['extras_require'] = config.configured_extras
+    else:
+        options['install_requires'] = config.dependencies
+        options['extras_require'] = config.extras
 
     try:
         virtual_env = get_virtualenv_python()

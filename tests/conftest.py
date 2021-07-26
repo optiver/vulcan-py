@@ -2,10 +2,20 @@ import hashlib
 import shutil
 from pathlib import Path
 from typing import Dict, Generator
+from contextlib import contextmanager
+import os
 
 import build
 import pytest
 from pkginfo import Wheel  # type: ignore
+
+
+@contextmanager
+def cd(p: Path) -> Generator[None, None, None]:
+    old = os.getcwd()
+    os.chdir(p)
+    yield
+    os.chdir(old)
 
 
 def hashes(directory: Path) -> Dict[Path, str]:
@@ -126,7 +136,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python3.6"
+interpreter="/usr/bin/env python"
 extra_args="-E --compile-pyc"
 
 
@@ -190,7 +200,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python3.6"
+interpreter="/usr/bin/env python"
 extra_args="-E --compile-pyc"
 
 
@@ -207,15 +217,19 @@ build-backend="vulcan.build_backend"
 def test_built_application(
         test_application: Path,
         tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return build_dist(test_application, 'sdist', tmp_path_factory.mktemp('build'))
+    with cd(test_application):
+        sdist = build_dist(test_application, 'sdist', tmp_path_factory.mktemp('build'))
+    return sdist
 
 
 @pytest.fixture(scope='session')
 def test_built_application_wheel(test_application: Path,
                                  tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
+    with cd(test_application):
+        whl = build_dist(test_application, 'wheel', tmp_path_factory.mktemp('build'))
+    return whl
 
 
-@pytest.fixture(scope='session')
+@ pytest.fixture(scope='session')
 def wheel_pkg_info(test_built_application_wheel: Path) -> Wheel:
     return Wheel(str(test_built_application_wheel))

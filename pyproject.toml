@@ -1,6 +1,6 @@
 [project]
 name = "vulcan-py"
-version = "0.5.0"
+version = "1.0.0"
 description = "Tool for leveraging poetry lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
@@ -39,6 +39,7 @@ dataclasses="~=0.8; python_version<='3.6'"
 typing_extensions='~=3.7'
 tomlkit = "~=0.7"
 ppsetuptools = "==2.0.2"
+importlib_metadata = "~=4.6; python_version<='3.7'"
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
@@ -73,3 +74,7 @@ warn_unused_configs = true
 warn_unused_ignores = true
 warn_unreachable = true
 strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ['vulcan.isolation']
+warn_unused_ignores = false

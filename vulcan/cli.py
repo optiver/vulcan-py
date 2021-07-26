@@ -3,7 +3,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import Callable, List
 
 import build
 import build.env
@@ -11,17 +11,23 @@ import click
 import packaging.version
 import tomlkit
 from pkg_resources import Requirement
-from importlib_metadata import version
 
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
 
+version: Callable[[str], str]
+if sys.version_info >= (3, 8):
+    from importlib.metadata import version
+else:
+    from importlib_metadata import version
+
+
 pass_vulcan = click.make_pass_decorator(Vulcan)
 
 
 @click.group()
-@click.version_option(version('vulcan-py'))  # type: ignore
+@click.version_option(version('vulcan-py'))
 @click.pass_context
 def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute())

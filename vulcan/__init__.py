@@ -65,7 +65,9 @@ class Vulcan:
     plugins: Optional[List[str]]
     shiv_options: List[ShivOpts]
     lockfile: Path
+    dependencies: List[str]
     configured_dependencies: VersionSpecs
+    extras: Dict[str, List[str]]
     configured_extras: Dict[str, List[str]]
     no_lock: bool = False
     python_lock_with: Optional[str] = None
@@ -80,7 +82,8 @@ class Vulcan:
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
         no_lock = config.get('no-lock', False)
-        install_requires, extras_require = None, None
+        install_requires: List[str] = []
+        extras_require: Dict[str, List[str]] = {}
         if not no_lock:
             install_requires, extras_require = get_requires(lockfile)
 
@@ -102,7 +105,9 @@ class Vulcan:
         return cls(version=version, source_path=source_path, plugins=list_or_none(config.get('plugins')),
                    packages=list_or_none(config.get("packages")),
                    lockfile=lockfile, shiv_options=shiv_ops,
+                   dependencies=install_requires,
                    configured_dependencies=config.get('dependencies', {}),
+                   extras=extras_require,
                    configured_extras=config.get('extras', {}),
                    no_lock=no_lock, python_lock_with=python_lock_with)
 
