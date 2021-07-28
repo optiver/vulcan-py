@@ -26,7 +26,7 @@ The recommended installation method is pipx, to avoid the dependencies in vulcan
 dependencies in your application:
 
 ```bash
-$ pip install --user pipx  # if you don't already have pipx installed
+$ pip install pipx-in-pipx  # if you don't already have pipx installed
 $ pipx install vulcan-py[cli,convert]
 ```
 
