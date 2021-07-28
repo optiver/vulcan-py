@@ -40,11 +40,19 @@ typing_extensions='~=3.7'
 tomlkit = "~=0.7"
 ppsetuptools = "==2.0.2"
 importlib_metadata = "~=4.6; python_version<='3.7'"
+editables = '~=0.2'
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools', 'tomlkit', 'dataclasses', 'wheel', 'typing_extensions', 'ppsetuptools==2.0.0']
+requires=['setuptools', 
+          'tomlkit',
+          'dataclasses', 
+          'wheel',
+          'typing_extensions', 
+          'ppsetuptools==2.0.0',
+          'editables~=0.2',
+          "importlib_metadata; python_version<='3.7'"]
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 

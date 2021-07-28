@@ -155,11 +155,5 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         ctx.invoke(lock)
 
 
-@main.command()
-def develop() -> None:
-    "Install project into current virtualenv as editable"
-    install_develop()
-
-
 if __name__ == '__main__':
     main()

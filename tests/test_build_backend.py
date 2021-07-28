@@ -9,7 +9,6 @@ from pkg_resources import Requirement
 from pkginfo import Wheel  # type: ignore
 from vulcan import VulcanConfigError, to_pep508
 
-
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
 EXPECTED_REQS = {
@@ -92,3 +91,7 @@ class TestConfig:
         whl = Wheel(test_built_application_wheel)
         assert whl.requires_dist, "No dependencies found"
         assert any("; extra == 'test1'" in req for req in whl.requires_dist), "no extra dependencies found"
+
+
+def test_editable_install(test_application: Path) -> None:
+    assert False, "pip cannot yet do its part in this, see https://github.com/pypa/pip/pull/8212"
