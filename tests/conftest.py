@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Generator
 from contextlib import contextmanager
 import os
+import sys
 
 import build
 import pytest
@@ -90,7 +91,7 @@ def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
     (tmp_path / 'testproject/__init__.py').write_text("""\
-def test_ep() -> None:
+def test_ep():
     print("Running!")
 """)
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
@@ -102,7 +103,7 @@ def test_ep() -> None:
 [project]
 name = "testproject"
 description = "an example test project for testing vulcan builds, %"
-authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
+authors = [{{name="Joel Christiansen", email="joelchristiansen@optiver.com"}}]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -126,7 +127,7 @@ packages = [ "testproject" ]
 plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
-requests = {version="~=2.25.1", extras=["security"]}
+requests = {{version="~=2.25.1", extras=["security"]}}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
@@ -136,7 +137,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python"
+interpreter="{cur_interp}"
 extra_args="-E --compile-pyc"
 
 
@@ -144,7 +145,7 @@ extra_args="-E --compile-pyc"
 requires=['setuptools', 'vulcan-py']
 build-backend="vulcan.build_backend"
 
-""")
+""".format(cur_interp=sys.executable))
 
     return tmp_path
 
@@ -154,7 +155,7 @@ def test_application_forbidden_keys(tmp_path_factory: pytest.TempPathFactory) ->
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
     (tmp_path / 'testproject/__init__.py').write_text("""\
-def test_ep() -> None:
+def test_ep():
     print("Running!")
 """)
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
@@ -166,7 +167,7 @@ def test_ep() -> None:
 [project]
 name = "testproject"
 description = "an example test project for testing vulcan builds, %"
-authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
+authors = [{{name="Joel Christiansen", email="joelchristiansen@optiver.com"}}]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -190,7 +191,7 @@ packages = [ "testproject" ]
 plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
-requests = {version="~=2.25.1", extras=["security"]}
+requests = {{version="~=2.25.1", extras=["security"]}}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
@@ -200,7 +201,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="/usr/bin/env python"
+interpreter="{cur_interp}"
 extra_args="-E --compile-pyc"
 
 
@@ -208,7 +209,7 @@ extra_args="-E --compile-pyc"
 requires=['setuptools', 'vulcan-py']
 build-backend="vulcan.build_backend"
 
-""")
+""".format(cur_interp=sys.executable))
 
     return tmp_path
 
