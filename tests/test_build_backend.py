@@ -93,5 +93,6 @@ class TestConfig:
         assert any("; extra == 'test1'" in req for req in whl.requires_dist), "no extra dependencies found"
 
 
+@pytest.mark.xfail
 def test_editable_install(test_application: Path) -> None:
     assert False, "pip cannot yet do its part in this, see https://github.com/pypa/pip/pull/8212"

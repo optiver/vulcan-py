@@ -13,7 +13,7 @@ import tomlkit
 from pkg_resources import Requirement
 
 from vulcan import Vulcan, flatten_reqs
-from vulcan.build_backend import get_virtualenv_python
+from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
@@ -153,6 +153,11 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     if not config.no_lock and _lock:
         ctx.obj = Vulcan.from_source(Path().absolute())
         ctx.invoke(lock)
+
+
+@main.command()
+def develop() -> None:
+    install_develop()
 
 
 if __name__ == '__main__':

@@ -129,6 +129,20 @@ def get_requires_for_build_wheel(config_settings: Dict[str, str] = None) -> List
     return []
 
 
+def install_develop() -> None:
+    config = Vulcan.from_source(Path().absolute())
+
+    try:
+        virtual_env = get_virtualenv_python()
+    except RuntimeError:
+        exit('may not use vulcan develop outside of a virtualenv')
+
+    if config.configured_extras:
+        path = f'.[{",".join(config.configured_extras)}]'
+    subprocess.check_call([
+        virtual_env, '-m', 'pip', 'install', '-e', path])
+
+
 # pep660 functions
 def unpack(whl: Path) -> Path:
     with tempfile.TemporaryDirectory() as tmp:
