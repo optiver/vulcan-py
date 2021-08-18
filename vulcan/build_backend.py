@@ -1,11 +1,13 @@
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, cast
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
 
 import tomlkit
 from editables import EditableProject  # type: ignore
@@ -129,6 +131,53 @@ def get_requires_for_build_wheel(config_settings: Dict[str, str] = None) -> List
     return []
 
 
+def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
+    out = subprocess.check_output([python_callable, '-m', 'pip', '--version'], encoding='utf-8')
+    m = re.search(r'pip (\d+\.\d+(\.\d+)?)', out)
+    if not m:
+        return None
+    return tuple((int(n) for n in m.group(1).split('.')))
+
+
+@contextmanager
+def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]:
+    pip_version = get_pip_version(venv)
+    if pip_version is None or pip_version < (999, 999, 999):  # TODO: Correct version once released
+        print(f"pip version {pip_version} does not support editable installs,"
+              " falling back to generated setup.py")
+        options: Dict[str, Any] = {}
+        if config.packages:
+            options['packages'] = config.packages
+        if config.version:
+            options['version'] = config.version
+
+        if config.no_lock:
+            options['install_requires'] = flatten_reqs(config.configured_dependencies)
+            options['extras_require'] = config.configured_extras
+        else:
+            options['install_requires'] = config.dependencies
+            options['extras_require'] = config.extras
+
+        setup = Path('setup.py')
+        if setup.exists():
+            exit('may not use vulcan develop when setup.py is present')
+        try:
+            with tempfile.NamedTemporaryFile(suffix='.json', mode="w+") as mdata_file:
+                mdata_file.write(json.dumps(options))
+                mdata_file.flush()
+                with setup.open('w+') as setup_file:
+                    setup_file.write(f"""\
+from vulcan.build_backend import setup
+import json, pathlib
+setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
+""")
+                yield
+        finally:
+            setup.unlink()
+    else:
+        yield
+
+
 def install_develop() -> None:
     config = Vulcan.from_source(Path().absolute())
 
@@ -137,10 +186,12 @@ def install_develop() -> None:
     except RuntimeError:
         exit('may not use vulcan develop outside of a virtualenv')
 
-    if config.configured_extras:
-        path = f'.[{",".join(config.configured_extras)}]'
-    subprocess.check_call([
-        virtual_env, '-m', 'pip', 'install', '-e', path])
+    with maybe_gen_setuppy(virtual_env, config):
+        path = str(Path().absolute())
+        if config.configured_extras:
+            path = f'{path}[{",".join(config.configured_extras)}]'
+        subprocess.check_call([
+            virtual_env, '-m', 'pip', 'install', '-e', path])
 
 
 # pep660 functions
