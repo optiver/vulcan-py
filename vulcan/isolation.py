@@ -1,5 +1,4 @@
 import shlex
-import sys
 import subprocess
 import sys
 import tempfile

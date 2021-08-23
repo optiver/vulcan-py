@@ -30,6 +30,7 @@ try:
 except PackageNotFoundError:
     vulcan_version = '0.0.0'
 
+
 @click.group()
 @click.version_option(vulcan_version)
 @click.pass_context
