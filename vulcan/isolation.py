@@ -1,4 +1,5 @@
 import shlex
+import sys
 import subprocess
 import sys
 import tempfile
@@ -20,8 +21,12 @@ def create_venv(python_version: str = None) -> Generator['VulcanEnvBuilder', Non
 
 
 def get_executable(version: str) -> str:
+    if sys.platform == 'win32':
+        which = 'where'
+    else:
+        which = 'which'
     return subprocess.check_output(
-        ['which', f'python{version}'], encoding='utf-8', stderr=subprocess.PIPE).strip()
+        [which, f'python{version}'], encoding='utf-8', stderr=subprocess.PIPE).strip()
 
 
 @contextmanager
