@@ -115,7 +115,10 @@ def get_virtualenv_python() -> Path:
     if sys.platform == 'win32':
         # sigh
         return Path(virtual_env, 'Scripts', 'python')
-    return Path(virtual_env, 'bin', 'python')
+    else:
+        # if this isn't in an else, 
+        # mypy complains on windows that it is unreachable
+        return Path(virtual_env, 'bin', 'python')
 
 
 # not part of PEP-517, but very useful to have
