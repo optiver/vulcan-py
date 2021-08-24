@@ -31,7 +31,8 @@ jobs:
     - name: Check version
       run: |
         python -m pip install .[cli]
-        [[ "$GITHUB_REF" == *"$(vulcan --version)"* ]]
+        echo "Checking tag ${{ steps.version_tag.outputs.value }} vs $(vulcan --version)"
+        [[ "${{ steps.version_tag.outputs.value }}" == *"$(vulcan --version)"* ]]
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
