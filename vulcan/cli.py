@@ -18,16 +18,21 @@ from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
 if sys.version_info >= (3, 8):
-    from importlib.metadata import version
+    from importlib.metadata import version, PackageNotFoundError
 else:
-    from importlib_metadata import version
+    from importlib_metadata import version, PackageNotFoundError
 
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
 
+try:
+    vulcan_version = version('vulcan-py')
+except PackageNotFoundError:
+    vulcan_version = '0.0.0'
+
 
 @click.group()
-@click.version_option(version('vulcan-py'))
+@click.version_option(vulcan_version)
 @click.pass_context
 def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute())
@@ -123,13 +128,13 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         venv_python = get_virtualenv_python()
     except RuntimeError:
         exit("Must be in a virtualenv to use `vulcan add`")
-    subprocess.check_call([venv_python, '-m', 'pip', 'install', str(req)])
+    subprocess.check_call([str(venv_python), '-m', 'pip', 'install', str(req)])
     if req.specifier:  # type: ignore
         # if the user gave a version spec, we blindly take that
         version = str(req.specifier)  # type: ignore
     else:
         # otherwise, we take a freeze to see what was actually installed
-        freeze = subprocess.check_output([venv_python, '-m', 'pip', 'freeze'], encoding='utf-8').strip()
+        freeze = subprocess.check_output([str(venv_python), '-m', 'pip', 'freeze'], encoding='utf-8').strip()
         try:
             # try and find the thing we just added
             line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore

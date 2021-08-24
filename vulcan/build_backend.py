@@ -112,7 +112,13 @@ def get_virtualenv_python() -> Path:
     virtual_env = os.environ.get('VIRTUAL_ENV')
     if virtual_env is None:
         raise RuntimeError("No virtualenv active")
-    return Path(virtual_env, 'bin', 'python')
+    if sys.platform == 'win32':
+        # sigh
+        return Path(virtual_env, 'Scripts', 'python')
+    else:
+        # if this isn't in an else,
+        # mypy complains on windows that it is unreachable
+        return Path(virtual_env, 'bin', 'python')
 
 
 # not part of PEP-517, but very useful to have
@@ -140,20 +146,25 @@ def install_develop() -> None:
     if setup.exists():
         exit('may not use vulcan develop when setup.py is present')
     try:
-        with tempfile.NamedTemporaryFile(suffix='.json', mode="w+") as mdata_file:
-            mdata_file.write(json.dumps(options))
-            mdata_file.flush()
-            with setup.open('w+') as setup_file:
-                setup_file.write(f"""\
+        with tempfile.NamedTemporaryFile(suffix='.json', mode="w+", delete=False) as mdata_file:
+            try:
+                mdata_file.write(json.dumps(options))
+                mdata_file.flush()
+                mdata_file.close()
+
+                with setup.open('w+') as setup_file:
+                    setup_file.write(f"""\
 from vulcan.build_backend import setup
 import json, pathlib
-setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
+setup(**json.load(pathlib.Path(r'{mdata_file.name}').open()))
 """)
-            path = str(Path().absolute())
-            if config.configured_extras:
-                path = f'{path}[{",".join(config.configured_extras)}]'
-            subprocess.check_call([
-                virtual_env, '-m', 'pip', 'install', '-e', path])
+                path = str(Path().absolute())
+                if config.configured_extras:
+                    path = f'{path}[{",".join(config.configured_extras)}]'
+                subprocess.check_call([
+                    str(virtual_env), '-m', 'pip', 'install', '-e', str(path)])
+            finally:
+                os.unlink(mdata_file.name)
     finally:
         setup.unlink()
 
