@@ -32,7 +32,7 @@ jobs:
       run: |
         python -m pip install .[cli]
         echo "Checking tag ${{ steps.version_tag.outputs.value }} vs $(vulcan --version)"
-        [[ "${{ steps.version_tag.outputs.value }}" == *"$(vulcan --version)"* ]]
+        [[ "${{ steps.version_tag.outputs.value }}" == *"$(vulcan --version | sed 's/vulcan, version //')"* ]]
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
