@@ -23,13 +23,18 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+    - name: Get version tag
+      id: version_tag
+      run: |
+        [[ ! "$GITHUB_REF" =~ refs/tags ]] && exit
+        echo "::set-output name=value::${GITHUB_REF#refs/tags/}"
     - name: Check version
       run: |
+        python -m pip install .[cli]
+        [[ "$GITHUB_REF" == *"$(vulcan --version)"* ]]
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[cli]
-        [[ "$GITHUB_REF" == *"$(vulcan --version)"* ]]
         pip install build
     - name: Build package
       run: python -m build
