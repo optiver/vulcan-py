@@ -116,7 +116,7 @@ def get_virtualenv_python() -> Path:
         # sigh
         return Path(virtual_env, 'Scripts', 'python')
     else:
-        # if this isn't in an else, 
+        # if this isn't in an else,
         # mypy complains on windows that it is unreachable
         return Path(virtual_env, 'bin', 'python')
 
