@@ -105,8 +105,8 @@ def lock(config: Vulcan) -> None:
     "Generate and update lockfile"
 
     python_version = config.python_lock_with
-    # this check does not make sense on windows as far as I can tell, there is never a "python3.6" or "python2.7" binary
-    # just "python"
+    # this check does not make sense on windows as far as I can tell,
+    # there is never a "python3.6" or "python2.7" binary just "python"
     if python_version is None and sys.platform != 'win32':
         try:
             # default to configured lock value, then current venv value if it exists, fallback to vulcan's
