@@ -48,10 +48,10 @@ jobs:
     - name: Tox
       # Note: this list of jobs needs to be kept in-sync with tox.
       env:
-        TOXENV: py$(echo ${{matrix.python-version}} | tr -cd '[[:digit:]]')-{mypy,flake8,pytest,pytest-no-cli-deps,wheel}
+        
       run: |
          python -m pip install -U tox
-         tox
+         TOXENV="py$(echo ${{matrix.python-version}} | tr -cd '[[:digit:]]')-{mypy,flake8,pytest,pytest-no-cli-deps,wheel}" tox
 
     - name: Build Wheel
       run: |
