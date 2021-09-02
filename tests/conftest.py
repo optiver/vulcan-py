@@ -137,7 +137,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="{cur_interp}"
+interpreter='{cur_interp}'
 extra_args="-E --compile-pyc"
 
 
@@ -201,7 +201,7 @@ test3 = ["requests>=2.0.0", "wheel"]
 [[tool.vulcan.shiv]]
 bin_name="testproject"
 console_script="myep"
-interpreter="{cur_interp}"
+interpreter='{cur_interp}'
 extra_args="-E --compile-pyc"
 
 
