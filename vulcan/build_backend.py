@@ -119,7 +119,13 @@ def get_virtualenv_python() -> Path:
     virtual_env = os.environ.get('VIRTUAL_ENV')
     if virtual_env is None:
         raise RuntimeError("No virtualenv active")
-    return Path(virtual_env, 'bin', 'python')
+    if sys.platform == 'win32':
+        # sigh
+        return Path(virtual_env, 'Scripts', 'python')
+    else:
+        # if this isn't in an else,
+        # mypy complains on windows that it is unreachable
+        return Path(virtual_env, 'bin', 'python')
 
 
 # tox requires these two for some reason :(
@@ -143,7 +149,7 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
 def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]:
     pip_version = get_pip_version(venv)
     if pip_version is None or pip_version < (999, 999, 999):  # TODO: Correct version once released
-        print(f"pip version {pip_version} does not support editable installs,"
+        print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
               " falling back to generated setup.py")
         options: Dict[str, Any] = {}
         if config.packages:
@@ -162,16 +168,20 @@ def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]
         if setup.exists():
             exit('may not use vulcan develop when setup.py is present')
         try:
-            with tempfile.NamedTemporaryFile(suffix='.json', mode="w+") as mdata_file:
-                mdata_file.write(json.dumps(options))
-                mdata_file.flush()
-                with setup.open('w+') as setup_file:
-                    setup_file.write(f"""\
+            with tempfile.NamedTemporaryFile(suffix='.json', mode="w+", delete=False) as mdata_file:
+                try:
+                    mdata_file.write(json.dumps(options))
+                    mdata_file.flush()
+                    mdata_file.close()
+                    with setup.open('w+') as setup_file:
+                        setup_file.write(f"""\
 from vulcan.build_backend import setup
 import json, pathlib
-setup(**json.load(pathlib.Path('{mdata_file.name}').open()))
+setup(**json.load(pathlib.Path(r'{mdata_file.name}').open()))
 """)
-                yield
+                        yield
+                finally:
+                    os.unlink(mdata_file.name)
         finally:
             setup.unlink()
     else:

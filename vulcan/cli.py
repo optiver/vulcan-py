@@ -18,16 +18,21 @@ from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
 if sys.version_info >= (3, 8):
-    from importlib.metadata import version
+    from importlib.metadata import PackageNotFoundError, version
 else:
-    from importlib_metadata import version
+    from importlib_metadata import PackageNotFoundError, version
 
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
 
+try:
+    vulcan_version = version('vulcan-py')
+except PackageNotFoundError:
+    vulcan_version = '0.0.0'
+
 
 @click.group()
-@click.version_option(version('vulcan-py'))
+@click.version_option(vulcan_version)
 @click.pass_context
 def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute())
@@ -98,9 +103,26 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
 @pass_vulcan
 def lock(config: Vulcan) -> None:
     "Generate and update lockfile"
+
+    python_version = config.python_lock_with
+    # this check does not make sense on windows as far as I can tell,
+    # there is never a "python3.6" or "python2.7" binary just "python"
+    if python_version is None and sys.platform != 'win32':
+        try:
+            # default to configured lock value, then current venv value if it exists, fallback to vulcan's
+            # version
+            python = get_virtualenv_python()
+            python_version = subprocess.check_output(
+                [str(python),
+                    '-c',
+                    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
+                encoding='utf-8').strip()
+
+        except RuntimeError:
+            pass
     install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
                                                     config.configured_extras or {},
-                                                    config.python_lock_with)
+                                                    python_version)
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
@@ -123,13 +145,13 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         venv_python = get_virtualenv_python()
     except RuntimeError:
         exit("Must be in a virtualenv to use `vulcan add`")
-    subprocess.check_call([venv_python, '-m', 'pip', 'install', str(req)])
+    subprocess.check_call([str(venv_python), '-m', 'pip', 'install', str(req)])
     if req.specifier:  # type: ignore
         # if the user gave a version spec, we blindly take that
         version = str(req.specifier)  # type: ignore
     else:
         # otherwise, we take a freeze to see what was actually installed
-        freeze = subprocess.check_output([venv_python, '-m', 'pip', 'freeze'], encoding='utf-8').strip()
+        freeze = subprocess.check_output([str(venv_python), '-m', 'pip', 'freeze'], encoding='utf-8').strip()
         try:
             # try and find the thing we just added
             line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore

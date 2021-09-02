@@ -7,7 +7,7 @@ from typing import Generator
 import pytest
 from click.testing import CliRunner, Result
 from vulcan import Vulcan, cli
-from vulcan.isolation import get_executable
+from vulcan.isolation import get_executable, create_venv
 
 
 def versions_exist(*versions: str) -> bool:
@@ -53,6 +53,10 @@ class TestCli:
         config = Vulcan.from_source(test_application)
         assert 'switch-config-render' in config.configured_dependencies
 
+    def test_develop_works(self, runner: CliRunner, test_application: Path) -> None:
+        with create_venv() as venv:
+            successful(runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir}))
+
 
 @contextmanager
 def cd(p: Path) -> Generator[None, None, None]:
@@ -68,5 +72,5 @@ def runner() -> CliRunner:
 
 
 def successful(result: Result) -> Result:
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     return result

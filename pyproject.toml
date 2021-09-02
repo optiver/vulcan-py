@@ -1,6 +1,6 @@
 [project]
 name = "vulcan-py"
-version = "1.0.0"
+version = "1.0.3"
 description = "Tool for leveraging lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
