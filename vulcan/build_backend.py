@@ -138,7 +138,7 @@ def get_requires_for_build_wheel(config_settings: Dict[str, str] = None) -> List
 
 
 def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
-    out = subprocess.check_output([python_callable, '-m', 'pip', '--version'], encoding='utf-8')
+    out = subprocess.check_output([str(python_callable), '-m', 'pip', '--version'], encoding='utf-8')
     m = re.search(r'pip (\d+\.\d+(\.\d+)?)', out)
     if not m:
         return None
@@ -201,7 +201,7 @@ def install_develop() -> None:
         if config.configured_extras:
             path = f'{path}[{",".join(config.configured_extras)}]'
         subprocess.check_call([
-            virtual_env, '-m', 'pip', 'install', '-e', path])
+            str(virtual_env), '-m', 'pip', 'install', '-e', path])
 
 
 # pep660 functions
