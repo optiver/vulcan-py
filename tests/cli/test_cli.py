@@ -72,5 +72,5 @@ def runner() -> CliRunner:
 
 
 def successful(result: Result) -> Result:
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
     return result

@@ -18,9 +18,9 @@ from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
 if sys.version_info >= (3, 8):
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
 else:
-    from importlib_metadata import version, PackageNotFoundError
+    from importlib_metadata import PackageNotFoundError, version
 
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
@@ -103,9 +103,26 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
 @pass_vulcan
 def lock(config: Vulcan) -> None:
     "Generate and update lockfile"
+
+    python_version = config.python_lock_with
+    # this check does not make sense on windows as far as I can tell,
+    # there is never a "python3.6" or "python2.7" binary just "python"
+    if python_version is None and sys.platform != 'win32':
+        try:
+            # default to configured lock value, then current venv value if it exists, fallback to vulcan's
+            # version
+            python = get_virtualenv_python()
+            python_version = subprocess.check_output(
+                [str(python),
+                    '-c',
+                    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
+                encoding='utf-8').strip()
+
+        except RuntimeError:
+            pass
     install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
                                                     config.configured_extras or {},
-                                                    config.python_lock_with)
+                                                    python_version)
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
