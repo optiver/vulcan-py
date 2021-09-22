@@ -1,4 +1,5 @@
 import os
+import shutil
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -8,6 +9,7 @@ import pytest
 from pkg_resources import Requirement
 from pkginfo import Wheel  # type: ignore
 from vulcan import VulcanConfigError, to_pep508
+from vulcan.build_backend import add_requirement, make_editable, pack, unpack
 
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
@@ -93,6 +95,35 @@ class TestConfig:
         assert any("; extra == 'test1'" in req for req in whl.requires_dist), "no extra dependencies found"
 
 
-@pytest.mark.xfail
-def test_editable_install(test_application: Path) -> None:
-    assert False, "pip cannot yet do its part in this, see https://github.com/pypa/pip/pull/8212"
+class TestEditable:
+
+    @pytest.fixture(scope="function")  # default, but test_built_application_wheel is session so make clear
+    def test_built_editable_application_wheel(self, test_built_application_wheel: Path, tmp_path: Path
+                                              ) -> Path:
+        shutil.copy(test_built_application_wheel, tmp_path)
+        return tmp_path / test_built_application_wheel.name
+
+    def test_make(self, test_built_editable_application_wheel: Path) -> None:
+
+        make_editable(test_built_editable_application_wheel)
+
+        whl = Wheel(test_built_editable_application_wheel)
+        assert any(req.startswith('editables') for req in whl.requires_dist)
+
+    def test_add_requirement(self, test_built_editable_application_wheel: Path) -> None:
+        unpacked = unpack(test_built_editable_application_wheel)
+        add_requirement(unpacked, 'test_req (~=1.2.3)')
+        whl = Wheel(pack(unpacked))
+        assert 'test_req (~=1.2.3)' in whl.requires_dist
+
+    def test_pack_unpack_idempotent(self, test_built_editable_application_wheel: Path, tmp_path: Path
+                                    ) -> None:
+        (tmp_path / 'tmp').mkdir()
+        shutil.copy(test_built_editable_application_wheel, tmp_path / 'tmp')
+        repacked = pack(unpack(tmp_path / 'tmp' / test_built_editable_application_wheel.name))
+
+        new = Wheel(repacked).__dict__
+        new.pop('filename')
+        old = Wheel(test_built_editable_application_wheel).__dict__
+        old.pop('filename')
+        assert new == old
