@@ -1,4 +1,3 @@
-import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
@@ -118,8 +117,7 @@ class Vulcan:
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     if not lockfile.exists():
-        warnings.warn(f"No lockfile {lockfile} found")
-        return [], {}
+        raise FileNotFoundError(f"Expected lockfile {lockfile}, does not exist")
     with lockfile.open() as f:
         content = cast(_ContainerStub, tomlkit.loads(f.read()))
     return (list(content['install_requires']),  # type: ignore
