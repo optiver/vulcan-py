@@ -30,7 +30,7 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             # if we have no extras, we are done here.
             return sorted([str(req) for req in base_freeze.values()]), {}
 
-        print(f"Building requirements for base + all extras")
+        print("Building requirements for base + all extras")
         final_out_task = asyncio.get_event_loop().create_task(
             build_requires(
                 pipenv,
