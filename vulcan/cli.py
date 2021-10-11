@@ -37,7 +37,7 @@ except PackageNotFoundError:
 @click.pass_context
 def main(ctx: click.Context) -> None:
     if sys.platform == 'win32':
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy)
+        asyncio.set_event_loop(asyncio.ProactorEventLoop())
     ctx.obj = Vulcan.from_source(Path().absolute())
 
 
