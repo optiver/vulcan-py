@@ -92,12 +92,12 @@ class VulcanEnvBuilder(EnvBuilder):
             '--use-pep517',
             '--target',
             str(deps_dir)] + requirements
-        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.DEVNULL,
+        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
                                                     stdout=asyncio.subprocess.DEVNULL)
-        await proc.communicate()
+        _, err = await proc.communicate()
         assert proc.returncode is not None
         if proc.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd)
+            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, stderr=err)
 
     async def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
                      ) -> Dict[str, Requirement]:
@@ -107,9 +107,9 @@ class VulcanEnvBuilder(EnvBuilder):
         frozen = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.DEVNULL,
                                                       stdout=asyncio.subprocess.PIPE)
 
-        out, _ = await frozen.communicate()
+        out, err = await frozen.communicate()
         assert frozen.returncode is not None
         if frozen.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd)
+            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, stderr=err)
         reqs = [Requirement.parse(line) for line in out.decode().split('\n') if line]
         return {req.name: req for req in reqs}  # type: ignore

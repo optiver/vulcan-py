@@ -123,10 +123,14 @@ def lock(config: Vulcan) -> None:
 
         except RuntimeError:
             pass
-    install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
-        resolve_deps(flatten_reqs(config.configured_dependencies),
-                     config.configured_extras or {},
-                     python_version))
+    try:
+        install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
+            resolve_deps(flatten_reqs(config.configured_dependencies),
+                         config.configured_extras or {},
+                         python_version))
+    except subprocess.CalledProcessError as e:
+        print(e.stderr.decode(), file=sys.stderr)
+        raise
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
