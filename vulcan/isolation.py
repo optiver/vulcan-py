@@ -1,3 +1,4 @@
+import asyncio
 import shlex
 import subprocess
 import sys
@@ -77,8 +78,9 @@ class VulcanEnvBuilder(EnvBuilder):
         cmd = [context.env_exe, '-Im', 'pip', 'install', '--upgrade', 'pip']
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
-    def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'], requirements: List[str]
-                ) -> None:
+    async def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'],
+                      requirements: List[str]
+                      ) -> None:
         # install Isolated with module pip using pep517
         if not requirements:
             return
@@ -90,12 +92,24 @@ class VulcanEnvBuilder(EnvBuilder):
             '--use-pep517',
             '--target',
             str(deps_dir)] + requirements
-        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.DEVNULL,
+                                                    stdout=asyncio.subprocess.DEVNULL)
+        await proc.communicate()
+        assert proc.returncode is not None
+        if proc.returncode != 0:
+            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd)
 
-    def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
-               ) -> Dict[str, Requirement]:
+    async def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
+                     ) -> Dict[str, Requirement]:
         # list with the requirements.txt format only libraries installed in specifically this venv
         cmd = [self.context.env_exe, '-Im', 'pip', 'list', '--format=freeze', '--path', str(deps_dir)]
-        frozen = subprocess.check_output(cmd, encoding='utf-8')
-        reqs = [Requirement.parse(line) for line in frozen.split('\n') if line]
+
+        frozen = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.DEVNULL,
+                                                      stdout=asyncio.subprocess.PIPE)
+
+        out, _ = await frozen.communicate()
+        assert frozen.returncode is not None
+        if frozen.returncode != 0:
+            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd)
+        reqs = [Requirement.parse(line) for line in out.decode().split('\n') if line]
         return {req.name: req for req in reqs}  # type: ignore

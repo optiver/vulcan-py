@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shlex
 import subprocess
@@ -5,13 +6,13 @@ import sys
 from pathlib import Path
 from typing import Callable, List
 
-import build
 import build.env
 import click
 import packaging.version
 import tomlkit
 from pkg_resources import Requirement
 
+import build
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
@@ -120,9 +121,10 @@ def lock(config: Vulcan) -> None:
 
         except RuntimeError:
             pass
-    install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
-                                                    config.configured_extras or {},
-                                                    python_version)
+    install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
+        resolve_deps(flatten_reqs(config.configured_dependencies),
+                     config.configured_extras or {},
+                     python_version))
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
