@@ -5,7 +5,7 @@ import shutil
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Generator
+from typing import Dict, Generator, Iterable
 
 import pytest
 from pkginfo import Wheel  # type: ignore
@@ -13,11 +13,14 @@ from pkginfo import Wheel  # type: ignore
 import build
 
 
-@pytest.fixture
-async def event_loop() -> asyncio.AbstractEventLoop:
+@pytest.fixture(autouse=True)
+def event_loop() -> Iterable[asyncio.AbstractEventLoop]:
     if sys.platform == 'win32':
-        return asyncio.ProactorEventLoop()
-    return asyncio.get_event_loop()
+        loop = asyncio.ProactorEventLoop()
+    else:
+        loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
 
 @contextmanager
