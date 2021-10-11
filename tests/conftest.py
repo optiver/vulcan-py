@@ -1,13 +1,23 @@
+import asyncio
 import hashlib
+import os
 import shutil
+import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator
-from contextlib import contextmanager
-import os
 
-import build
 import pytest
 from pkginfo import Wheel  # type: ignore
+
+import build
+
+
+@pytest.fixture
+async def event_loop() -> asyncio.AbstractEventLoop:
+    if sys.platform == 'win32':
+        return asyncio.ProactorEventLoop()
+    return asyncio.get_event_loop()
 
 
 @contextmanager
