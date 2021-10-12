@@ -42,7 +42,14 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
             resolved_extras[extra] = asyncio.get_event_loop().create_task(
                 build_requires(pipenv, install_requires + extra_reqs))
 
-        await asyncio.gather(*resolved_extras.values(), final_out_task)
+        # It is important here to wait until ALL tasks are complete (return_exceptions=True) because on
+        # windows, if that is not done then the TemporaryDirectory is create_venv will try to remove itself
+        # while our async subprocesses still have a lock on the python.exe (windows-only issue). which then
+        # causes more errors
+        results = await asyncio.gather(*resolved_extras.values(), final_out_task, return_exceptions=True)
+        for res in results:
+            if isinstance(res, BaseException):
+                raise res
         all_resolved = final_out_task.result()
 
         extras_out = {k: sorted([str(all_resolved[req]) for req in v.result()]) for k, v in
