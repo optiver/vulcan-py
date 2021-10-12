@@ -4,7 +4,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, Dict, List, Tuple
 
 import build.env
 import click
@@ -102,6 +102,18 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
             os.remove(dist)
 
 
+async def resolve_deps_or_report(config: Vulcan,
+                                 python_version: str = None) -> Tuple[List[str], Dict[str, List[str]]]:
+    try:
+        return await resolve_deps(flatten_reqs(config.configured_dependencies),
+                                  config.configured_extras or {},
+                                  python_version)
+
+    except subprocess.CalledProcessError as e:
+        print(e.stderr.decode(), file=sys.stderr)
+        raise
+
+
 @main.command()
 @pass_vulcan
 def lock(config: Vulcan) -> None:
@@ -123,14 +135,8 @@ def lock(config: Vulcan) -> None:
 
         except RuntimeError:
             pass
-    try:
-        install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
-            resolve_deps(flatten_reqs(config.configured_dependencies),
-                         config.configured_extras or {},
-                         python_version))
-    except subprocess.CalledProcessError as e:
-        print(e.stderr.decode(), file=sys.stderr)
-        raise
+    install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
+        resolve_deps_or_report(config, python_version))
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
