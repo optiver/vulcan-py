@@ -203,7 +203,6 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
 
 @main.command()
 def develop() -> None:
-    "Install project into current virtualenv as editable"
     install_develop()
 
 

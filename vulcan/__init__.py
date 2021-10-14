@@ -58,6 +58,7 @@ def dict_or_none(val: Any) -> Optional[Dict[str, Any]]:
 
 @dataclass
 class Vulcan:
+    name: str
     version: Optional[str]
     packages: Optional[List[str]]
     source_path: Path
@@ -74,7 +75,9 @@ class Vulcan:
     @classmethod
     def from_source(cls, source_path: Path) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
-            config = tomlkit.loads(f.read())['tool']['vulcan']  # type: ignore
+            all_config = tomlkit.loads(f.read())
+            name = str(all_config['project']['name'])  # type: ignore
+            config = all_config['tool']['vulcan']  # type: ignore
             config = cast(_ContainerStub, config)
         version_file = find_version_file(source_path)
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
@@ -101,7 +104,8 @@ class Vulcan:
             ))
 
         print(f"Setting version to {version}")
-        return cls(version=version, source_path=source_path, plugins=list_or_none(config.get('plugins')),
+        return cls(name=name,
+                   version=version, source_path=source_path, plugins=list_or_none(config.get('plugins')),
                    packages=list_or_none(config.get("packages")),
                    lockfile=lockfile, shiv_options=shiv_ops,
                    dependencies=install_requires,
