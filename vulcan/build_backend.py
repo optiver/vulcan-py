@@ -11,8 +11,8 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
 
 import setuptools
 import tomlkit
-from editables import EditableProject
-from ppsetuptools.ppsetuptools import _parse_kwargs
+from editables import EditableProject  # type: ignore
+from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
 from vulcan import Vulcan, flatten_reqs
 from vulcan.plugins import PluginRunner
