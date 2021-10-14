@@ -141,7 +141,7 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
 @contextmanager
 def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]:
     pip_version = get_pip_version(venv)
-    if pip_version is None or pip_version < (999, 999, 999):  # TODO: Correct version once released
+    if pip_version is None or pip_version < (21, 3):
         print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
               " falling back to generated setup.py")
         options: Dict[str, Any] = {}
