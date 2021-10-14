@@ -11,8 +11,8 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
 
 import setuptools
 import tomlkit
-from editables import EditableProject  # type: ignore
-from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
+from editables import EditableProject
+from ppsetuptools.ppsetuptools import _parse_kwargs
 
 from vulcan import Vulcan, flatten_reqs
 from vulcan.plugins import PluginRunner
@@ -220,6 +220,7 @@ def add_requirement(unpacked_whl_dir: Path, req: str) -> None:
     metadata = next(unpacked_whl_dir.glob('*.dist-info')) / 'METADATA'  # is mandatory
     with metadata.open() as f:
         metadata_lines = list(f)
+    i = 0
     for i, line in enumerate(metadata_lines):
         if not (line.strip() and not line.startswith('Requires-Dist: ')):
             # find the start of the requires-dist, or the end of the metadata keys
