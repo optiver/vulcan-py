@@ -93,23 +93,23 @@ class VulcanEnvBuilder(EnvBuilder):
             '--target',
             str(deps_dir)] + requirements
         proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
-                                                    stdout=asyncio.subprocess.DEVNULL)
-        _, err = await proc.communicate()
+                                                    stdout=asyncio.subprocess.PIPE)
+        out, err = await proc.communicate()
         assert proc.returncode is not None
         if proc.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, stderr=err)
+            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out, stderr=err)
 
     async def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
                      ) -> Dict[str, Requirement]:
         # list with the requirements.txt format only libraries installed in specifically this venv
         cmd = [self.context.env_exe, '-Im', 'pip', 'list', '--format=freeze', '--path', str(deps_dir)]
 
-        frozen = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.DEVNULL,
+        frozen = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
                                                       stdout=asyncio.subprocess.PIPE)
 
         out, err = await frozen.communicate()
         assert frozen.returncode is not None
         if frozen.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, stderr=err)
+            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)
         reqs = [Requirement.parse(line) for line in out.decode().split('\n') if line]
         return {req.name: req for req in reqs}  # type: ignore
