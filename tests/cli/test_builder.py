@@ -1,11 +1,25 @@
 import subprocess
+import sys
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import pytest
 from pkg_resources import Requirement
 from pkginfo import Wheel
+
 from vulcan.builder import resolve_deps
 from vulcan.isolation import get_executable
+
+
+@contextmanager
+def verbose_called_process_error() -> Iterator[None]:
+    try:
+        yield
+    except subprocess.CalledProcessError as err:
+        print(err.stdout)
+        print(err.stderr, file=sys.stderr)
+        raise
 
 
 @pytest.fixture
@@ -33,23 +47,27 @@ class TestResolveDeps:
 
     @pytest.mark.asyncio
     async def test_empty_reqs_empty_deps(self) -> None:
-        assert await resolve_deps([], {}) == ([], {})
+        with verbose_called_process_error():
+            assert await resolve_deps([], {}) == ([], {})
 
     @pytest.mark.asyncio
     async def test_empty_base_non_empty_extras_empty_base(self) -> None:
-        base, extras = await resolve_deps([], {'test': ['requests']})
+        with verbose_called_process_error():
+            base, extras = await resolve_deps([], {'test': ['requests']})
         assert base == []
         assert extras
 
     @pytest.mark.asyncio
     async def test_non_empty_base_empty_extras_empty_extras(self) -> None:
-        base, extras = await resolve_deps(['requests'], {})
+        with verbose_called_process_error():
+            base, extras = await resolve_deps(['requests'], {})
         assert base
         assert extras == {}
 
     @pytest.mark.asyncio
     async def test_same_reqs_same_deps(self) -> None:
-        base, extras = await resolve_deps(['requests'], {'test': ['requests']})
+        with verbose_called_process_error():
+            base, extras = await resolve_deps(['requests'], {'test': ['requests']})
         # output should be sorted, so it is good to just test equality here
         assert base == extras['test']
 
@@ -62,9 +80,11 @@ class TestResolveDeps:
     @pytest.mark.asyncio
     async def test_resolve_different_python_versions(self) -> None:
         spec = 'traitlets>=4.0.1,<=5.0.5'
-        resolved, _ = await resolve_deps([spec], {}, python_version='3.6')
+        with verbose_called_process_error():
+            resolved, _ = await resolve_deps([spec], {}, python_version='3.6')
         print(resolved)
         assert 'traitlets==4.3.3' in resolved
-        resolved, _ = await resolve_deps([spec], {}, python_version='3.8')
+        with verbose_called_process_error():
+            resolved, _ = await resolve_deps([spec], {}, python_version='3.8')
         print(resolved)
         assert 'traitlets==5.0.5' in resolved
