@@ -6,9 +6,8 @@ from typing import Generator
 
 import pytest
 from click.testing import CliRunner, Result
-
 from vulcan import Vulcan, cli
-from vulcan.isolation import create_venv, get_executable
+from vulcan.isolation import get_executable, create_venv
 
 
 def versions_exist(*versions: str) -> bool:
@@ -27,16 +26,16 @@ class TestCli:
 
         with cd(test_application):
             print(os.getcwd(), test_application)
-            successful(runner.invoke(cli.main, ['lock'], mix_stderr=False))
+            successful(runner.invoke(cli.main, ['lock']))
         first_pass = (test_application / 'vulcan.lock').read_text()
 
         with cd(test_application):
-            successful(runner.invoke(cli.main, ['lock'], mix_stderr=False))
+            successful(runner.invoke(cli.main, ['lock']))
         assert (test_application / 'vulcan.lock').read_text() == first_pass
 
     def test_shiv_build_works(self, runner: CliRunner, test_application: Path, tmp_path: Path) -> None:
         with cd(test_application):
-            successful(runner.invoke(cli.main, ['build', '--shiv', '-o', 'dist'], mix_stderr=False))
+            successful(runner.invoke(cli.main, ['build', '--shiv', '-o', 'dist']))
         output = test_application / 'dist/testproject'
         assert output.exists()
         assert os.access(output, os.X_OK)
@@ -50,14 +49,13 @@ class TestCli:
         config = Vulcan.from_source(test_application)
         assert 'switch-config-render' not in config.configured_dependencies
         with cd(test_application):
-            successful(runner.invoke(cli.main, ['add', 'switch-config-render'], mix_stderr=False))
+            successful(runner.invoke(cli.main, ['add', 'switch-config-render']))
         config = Vulcan.from_source(test_application)
         assert 'switch-config-render' in config.configured_dependencies
 
     def test_develop_works(self, runner: CliRunner, test_application: Path) -> None:
         with create_venv() as venv:
-            successful(runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir},
-                       mix_stderr=False))
+            successful(runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir}))
 
 
 @contextmanager
