@@ -16,7 +16,7 @@ from vulcan.plugins import PluginRunner
 # importing setuptools here rather than at point of use forces user to specify setuptools in their
 # [build-system][requires] section
 try:
-    import setuptools  # type: ignore
+    import setuptools
 except ImportError as e:
     raise ImportError(str(e) + '\nPlease add setuptools to [build-system] requires in pyproject.toml') from e
 

@@ -1,17 +1,18 @@
+import asyncio
 import os
 import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, Dict, List, Tuple
 
-import build
 import build.env
 import click
 import packaging.version
 import tomlkit
 from pkg_resources import Requirement
 
+import build
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
@@ -35,6 +36,18 @@ except PackageNotFoundError:
 @click.version_option(vulcan_version)
 @click.pass_context
 def main(ctx: click.Context) -> None:
+    if sys.platform == 'win32':
+        # This is required for python <3.8, where this is not yet the default for windows.
+        # Can be removed when support for those are removed.
+        # https://docs.python.org/3.7/library/asyncio-eventloop.html#event-loop-implementations
+        #
+        # > By default asyncio is configured to use SelectorEventLoop on all platforms.
+        #
+        # And then https://docs.python.org/3.8/library/asyncio-eventloop.html#event-loop-implementations
+        #
+        # > By default asyncio is configured to use SelectorEventLoop on Unix and ProactorEventLoop on
+        #   Windows.
+        asyncio.set_event_loop(asyncio.ProactorEventLoop())
     ctx.obj = Vulcan.from_source(Path().absolute())
 
 
@@ -99,6 +112,18 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
             os.remove(dist)
 
 
+async def resolve_deps_or_report(config: Vulcan,
+                                 python_version: str = None) -> Tuple[List[str], Dict[str, List[str]]]:
+    try:
+        return await resolve_deps(flatten_reqs(config.configured_dependencies),
+                                  config.configured_extras or {},
+                                  python_version)
+
+    except subprocess.CalledProcessError as e:
+        print(e.stderr.decode(), file=sys.stderr)
+        raise
+
+
 @main.command()
 @pass_vulcan
 def lock(config: Vulcan) -> None:
@@ -120,9 +145,8 @@ def lock(config: Vulcan) -> None:
 
         except RuntimeError:
             pass
-    install_requires, extras_require = resolve_deps(flatten_reqs(config.configured_dependencies),
-                                                    config.configured_extras or {},
-                                                    python_version)
+    install_requires, extras_require = asyncio.get_event_loop().run_until_complete(
+        resolve_deps_or_report(config, python_version))
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
     doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
