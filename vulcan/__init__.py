@@ -65,9 +65,9 @@ class Vulcan:
     plugins: Optional[List[str]]
     shiv_options: List[ShivOpts]
     lockfile: Path
-    dependencies: List[str]
+    dependencies: Optional[List[str]]
     configured_dependencies: VersionSpecs
-    extras: Dict[str, List[str]]
+    extras: Optional[Dict[str, List[str]]]
     configured_extras: Dict[str, List[str]]
     no_lock: bool = False
     python_lock_with: Optional[str] = None
@@ -84,16 +84,16 @@ class Vulcan:
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
         no_lock = config.get('no-lock', False)
-        install_requires: List[str] = []
-        extras_require: Dict[str, List[str]] = {}
+        install_requires: Optional[List[str]] = []
+        extras_require: Optional[Dict[str, List[str]]] = {}
         if not no_lock:
             try:
                 install_requires, extras_require = get_requires(lockfile)
             except FileNotFoundError:
                 if fail_on_missing_lock:
                     raise
-                install_requires = []
-                extras_require = {}
+                install_requires = None
+                extras_require = None
 
         python_lock_with = config.get('python-lock-with')
 

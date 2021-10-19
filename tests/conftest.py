@@ -162,6 +162,12 @@ build-backend="vulcan.build_backend"
     return tmp_path
 
 
+@pytest.fixture
+def test_application_function_scope(test_application: Path, tmp_path: Path) -> Path:
+    shutil.copytree(test_application, tmp_path)
+    return tmp_path
+
+
 @pytest.fixture(scope='session')
 def test_application_forbidden_keys(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
