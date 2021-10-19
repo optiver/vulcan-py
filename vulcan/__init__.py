@@ -73,7 +73,7 @@ class Vulcan:
     python_lock_with: Optional[str] = None
 
     @classmethod
-    def from_source(cls, source_path: Path) -> 'Vulcan':
+    def from_source(cls, source_path: Path, fail_on_missing_lock: bool = True) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
             all_config = tomlkit.loads(f.read())
             name = str(all_config['project']['name'])  # type: ignore
@@ -87,7 +87,13 @@ class Vulcan:
         install_requires: List[str] = []
         extras_require: Dict[str, List[str]] = {}
         if not no_lock:
-            install_requires, extras_require = get_requires(lockfile)
+            try:
+                install_requires, extras_require = get_requires(lockfile)
+            except FileNotFoundError:
+                if fail_on_missing_lock:
+                    raise
+                install_requires = []
+                extras_require = {}
 
         python_lock_with = config.get('python-lock-with')
 

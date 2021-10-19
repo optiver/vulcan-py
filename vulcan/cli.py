@@ -48,7 +48,9 @@ def main(ctx: click.Context) -> None:
         # > By default asyncio is configured to use SelectorEventLoop on Unix and ProactorEventLoop on
         #   Windows.
         asyncio.set_event_loop(asyncio.ProactorEventLoop())
-    ctx.obj = Vulcan.from_source(Path().absolute())
+    # don't fail on missing lock here, because this config object is not actually used for building only for
+    # cli values
+    ctx.obj = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
 
 
 def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
