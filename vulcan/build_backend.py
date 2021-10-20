@@ -238,9 +238,8 @@ def make_editable(whl: Path) -> None:
     project = EditableProject(project_name, Path().absolute())
     for package in (config.packages or []):
         project.map(package, package)
-    # removing the actual code packages because they will conflict with the .pth files, and take precendence
-    # over them
-    for package in (config.packages or []):
+        # removing the actual code packages because they will conflict with the .pth files, and take
+        # precendence over them
         shutil.rmtree(unpacked_whl_dir / package)
     for name, content in project.files():
         (unpacked_whl_dir / name).write_text(content)
