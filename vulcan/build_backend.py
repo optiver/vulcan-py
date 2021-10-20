@@ -250,7 +250,6 @@ def make_editable(whl: Path) -> None:
 
     assert whl == pack(unpacked_whl_dir), 'pre-wheel and post-wheel should be the same path'
     shutil.rmtree(unpacked_whl_dir)
-    shutil.copy2(whl, '/tmp')
 
 
 def build_editable(wheel_directory: str, config_settings: Dict[str, str] = None,
