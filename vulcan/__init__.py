@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import tomlkit
+from pkg_resources import Requirement
 from typing_extensions import TypedDict
 
 
@@ -67,6 +68,7 @@ class Vulcan:
     lockfile: Path
     dependencies: Optional[List[str]]
     configured_dependencies: VersionSpecs
+    dev_dependencies: Optional[List[Requirement]]
     extras: Optional[Dict[str, List[str]]]
     configured_extras: Dict[str, List[str]]
     no_lock: bool = False
@@ -95,6 +97,11 @@ class Vulcan:
                 install_requires = None
                 extras_require = None
 
+        dev_dependencies: Optional[List[Requirement]] = None
+        if config.get('dev-dependencies') is not None:
+            dev_dependencies = [Requirement.parse(to_pep508(lib, spec))
+                                for lib, spec in config['dev-dependencies'].items()]
+
         python_lock_with = config.get('python-lock-with')
 
         shiv_ops = []
@@ -116,6 +123,7 @@ class Vulcan:
                    lockfile=lockfile, shiv_options=shiv_ops,
                    dependencies=install_requires,
                    configured_dependencies=config.get('dependencies', {}),
+                   dev_dependencies=dev_dependencies,
                    extras=extras_require,
                    configured_extras=config.get('extras', {}),
                    no_lock=no_lock, python_lock_with=python_lock_with)

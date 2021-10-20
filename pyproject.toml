@@ -42,6 +42,15 @@ ppsetuptools = "==2.0.2"
 importlib_metadata = "~=4.6; python_version<='3.7'"
 editables = '~=0.2'
 
+[tool.vulcan.dev-dependencies]
+mypy=""
+flake8=""
+pytest=""
+pytest-asyncio=""
+coverage=""
+pkginfo="~=1.7"
+dataclasses="~=0.8; python_version<='3.6'"
+
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
