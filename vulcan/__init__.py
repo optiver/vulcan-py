@@ -100,7 +100,7 @@ class Vulcan:
         dev_dependencies: Optional[List[Requirement]] = None
         if config.get('dev-dependencies') is not None:
             dev_dependencies = [Requirement.parse(to_pep508(lib, spec))
-                                for lib, spec in config['dev-dependencies'].items()]
+                                for lib, spec in config['dev-dependencies'].items()]  # type: ignore
 
         python_lock_with = config.get('python-lock-with')
 
