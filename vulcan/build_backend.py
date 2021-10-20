@@ -233,8 +233,11 @@ def make_editable(whl: Path) -> None:
     config = Vulcan.from_source(Path().absolute())
     unpacked_whl_dir = unpack(whl)
     add_requirement(unpacked_whl_dir, f"editables (~={version('editables')})")
-    project = EditableProject(config.name, Path().absolute())
+    # https://www.python.org/dev/peps/pep-0427/#escaping-and-unicode
+    project_name = re.sub(r'[^\w\d.]+', '_', config.name, re.UNICODE)
+    project = EditableProject(project_name, Path().absolute())
     for package in (config.packages or []):
+        print(package)
         project.map(package, package)
     for name, content in project.files():
         (unpacked_whl_dir / name).write_text(content)
