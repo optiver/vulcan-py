@@ -8,8 +8,10 @@ from typing import Generator
 import pytest
 from pkg_resources import Requirement
 from pkginfo import Wheel  # type: ignore
+
 from vulcan import VulcanConfigError, to_pep508
-from vulcan.build_backend import add_requirement, make_editable, pack, unpack
+from vulcan.build_backend import (add_requirement, build_editable,
+                                  make_editable, pack, unpack)
 
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
@@ -98,17 +100,12 @@ class TestConfig:
 class TestEditable:
 
     @pytest.fixture(scope="function")  # default, but test_built_application_wheel is session so make clear
-    def test_built_editable_application_wheel(self, test_built_application_wheel: Path, tmp_path: Path
+    def test_built_editable_application_wheel(self, test_application: Path, tmp_path: Path
                                               ) -> Path:
-        shutil.copy(test_built_application_wheel, tmp_path)
-        return tmp_path / test_built_application_wheel.name
-
-    def test_make(self, test_built_editable_application_wheel: Path) -> None:
-
-        make_editable(test_built_editable_application_wheel)
-
-        whl = Wheel(test_built_editable_application_wheel)
-        assert any(req.startswith('editables') for req in whl.requires_dist)
+        shutil.copytree(test_application, tmp_path / 'build')
+        with cd(tmp_path / 'build'):
+            whl = build_editable(str(tmp_path))
+        return tmp_path / whl
 
     def test_add_requirement(self, test_built_editable_application_wheel: Path) -> None:
         unpacked = unpack(test_built_editable_application_wheel)
