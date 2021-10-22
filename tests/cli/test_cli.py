@@ -46,7 +46,14 @@ class TestCli:
                                                            encoding='utf-8',
                                                            env={'SHIV_ROOT': str(tmp_path)})
 
-    def test_shiv_add_works(self, runner: CliRunner, test_application: Path) -> None:
+    def test_add_works_without_lockfile(self, runner: CliRunner, test_application: Path) -> None:
+        (test_application / 'vulcan.lock').unlink()
+        with cd(test_application):
+            successful(runner.invoke(cli.main, ['add', 'switch-config-render']))
+        config = Vulcan.from_source(test_application)
+        assert 'switch-config-render' in config.configured_dependencies
+
+    def test_add_works(self, runner: CliRunner, test_application: Path) -> None:
         config = Vulcan.from_source(test_application)
         assert 'switch-config-render' not in config.configured_dependencies
         with cd(test_application):
