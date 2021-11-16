@@ -8,7 +8,7 @@ from pkg_resources import Requirement
 from vulcan.isolation import VulcanEnvBuilder, create_venv
 
 
-async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str]) -> Dict[str, Requirement]:
+async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str]) -> Dict[Requirement, Requirement]:
     with tempfile.TemporaryDirectory() as site_packages:
         await pipenv.install(site_packages, requires)
         freeze = await pipenv.freeze(site_packages)
@@ -52,6 +52,6 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
                 raise res
         all_resolved = final_out_task.result()
 
-        extras_out = {k: sorted([str(all_resolved[req]) for req in v.result()]) for k, v in
-                      resolved_extras.items()}
+        extras_out = {k: sorted([str(all_resolved[req]) for req in v.result()])
+                      for k, v in resolved_extras.items()}
         return sorted([str(all_resolved[req]) for req in base_freeze.keys()]), extras_out
