@@ -101,7 +101,7 @@ class VulcanEnvBuilder(EnvBuilder):
             raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out, stderr=err)
 
     async def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
-                     ) -> Dict[str, Requirement]:
+                     ) -> Dict[Requirement, Requirement]:
         # list with the requirements.txt format only libraries installed in specifically this venv
         cmd = [self.context.env_exe, '-Im', 'pip', 'list', '--format=freeze', '--path', str(deps_dir)]
 
@@ -113,4 +113,4 @@ class VulcanEnvBuilder(EnvBuilder):
         if frozen.returncode != 0:
             raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)
         reqs = [Requirement.parse(line) for line in out.decode().split('\n') if line]
-        return {req.name: req for req in reqs}  # type: ignore
+        return {Requirement.parse(req.name): req for req in reqs}  # type: ignore
