@@ -152,6 +152,11 @@ console_script="myep"
 interpreter='{cur_interp}'
 extra_args="-E --compile-pyc"
 
+[[tool.vulcan.shiv]]
+bin_name="testproject2"
+console_script="myep"
+interpreter='{cur_interp}'
+extra_args="-E --compile-pyc"
 
 [build-system]
 requires=['setuptools', 'vulcan-py']

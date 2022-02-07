@@ -51,9 +51,11 @@ def setup(**kwargs: Any) -> Any:
             parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
             del parsed_kwargs['gui-scripts']
         if 'entry_points' in parsed_kwargs:
-            for ep_group in list(parsed_kwargs['entry_points']):
+            old_entry_points = dict(parsed_kwargs['entry_points'])
+            parsed_kwargs['entry_points'] = {}
+            for ep_group, eps in old_entry_points.items():
                 parsed_kwargs['entry_points'][ep_group] = [
-                    f'{k}={v}' for k, v in parsed_kwargs['entry_points'][ep_group].items()]
+                    f'{k}={v}' for k, v in eps.items()]
         return setuptools.setup(**parsed_kwargs)
     else:
         return setuptools.setup(**_filter_nones(kwargs))
