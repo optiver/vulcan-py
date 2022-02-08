@@ -54,7 +54,7 @@ def wheel() -> BuildData:
     for epname, ep in eps.items():
         t = tomlkit.table()
         ep_table[epname] = t
-        t.update(ep)  # type: ignore
+        t.update(ep)
     return BuildData(whl, ep_table, packages)
 
 

@@ -1,4 +1,5 @@
 import asyncio
+import asyncio.subprocess
 import os
 import shlex
 import subprocess
@@ -22,7 +23,6 @@ if sys.version_info >= (3, 8):
     from importlib.metadata import PackageNotFoundError, version
 else:
     from importlib_metadata import PackageNotFoundError, version
-
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
 
@@ -53,7 +53,7 @@ def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
 
 
-def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
+async def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
     results = []
     for app in vulcan.shiv_options:
         try:
@@ -70,13 +70,21 @@ def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
                 cmd += ['-p', app.interpreter]
             if app.extra_args:
                 cmd += shlex.split(app.extra_args)
-            res = subprocess.run(cmd)
-            if res.returncode != 0:
-                raise SystemExit(res.returncode)
-            results.append(outdir / app.bin_name)
+            proc = await asyncio.subprocess.create_subprocess_exec(*cmd)
+            results.append((proc, app.bin_name))
         except KeyError as e:
             raise KeyError('missing config value in pyproject.toml: {e}') from e
-    return results
+    await asyncio.gather(*(p.wait() for p, _ in results))
+    succeeded = []
+    failed = []
+    for proc, res in results:
+        if await proc.wait() == 0:
+            succeeded.append(outdir / res)
+        else:
+            failed.append(res)
+    for fail in failed:
+        print(f"failed to create executable {failed}", file=sys.stderr)
+    return succeeded
 
 
 @main.command(name='build')
@@ -109,7 +117,7 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
         assert False, 'unreachable because dist_types is required'
     if shiv:
         try:
-            build_shiv_apps(dist, config, outdir)
+            asyncio.get_event_loop().run_until_complete(build_shiv_apps(dist, config, outdir))
         finally:
             os.remove(dist)
 
@@ -139,11 +147,10 @@ def lock(config: Vulcan) -> None:
             # default to configured lock value, then current venv value if it exists, fallback to vulcan's
             # version
             python = get_virtualenv_python()
-            python_version = subprocess.check_output(
-                [str(python),
-                    '-c',
-                    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
-                encoding='utf-8').strip()
+            python_version = subprocess.check_output([
+                str(python), '-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
+            ],
+                                                     encoding='utf-8').strip()
 
         except RuntimeError:
             pass
@@ -151,8 +158,10 @@ def lock(config: Vulcan) -> None:
         resolve_deps_or_report(config, python_version))
     doc = tomlkit.document()
     doc['install_requires'] = tomlkit.array(install_requires).multiline(True)  # type: ignore
-    doc['extras_require'] = {k: tomlkit.array(v).multiline(True)   # type: ignore
-                             for k, v in extras_require.items()}
+    doc['extras_require'] = {
+        k: tomlkit.array(v).multiline(True)  # type: ignore
+        for k, v in extras_require.items()
+    }
     with open(config.lockfile, 'w+') as f:
         f.write(tomlkit.dumps(doc))
 
@@ -182,8 +191,9 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
             # try and find the thing we just added
             line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore
             # and parse it to a version
-            spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier  # type: ignore
-                                               )[2:])  # remove the == at the start
+            spec = packaging.version.parse(
+                str(Requirement.parse(line.strip()).specifier  # type: ignore
+                    )[2:])  # remove the == at the start
             if isinstance(spec, packaging.version.LegacyVersion):
                 # this will raise a DeprecationWarning as well, so it will yell at user for us.
                 version = ''
@@ -195,7 +205,7 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     with open('pyproject.toml') as f:
         parse = tomlkit.parse(f.read())
     deps = parse['tool']['vulcan'].setdefault('dependencies', tomlkit.table())  # type: ignore
-    deps[name] = version  # type: ignore
+    deps[name] = version
     with open('pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(parse))
     if not config.no_lock and _lock:
