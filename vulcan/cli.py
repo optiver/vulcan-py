@@ -205,7 +205,7 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     with open('pyproject.toml') as f:
         parse = tomlkit.parse(f.read())
     deps = parse['tool']['vulcan'].setdefault('dependencies', tomlkit.table())  # type: ignore
-    deps[name] = version  # type: ignore
+    deps[name] = version
     with open('pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(parse))
     if not config.no_lock and _lock:

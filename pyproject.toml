@@ -47,7 +47,7 @@ editables = '~=0.2'
 # to correctly install and use this tool
 requires=['setuptools', 
           'tomlkit~=0.9',
-          "dataclasses; python_version<='3.6'", 
+          "dataclasses~=0.8; python_version<='3.6'", 
           'wheel',
           'typing_extensions', 
           'ppsetuptools==2.0.0',
