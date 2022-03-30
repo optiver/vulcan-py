@@ -24,11 +24,8 @@ jobs:
   build:
     strategy:
         matrix:
-            python-version: [3.6, 3.7, 3.8, 3.9, 3.10-dev]
+            python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
             os: [ubuntu-latest, windows-latest]
-            # include:
-            # - python-version: 3.10-dev
-            #   allowed_failure: true
 
 
     # The type of runner that the job will run on
