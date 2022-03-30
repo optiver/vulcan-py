@@ -68,10 +68,12 @@ def build_dist(source: Path, dist_type: str, target: Path) -> Path:
 
 
 @pytest.fixture(autouse=True)
-def _preserve_lockfile(test_application: Path) -> Generator[None, None, None]:
-    old_content = (test_application / 'vulcan.lock').read_text()
+def _preserve_lockfile_pyprjoect(test_application: Path) -> Generator[None, None, None]:
+    old_content_lock = (test_application / 'vulcan.lock').read_text()
+    old_content_pyproject = (test_application / 'pyproject.toml').read_text()
     yield
-    (test_application / 'vulcan.lock').write_text(old_content)
+    (test_application / 'vulcan.lock').write_text(old_content_lock)
+    (test_application / 'pyproject.toml').write_text(old_content_pyproject)
 
 
 @pytest.fixture
