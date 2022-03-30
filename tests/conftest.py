@@ -122,6 +122,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
 requires-python = ">=3.6"
+dynamic = ['version', 'optional-dependencies', 'dependencies']
 
 [project.scripts]
 myep = "testproject:test_ep"
