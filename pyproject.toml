@@ -45,7 +45,7 @@ editables = '~=0.2'
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools', 
+requires=['setuptools~=59.0', 
           'tomlkit~=0.9',
           "dataclasses~=0.8; python_version<='3.6'", 
           'wheel',

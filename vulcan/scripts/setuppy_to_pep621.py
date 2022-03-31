@@ -100,6 +100,7 @@ def convert() -> None:
     tool = cast(tomlkit.items.Table, pyproject['tool'])
     tool['vulcan'] = vulcan
     project['name'] = whl.name
+    project['dynamic'] = ['version']
     if whl.author or whl.author_email:
         project['authors'] = contributors(whl.author, whl.author_email)
     if whl.maintainer or whl.maintainer_email:
@@ -121,6 +122,7 @@ def convert() -> None:
         pass
 
     if whl.requires_dist:
+        project['dynamic'].append('dependencies')  # type: ignore[attr-defined]
         vulcan['dependencies'] = {}
         for req in whl.requires_dist:
             parsed_req = Requirement.parse(req)
@@ -132,6 +134,7 @@ def convert() -> None:
                 name = f'{name}[{",".join(parsed_req.extras)}]'
             vulcan['dependencies'][name] = str(parsed_req.specifier)  # type: ignore
     if whl.provides_extras:
+        project['dynamic'].append('optional-dependencies')  # type: ignore[attr-defined]
         extras = tomlkit.table()
         vulcan['extras'] = extras
         for extra in whl.provides_extras:
