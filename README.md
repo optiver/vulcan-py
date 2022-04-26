@@ -33,8 +33,9 @@ $ pipx install vulcan-py[cli,convert]
 ## Minimal starting configuration (pyproject.toml)
 
 ```toml
-[package]
+[project]
 name = "package_name"
+dynamic = ['version']
 
 # This section is mandatory and may be blindly copy/pasted
 [build-system]
