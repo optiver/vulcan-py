@@ -235,7 +235,7 @@ And this will ensure that vulcan and all its dependencies are pinned in your loc
 
 vulcan is:
 
-Copyright 2021 Optiver
+Copyright 2021 Optiver IP B.V.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
 with the License. You may obtain a copy of the License at
