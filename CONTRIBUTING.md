@@ -15,4 +15,4 @@ Contributions to vulcan or its dependencies should be made in the form of GitHub
 
 * [ ] Branch from master or rebase your branch to current master. 
 * [ ] Each commit should compile, pass static analysis, and pass tests. 
-* [ ] Add tests relevant to any fixed bug or new featur
+* [ ] Add tests relevant to any fixed bug or new feature
