@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 import tomlkit
 
@@ -13,19 +14,20 @@ def convert() -> None:
         setuptools = tool.setdefault('setuptools', tomlkit.table(is_super_table=True))
         vulcan = tool.get('vulcan', {})
         setuptools_dynamic = setuptools.setdefault('dynamic', tomlkit.table(is_super_table=True))
+    dynamic = project.get('dynamic', [])
 
     # fix dynamic
     for vulcan_key, real_key in (('dependencies', 'dependencies'),
                                  ('version', 'version'), ('extras', 'optional-dependencies')):
         if vulcan_key in vulcan and ('dynamic' not in project or real_key not in project['dynamic']):
-            dynamic = project.setdefault('dynamic', tomlkit.array())
             dynamic.append(real_key)
 
     # fix version discovery
     version_file = next(Path().rglob('VERSION'), None)
     if 'version' not in project and version_file is not None:
+        dynamic.append('version')
         if 'version' in setuptools_dynamic:
-            print("version already configured in [tool.setuptools.dynamic], not changing")
+            print("version already configured in [tool.setuptools.dynamic], not changing", file=sys.stderr)
         else:
             version_table = tomlkit.table(is_super_table=True)
             setuptools_dynamic['version'] = version_table
@@ -45,6 +47,9 @@ def convert() -> None:
     pyproject['build-system'] = build_system
     build_system['requires'] = ['vulcan-py~=2.0']
     build_system['build-backend'] = 'vulcan.build_backend'
+
+    if dynamic:
+        project['dynamic'] = dynamic
 
     with open('./pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(pyproject))
