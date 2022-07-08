@@ -1,8 +1,12 @@
+import distutils.core
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import tomlkit
+import tomlkit.container
+import tomlkit.items
+from setuptools import setup
 from typing_extensions import TypedDict
 
 
@@ -39,11 +43,6 @@ class ShivOpts:
     extra_args: str = ''
 
 
-class _ContainerStub(tomlkit.container.Container):
-    def get(self, v: str, default: Any = None) -> Any:
-        ...
-
-
 def list_or_none(val: Any) -> Optional[List[str]]:
     return [str(v) for v in val] if val is not None else None
 
@@ -69,6 +68,8 @@ class Vulcan:
     configured_dependencies: VersionSpecs
     extras: Optional[Dict[str, List[str]]]
     configured_extras: Dict[str, List[str]]
+    dev_dependencies: Dict[str, VersionSpecs]
+    dynamic: Optional[List[str]]
     no_lock: bool = False
     python_lock_with: Optional[str] = None
 
@@ -76,9 +77,10 @@ class Vulcan:
     def from_source(cls, source_path: Path, fail_on_missing_lock: bool = True) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
             all_config = tomlkit.loads(f.read())
-            name = str(all_config['project']['name'])  # type: ignore
-            config = all_config['tool']['vulcan']  # type: ignore
-            config = cast(_ContainerStub, config)
+            name = str(all_config['project']['name'])  # type: ignore[index]
+            config = all_config['tool']['vulcan']  # type: ignore[index]
+            assert isinstance(config, dict)
+            dynamic = all_config['project'].get('dynamic', [])  # type: ignore[union-attr]
         version_file = find_version_file(source_path)
         version = version_file.read_text().strip() if version_file is not None else config.get('version')
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
@@ -100,34 +102,65 @@ class Vulcan:
         shiv_ops = []
         shiv_config = config.get('shiv', [])
         for conf in shiv_config:
-            shiv_ops.append(ShivOpts(
-                bin_name=str(conf.get('bin_name')),
-                console_script=str_or_none(conf.get('console_script')),
-                entry_point=str_or_none(conf.get('entry_point')),
-                interpreter=str_or_none(conf.get('interpreter')),
-                with_extras=[str(e) for e in conf.get('with_extras', [])],
-                extra_args=str(conf.get('extra_args', '')),
-            ))
+            shiv_ops.append(
+                ShivOpts(
+                    bin_name=str(conf.get('bin_name')),
+                    console_script=str_or_none(conf.get('console_script')),
+                    entry_point=str_or_none(conf.get('entry_point')),
+                    interpreter=str_or_none(conf.get('interpreter')),
+                    with_extras=[str(e) for e in conf.get('with_extras', [])],
+                    extra_args=str(conf.get('extra_args', '')),
+                ))
+            if 'dependencies' in config and 'dependencies' not in dynamic:
+                raise RuntimeError("tool.vulcan.dependencies configured but 'dependencies' not in dynamic,"
+                                   " this is an error.")
+            if 'extras' in config and 'optional-dependencies' not in dynamic:
+                raise RuntimeError("tool.vulcan.extras configured but 'optional-dependencies' not in dynamic,"
+                                   " this is an error.")
 
-        print(f"Setting version to {version}")
         return cls(name=name,
-                   version=version, source_path=source_path, plugins=list_or_none(config.get('plugins')),
+                   version=version,
+                   source_path=source_path,
+                   plugins=list_or_none(config.get('plugins')),
                    packages=list_or_none(config.get("packages")),
-                   lockfile=lockfile, shiv_options=shiv_ops,
+                   lockfile=lockfile,
+                   shiv_options=shiv_ops,
                    dependencies=install_requires,
                    configured_dependencies=config.get('dependencies', {}),
                    extras=extras_require,
+                   dev_dependencies=config.get('dev-dependencies', {}),
                    configured_extras=config.get('extras', {}),
-                   no_lock=no_lock, python_lock_with=python_lock_with)
+                   no_lock=no_lock,
+                   python_lock_with=python_lock_with,
+                   dynamic=dynamic)
+
+    def setup(self, config_settings: Dict[str, str] = None) -> distutils.core.Distribution:
+        install_requires: Optional[List[str]]
+        extras_require: Optional[Dict[str, List[str]]]
+        if self.no_lock or (config_settings and config_settings.get('no-lock') == 'true'):
+            install_requires = flatten_reqs(self.configured_dependencies)
+            extras_require = self.configured_extras
+        else:
+            install_requires = self.dependencies
+            extras_require = self.extras
+        # setuptools apparently does not know what setuptools returns
+        # very reassuring
+        return setup(packages=self.packages or [],  # type: ignore[no-any-return,func-returns-value]
+                     version=self.version or '0.0.0',
+                     install_requires=install_requires,
+                     extras_require=extras_require,
+                     include_package_data=True)
 
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     if not lockfile.exists():
         raise FileNotFoundError(f"Expected lockfile {lockfile}, does not exist")
     with lockfile.open() as f:
-        content = cast(_ContainerStub, tomlkit.loads(f.read()))
-    return (list(content['install_requires']),  # type: ignore
-            {k: list(v) for k, v in content['extras_require'].items()})  # type: ignore
+        content = cast(tomlkit.container.Container, tomlkit.loads(f.read()))
+    return (
+        list(content['install_requires']),  # type: ignore
+        {k: list(v)
+         for k, v in content['extras_require'].items()})  # type: ignore
 
 
 def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:

@@ -1,4 +1,3 @@
-import json
 import os
 import re
 import shutil
@@ -7,14 +6,11 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
+from typing import Callable, Dict, Generator, List, Optional, Tuple
 
-import setuptools
-import tomlkit
 from editables import EditableProject  # type: ignore
-from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
-from vulcan import Vulcan, flatten_reqs
+from vulcan import Vulcan
 from vulcan.plugins import PluginRunner
 
 version: Callable[[str], str]
@@ -23,46 +19,7 @@ if sys.version_info >= (3, 8):
 else:
     from importlib_metadata import version
 
-
-def _filter_nones(vals_dict: Dict[str, Optional[Any]]) -> Dict[str, Any]:
-    return {k: v for k, v in vals_dict.items() if v is not None}
-
-
-def setup(**kwargs: Any) -> Any:
-
-    with open('pyproject.toml', 'r') as pptoml:
-        pyproject_data = cast(Dict[str, Any], tomlkit.parse(pptoml.read()))
-
-    if 'project' in pyproject_data:
-        if 'dependencies' in pyproject_data['project']:
-            raise RuntimeError("May not use [project]:dependencies key with vulcan")
-        if 'optional-dependencies' in pyproject_data['project']:
-            raise RuntimeError("May not use [project]:optional-dependencies key with vulcan")
-        parsed_kwargs = _parse_kwargs(pyproject_data['project'], '.')
-        parsed_kwargs.update(_filter_nones(kwargs))
-        parsed_kwargs = _filter_nones(parsed_kwargs)
-        # ppsetuptools doesn't handle entry points correctly
-        if 'scripts' in parsed_kwargs:
-            if 'entry_points' not in parsed_kwargs:
-                parsed_kwargs['entry_points'] = {}
-            parsed_kwargs['entry_points']['console_scripts'] = parsed_kwargs['scripts']
-            del parsed_kwargs['scripts']
-        if 'gui-scripts' in parsed_kwargs:
-            parsed_kwargs['entry_points']['gui_scripts'] = parsed_kwargs['gui-scripts']
-            del parsed_kwargs['gui-scripts']
-        if 'entry_points' in parsed_kwargs:
-            old_entry_points = dict(parsed_kwargs['entry_points'])
-            parsed_kwargs['entry_points'] = {}
-            for ep_group, eps in old_entry_points.items():
-                parsed_kwargs['entry_points'][ep_group] = [
-                    f'{k}={v}' for k, v in eps.items()]
-        return setuptools.setup(**parsed_kwargs)
-    else:
-        return setuptools.setup(**_filter_nones(kwargs))
-
-
-__all__ = ['build_wheel',
-           'build_sdist']
+__all__ = ['build_wheel', 'build_sdist']
 
 
 @contextmanager
@@ -75,37 +32,25 @@ def patch_argv(argv: List[str]) -> Generator[None, None, None]:
 
 def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
     config = Vulcan.from_source(Path().absolute())
-    options: Dict[str, Any] = {}
-    if config.packages:
-        options['packages'] = config.packages
-    if config.version:
-        options['version'] = config.version
-
-    if config.no_lock or (config_settings and config_settings.get('no-lock') == 'true'):
-        options['install_requires'] = flatten_reqs(config.configured_dependencies)
-        options['extras_require'] = config.configured_extras
-    else:
-        options['install_requires'] = config.dependencies
-        options['extras_require'] = config.extras
 
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
     # https://docs.python.org/3/distutils/apiref.html
     with PluginRunner(config):
-        dist = setup(**options, include_package_data=True)
-    rel_dist = Path(dist.dist_files[0][-1])
+        dist = config.setup()
+    rel_dist = Path(dist.dist_files[0][-1])  # type: ignore[attr-defined]
     shutil.move(str(rel_dist), Path(outdir) / rel_dist.name)
     return rel_dist.name
 
 
-def build_wheel(wheel_directory: str, config_settings: Dict[str, str] = None,
-                metadata_directory: str = None) -> str:
+def build_wheel(wheel_directory: str, config_settings: Dict[str, str] = None, metadata_directory: str = None) -> str:
     with patch_argv(['bdist_wheel']):
         return build(wheel_directory, config_settings)
 
 
-def build_sdist(sdist_directory: str,
-                config_settings: Dict[str, str] = None,
-                ) -> str:
+def build_sdist(
+    sdist_directory: str,
+    config_settings: Dict[str, str] = None,
+) -> str:
     with patch_argv(['sdist']):
         return build(sdist_directory, config_settings)
 
@@ -140,49 +85,6 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
     return tuple((int(n) for n in m.group(1).split('.')))
 
 
-@contextmanager
-def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]:
-    pip_version = get_pip_version(venv)
-    if pip_version is None or pip_version < (21, 3):
-        print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
-              " falling back to generated setup.py")
-        options: Dict[str, Any] = {}
-        if config.packages:
-            options['packages'] = config.packages
-        if config.version:
-            options['version'] = config.version
-
-        if config.no_lock:
-            options['install_requires'] = flatten_reqs(config.configured_dependencies)
-            options['extras_require'] = config.configured_extras
-        else:
-            options['install_requires'] = config.dependencies
-            options['extras_require'] = config.extras
-
-        setup = Path('setup.py')
-        if setup.exists():
-            exit('may not use vulcan develop when setup.py is present')
-        try:
-            with tempfile.NamedTemporaryFile(suffix='.json', mode="w+", delete=False) as mdata_file:
-                try:
-                    mdata_file.write(json.dumps(options))
-                    mdata_file.flush()
-                    mdata_file.close()
-                    with setup.open('w+') as setup_file:
-                        setup_file.write(f"""\
-from vulcan.build_backend import setup
-import json, pathlib
-setup(**json.load(pathlib.Path(r'{mdata_file.name}').open()))
-""")
-                        yield
-                finally:
-                    os.unlink(mdata_file.name)
-        finally:
-            setup.unlink()
-    else:
-        yield
-
-
 def install_develop() -> None:
     config = Vulcan.from_source(Path().absolute())
 
@@ -190,13 +92,15 @@ def install_develop() -> None:
         virtual_env = get_virtualenv_python()
     except RuntimeError:
         exit('may not use vulcan develop outside of a virtualenv')
+    pip_version = get_pip_version(virtual_env)
+    if pip_version is None or pip_version < (21, 3):
+        print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
+              " Please upgrade your pip")
 
-    with maybe_gen_setuppy(virtual_env, config):
-        path = str(Path().absolute())
-        if config.configured_extras:
-            path = f'{path}[{",".join(config.configured_extras)}]'
-        subprocess.check_call([
-            str(virtual_env), '-m', 'pip', 'install', '-e', path])
+    path = str(Path().absolute())
+    if config.configured_extras:
+        path = f'{path}[{",".join(config.configured_extras)}]'
+    subprocess.check_call([str(virtual_env), '-m', 'pip', 'install', '-e', path])
 
 
 # pep660 functions
@@ -250,8 +154,7 @@ def make_editable(whl: Path) -> None:
     shutil.rmtree(unpacked_whl_dir)
 
 
-def build_editable(wheel_directory: str, config_settings: Dict[str, str] = None,
-                   metadata_directory: str = None) -> str:
+def build_editable(wheel_directory: str, config_settings: Dict[str, str] = None, metadata_directory: str = None) -> str:
     whl_path = Path(wheel_directory) / build_wheel(wheel_directory, config_settings, metadata_directory)
     make_editable(whl_path)
     return whl_path.name

@@ -5,7 +5,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import build.env
 import click
@@ -15,7 +15,8 @@ from pkg_resources import Requirement
 
 import build
 from vulcan import Vulcan, flatten_reqs
-from vulcan.build_backend import get_virtualenv_python, install_develop
+from vulcan.build_backend import (get_pip_version, get_virtualenv_python,
+                                  install_develop)
 from vulcan.builder import resolve_deps
 
 version: Callable[[str], str]
@@ -122,8 +123,7 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
             os.remove(dist)
 
 
-async def resolve_deps_or_report(config: Vulcan,
-                                 python_version: str = None) -> Tuple[List[str], Dict[str, List[str]]]:
+async def resolve_deps_or_report(config: Vulcan, python_version: str = None) -> Tuple[List[str], Dict[str, List[str]]]:
     try:
         return await resolve_deps(flatten_reqs(config.configured_dependencies),
                                   config.configured_extras or {},
@@ -147,10 +147,9 @@ def lock(config: Vulcan) -> None:
             # default to configured lock value, then current venv value if it exists, fallback to vulcan's
             # version
             python = get_virtualenv_python()
-            python_version = subprocess.check_output([
-                str(python), '-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
-            ],
-                                                     encoding='utf-8').strip()
+            python_version = subprocess.check_output(
+                [str(python), '-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
+                encoding='utf-8').strip()
 
         except RuntimeError:
             pass
@@ -191,9 +190,8 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
             # try and find the thing we just added
             line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore
             # and parse it to a version
-            spec = packaging.version.parse(
-                str(Requirement.parse(line.strip()).specifier  # type: ignore
-                    )[2:])  # remove the == at the start
+            spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier  # type: ignore
+                                               )[2:])  # remove the == at the start
             if isinstance(spec, packaging.version.LegacyVersion):
                 # this will raise a DeprecationWarning as well, so it will yell at user for us.
                 version = ''
@@ -213,9 +211,39 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         ctx.invoke(lock)
 
 
+def install_dev_dependencies(target: str = None) -> None:
+    config = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
+
+    try:
+        virtual_env = get_virtualenv_python()
+    except RuntimeError:
+        exit('may not use vulcan develop outside of a virtualenv')
+    pip_version = get_pip_version(virtual_env)
+    if pip_version is None or pip_version < (21, 3):
+        print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
+              " Please upgrade your pip")
+
+    if target is not None and target not in config.dev_dependencies:
+        raise click.UsageError(f"No such dev dependency {target}")
+    if config.dev_dependencies:
+        for name, section in config.dev_dependencies.items():
+            if target is None or name == target:
+                print(f"Installing dev dependencies for {name}", flush=True)
+                # print(subprocess.check_output(...)) instead of just subprocess.check_call(...)
+                # purely because the CliRunner fixture isn't very good at actually capturing stdout, and it
+                # breaks pytest's capsys which _is_ usually good at that
+                # ah well
+                print(subprocess.check_output(
+                    [str(virtual_env), '-m', 'pip', 'install', *(flatten_reqs(section) or [])],
+                    encoding='utf-8'),
+                      flush=True)
+
+
 @main.command()
-def develop() -> None:
+@click.argument('dev_deps_target', required=False, type=str)
+def develop(dev_deps_target: Optional[str]) -> None:
     install_develop()
+    install_dev_dependencies(target=dev_deps_target)
 
 
 if __name__ == '__main__':
