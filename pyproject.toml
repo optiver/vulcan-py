@@ -28,8 +28,7 @@ no-lock = true
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
-cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0", "click~=8.0"]
-# remove when https://github.com/psf/fundable-packaging-improvements/issues/25 is complete.
+cli=["shiv~=0.5.2","build[virtualenv]~=0.8.0", "click~=8.0"]
 convert=["pkginfo~=1.7"]
 
 [tool.vulcan.dependencies]

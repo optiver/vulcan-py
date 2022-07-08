@@ -103,11 +103,11 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
 
     should_lock = _lock and not config.no_lock
 
-    project = build.ProjectBuilder('.')
-    outdir.mkdir(exist_ok=True)
     config_settings = {}
     if not _lock:
         config_settings['no-lock'] = 'true'
+    project = build.ProjectBuilder('.')
+    outdir.mkdir(exist_ok=True)
     if sdist:
         dist = project.build('sdist', str(outdir), config_settings=config_settings)
     elif wheel or shiv:
