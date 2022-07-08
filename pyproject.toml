@@ -40,6 +40,20 @@ tomlkit = "~=0.11"
 importlib_metadata = "~=4.6; python_version<='3.7'"
 editables = '~=0.2'
 
+[tool.vulcan.dev-dependencies.test]
+pytest=""
+pytest-asyncio=""
+pkginfo=""
+coverage=""
+
+[tool.vulcan.dev-dependencies.static-analysis]
+flake8=""
+mypy=""
+types-click=""
+types-dataclasses=""
+types-setuptools=""
+
+
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
