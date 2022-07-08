@@ -129,6 +129,9 @@ dynamic = ['version', 'optional-dependencies', 'dependencies']
 [project.scripts]
 myep = "testproject:test_ep"
 
+[tool.setuptools.dynamic.version]
+file="testproject/VERSION"
+
 [tool.vulcan.plugin.example_plugin]
 foobar = "barfoo"
 module_dir = "testproject"

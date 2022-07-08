@@ -136,17 +136,23 @@ def add_requirement(unpacked_whl_dir: Path, req: str) -> None:
 
 
 def make_editable(whl: Path) -> None:
-    config = Vulcan.from_source(Path().absolute())
     unpacked_whl_dir = unpack(whl)
     add_requirement(unpacked_whl_dir, f"editables (~={version('editables')})")
     # https://www.python.org/dev/peps/pep-0427/#escaping-and-unicode
-    project_name = re.sub(r'[^\w\d.]+', '_', config.name, re.UNICODE)
+    # this is guarenteed to exist, name is extremely mandatory. Can't make a valid wheel without it.
+    # it might be UNKNOWN, but this is user error.
+    name = next(
+        line.split(':')[1].strip()
+        for line in (next(unpacked_whl_dir.glob('*.dist-info')) / 'METADATA').read_text().splitlines()
+        if 'Name:' in line)
+    project_name = re.sub(r'[^\w\d.]+', '_', name, re.UNICODE)
     project = EditableProject(project_name, Path().absolute())
-    for package in (config.packages or []):
-        project.map(package, package)
+    packages = (p for p in unpacked_whl_dir.iterdir() if not p.name.endswith('.dist-info'))
+    for package in packages:
+        project.map(package.name, package.name)
         # removing the actual code packages because they will conflict with the .pth files, and take
         # precendence over them
-        shutil.rmtree(unpacked_whl_dir / package)
+        shutil.rmtree(unpacked_whl_dir / package.name)
     for name, content in project.files():
         (unpacked_whl_dir / name).write_text(content)
 

@@ -10,13 +10,6 @@ from setuptools import setup
 from typing_extensions import TypedDict
 
 
-def find_version_file(source_dir: Path) -> Optional[Path]:
-    try:
-        return next(source_dir.rglob('VERSION'))
-    except StopIteration:
-        return None
-
-
 class VulcanConfigError(Exception):
     pass
 
@@ -57,9 +50,6 @@ def dict_or_none(val: Any) -> Optional[Dict[str, Any]]:
 
 @dataclass
 class Vulcan:
-    name: str
-    version: Optional[str]
-    packages: Optional[List[str]]
     source_path: Path
     plugins: Optional[List[str]]
     shiv_options: List[ShivOpts]
@@ -77,12 +67,9 @@ class Vulcan:
     def from_source(cls, source_path: Path, fail_on_missing_lock: bool = True) -> 'Vulcan':
         with open(source_path / 'pyproject.toml') as f:
             all_config = tomlkit.loads(f.read())
-            name = str(all_config['project']['name'])  # type: ignore[index]
             config = all_config['tool']['vulcan']  # type: ignore[index]
             assert isinstance(config, dict)
             dynamic = all_config['project'].get('dynamic', [])  # type: ignore[union-attr]
-        version_file = find_version_file(source_path)
-        version = version_file.read_text().strip() if version_file is not None else config.get('version')
         lockfile = source_path / config.get('lockfile', 'vulcan.lock')
 
         no_lock = config.get('no-lock', False)
@@ -111,18 +98,18 @@ class Vulcan:
                     with_extras=[str(e) for e in conf.get('with_extras', [])],
                     extra_args=str(conf.get('extra_args', '')),
                 ))
-            if 'dependencies' in config and 'dependencies' not in dynamic:
-                raise RuntimeError("tool.vulcan.dependencies configured but 'dependencies' not in dynamic,"
-                                   " this is an error.")
-            if 'extras' in config and 'optional-dependencies' not in dynamic:
-                raise RuntimeError("tool.vulcan.extras configured but 'optional-dependencies' not in dynamic,"
-                                   " this is an error.")
+        # note that setuptools also checks this, and says that it _should_ consider this a warning, but will
+        # not for the intermediate period.
+        # We'll consider it an error until setuptools sees fit to do it for us, and then remove this check.
+        if 'dependencies' in config and 'dependencies' not in dynamic:
+            raise RuntimeError("tool.vulcan.dependencies configured but 'dependencies' not in dynamic,"
+                               " this is an error.")
+        if 'extras' in config and 'optional-dependencies' not in dynamic:
+            raise RuntimeError("tool.vulcan.extras configured but 'optional-dependencies' not in dynamic,"
+                               " this is an error.")
 
-        return cls(name=name,
-                   version=version,
-                   source_path=source_path,
+        return cls(source_path=source_path,
                    plugins=list_or_none(config.get('plugins')),
-                   packages=list_or_none(config.get("packages")),
                    lockfile=lockfile,
                    shiv_options=shiv_ops,
                    dependencies=install_requires,
@@ -145,11 +132,9 @@ class Vulcan:
             extras_require = self.extras
         # setuptools apparently does not know what setuptools returns
         # very reassuring
-        return setup(packages=self.packages or [],  # type: ignore[no-any-return,func-returns-value]
-                     version=self.version or '0.0.0',
-                     install_requires=install_requires,
-                     extras_require=extras_require,
-                     include_package_data=True)
+        return setup(  # type: ignore[no-any-return,func-returns-value]
+            install_requires=install_requires,
+            extras_require=extras_require)
 
 
 def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:

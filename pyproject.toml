@@ -5,7 +5,6 @@ description = "Tool for leveraging lockfiles to pin dependencies in wheels and s
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
 license = {text="Apache License Version 2.0"}
-readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -13,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 requires-python = ">=3.7"
-dynamic = ["dependencies", "optional-dependencies"]
+dynamic = ["dependencies", "optional-dependencies", "readme"]
 
 [project.scripts]
 vulcan="vulcan.cli:main"
@@ -23,8 +22,14 @@ convert_pep621="vulcan.scripts.setuppy_to_pep621:convert"
 example_plugin="vulcan.plugins:test_plugin"
 
 [tool.vulcan]
-packages = [ "vulcan" ]
 no-lock = true
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"]}
+
+[tool.setuptools.packages.find]
+include = ["vulcan*"]
+
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
@@ -67,12 +72,12 @@ build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
 [tool.pytest.ini_options]
-filterwarnings = [ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning" ]
+filterwarnings = [ 
+ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning",
+ "ignore:.*The loop argument is deprecated since Python 3.8, and scheduled for removal in Python 3.10.*:DeprecationWarning" ]
 junit_family="xunit1"
 testpaths = [ "tests", ]
-markers = [ 
-    "cli: Tests that require full cli dependencies" 
-]
+markers = [ "cli: Tests that require full cli dependencies" ]
 asyncio_mode = 'auto'
 
 [tool.mypy]
