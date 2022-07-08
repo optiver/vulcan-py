@@ -41,5 +41,10 @@ def convert() -> None:
         include.extend(vulcan['packages'])
         del vulcan['packages']
 
+    build_system = tomlkit.table()
+    pyproject['build-system'] = build_system
+    build_system['requires'] = ['vulcan-py~=2.0']
+    build_system['build-backend'] = 'vulcan.build_backend'
+
     with open('./pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(pyproject))
