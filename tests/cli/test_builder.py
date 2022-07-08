@@ -32,7 +32,7 @@ def versions_exist(*versions: str) -> bool:
         for v in versions:
             get_executable(v)
         return True
-    except subprocess.CalledProcessError:
+    except FileNotFoundError:
         return False
 
 
