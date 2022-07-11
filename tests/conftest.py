@@ -129,6 +129,9 @@ dynamic = ['version', 'optional-dependencies', 'dependencies']
 [project.scripts]
 myep = "testproject:test_ep"
 
+[tool.setuptools.dynamic.version]
+file="testproject/VERSION"
+
 [tool.vulcan.plugin.example_plugin]
 foobar = "barfoo"
 module_dir = "testproject"
@@ -143,6 +146,12 @@ plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
 requests = {{version="~=2.25.1", extras=["security"]}}
+
+[tool.vulcan.dev-dependencies.test]
+pytest=""
+
+[tool.vulcan.dev-dependencies.lint]
+flake8=""
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]

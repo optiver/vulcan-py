@@ -2,6 +2,7 @@ import asyncio
 import shlex
 import subprocess
 import sys
+import shutil
 import tempfile
 from contextlib import contextmanager
 from os import PathLike
@@ -21,12 +22,10 @@ def create_venv(python_version: str = None) -> Generator['VulcanEnvBuilder', Non
 
 
 def get_executable(version: str) -> str:
-    if sys.platform == 'win32':
-        which = 'where'
-    else:
-        which = 'which'
-    return subprocess.check_output(
-        [which, f'python{version}'], encoding='utf-8', stderr=subprocess.PIPE).strip()
+    py = shutil.which(f'python{version}')
+    if py is None:
+        raise FileNotFoundError(f"No such thing as python{version}")
+    return py
 
 
 @contextmanager
