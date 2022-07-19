@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
@@ -12,6 +13,7 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, cast
 import setuptools
 import tomlkit
 from editables import EditableProject  # type: ignore
+from pkg_resources import Requirement
 from ppsetuptools.ppsetuptools import _parse_kwargs  # type: ignore
 
 from vulcan import Vulcan, flatten_reqs
@@ -146,6 +148,9 @@ def maybe_gen_setuppy(venv: Path, config: Vulcan) -> Generator[None, None, None]
     if pip_version is None or pip_version < (21, 3):
         print(f"pip version {pip_version} does not support editable installs for PEP517 projects,"
               " falling back to generated setup.py")
+        if config.dev_dependencies is not None:
+            warnings.warn("Dev dependencies are not supported by old-style editable installs."
+                          " Upgrading pip (pip install -U 'pip>=21.3') will solve this issue")
         options: Dict[str, Any] = {}
         if config.packages:
             options['packages'] = config.packages
@@ -218,7 +223,7 @@ def pack(unpacked_wheel: Path) -> Path:
         return unpacked_wheel.parent / packed[0].name
 
 
-def add_requirement(unpacked_whl_dir: Path, req: str) -> None:
+def add_requirement(unpacked_whl_dir: Path, req: Requirement) -> None:
     metadata = next(unpacked_whl_dir.glob('*.dist-info')) / 'METADATA'  # is mandatory
     with metadata.open() as f:
         metadata_lines = list(f)
@@ -234,7 +239,9 @@ def add_requirement(unpacked_whl_dir: Path, req: str) -> None:
 def make_editable(whl: Path) -> None:
     config = Vulcan.from_source(Path().absolute())
     unpacked_whl_dir = unpack(whl)
-    add_requirement(unpacked_whl_dir, f"editables (~={version('editables')})")
+    add_requirement(unpacked_whl_dir, Requirement.parse(f"editables (~={version('editables')})"))
+    for dep in (config.dev_dependencies or []):
+        add_requirement(unpacked_whl_dir, dep)
     # https://www.python.org/dev/peps/pep-0427/#escaping-and-unicode
     project_name = re.sub(r'[^\w\d.]+', '_', config.name, re.UNICODE)
     project = EditableProject(project_name, Path().absolute())
