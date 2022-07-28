@@ -49,14 +49,16 @@ Vulcan uses setuptools internally, so any configuration specified in the
 [setuptools pyproject.toml config](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html) will
 be respected here.
 
-In addition, there are some vulcan-specific configurations which may be specified under `[tool.vulcan]`
+In addition, there are some vulcan-specific configurations which may be specified under `[tool.vulcan]`:
 
 ### no-lock
 
 If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a
 shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
 
-Generally, no-lock should be used with libraries, and should not be used with applications.
+Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the
+fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked
+dependencies conflicting almost immediately.
 
 ```toml
 [tool.vulcan]
@@ -76,7 +78,7 @@ lockfile = "vulcan-2.lock"
 
 By default, vulcan decides which python to use to generate a lockfile based on the currently active
 virtualenv. If there is not a currently active virtualenv, it will default to whichever version of python
-vulcan itself was installed with. Both of these behaviors can be overridden with the python-lock-with key,
+vulcan itself was installed with. Both of these behaviors can be overridden with the `python-lock-with` key,
 which specifies which python should be used to lock
 
 ```toml
@@ -146,7 +148,8 @@ extra2 = ["click"]
 ### dev-dependencies
 
 Finally, this section is used to specify any dependencies used for development, such as mypy or pytest. These
-are NOT used in resolving the lockfile, and are installed when `vulcan develop` is run. It is possible to only
+are NOT used in resolving the lockfile, and are installed when `vulcan develop` is run (in addition to
+installing the application as an editable install, equivalent to `pip install -e .`). It is possible to only
 install a single set of dev dependencies with `vulcan develop {key}` (e.x `vulcan develop static-analysis`)
 
 ```toml
