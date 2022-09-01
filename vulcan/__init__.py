@@ -103,10 +103,12 @@ class Vulcan:
         # We'll consider it an error until setuptools sees fit to do it for us, and then remove this check.
         if 'dependencies' in config and 'dependencies' not in dynamic:
             raise RuntimeError("tool.vulcan.dependencies configured but 'dependencies' not in dynamic,"
-                               " this is an error.")
+                               " this is an error according to PEP-621. "
+                               "See https://peps.python.org/pep-0621/#dynamic for more information")
         if 'extras' in config and 'optional-dependencies' not in dynamic:
             raise RuntimeError("tool.vulcan.extras configured but 'optional-dependencies' not in dynamic,"
-                               " this is an error.")
+                               " this is an error according to PEP-621. "
+                               "See https://peps.python.org/pep-0621/#dynamic for more information")
 
         return cls(source_path=source_path,
                    plugins=list_or_none(config.get('plugins')),

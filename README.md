@@ -2,6 +2,12 @@
 
 ---
 
+Vulcan supports building python>=3.6. Vulcan itself may only be installed in python>=3.7. 
+The recommended installation is via pipx. This will save a lot of pain with respect to conflicting versions,
+as well as having multiple python versions in various projects.
+
+---
+
 [//]: # ( TODO: build status indicator here )
 
 Vulcan is a build tool intended to make lockfiles without having to force users to deal with a bunch of setup 
@@ -362,3 +368,11 @@ permissions and limitations under the License.
 
 To make sure that tox and vulcan can interact comfortably, be sure to add your `vulcan.lock` to your `MANIFEST.in`. 
 This will ensure that while building your package, tox also picks up the locked dependencies.
+
+
+# Migrating
+
+Vulcan contains 2 conversion scripts: convert_pep621, and convert_vulcan2. 
+The first script will convert any non-pyproject.toml project into vulcan and pyproject.toml. 
+The second will convert vulcan~=1 projects into vulcan 2. 
+These scripts are for convenience and provided as best-effort only, and may not perfectly convert all possible projects.
