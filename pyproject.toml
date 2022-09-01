@@ -17,7 +17,7 @@ dynamic = ["dependencies", "optional-dependencies", "readme"]
 [project.scripts]
 vulcan="vulcan.cli:main"
 convert_pep621="vulcan.scripts.setuppy_to_pep621:convert"
-convert_pep621="vulcan.scripts.vulcan_1_to_2:convert"
+convert_vulcan2="vulcan.scripts.vulcan_1_to_2:convert"
 
 [project.entry-points."vulcan.pre_build"]
 example_plugin="vulcan.plugins:test_plugin"
