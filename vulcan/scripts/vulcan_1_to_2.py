@@ -9,7 +9,7 @@ def convert() -> None:
         pyproject = tomlkit.loads(f.read())
         project = pyproject.get('project')
         if not project:
-            exit("Refusing to try and migrate a pyproject.toml without any [package] section")
+            exit("Refusing to try and migrate a pyproject.toml without any [project] section")
         tool = pyproject.setdefault('tool', tomlkit.table(is_super_table=True))
         setuptools = tool.setdefault('setuptools', tomlkit.table(is_super_table=True))
         vulcan = tool.get('vulcan', {})
