@@ -1,68 +1,85 @@
 [project]
 name = "vulcan-py"
-version = "1.2.1"
+version = "2.0.0"
 description = "Tool for leveraging lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
 license = {text="Apache License Version 2.0"}
-readme = "README.md"
 keywords = [ "build", "tooling" ] 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: OSI Approved :: Apache Software License"
 ]
-requires-python = ">=3.6"
-dynamic = ["dependencies", "optional-dependencies"]
+requires-python = ">=3.7"
+dynamic = ["dependencies", "optional-dependencies", "readme"]
 
 [project.scripts]
 vulcan="vulcan.cli:main"
 convert_pep621="vulcan.scripts.setuppy_to_pep621:convert"
+convert_vulcan2="vulcan.scripts.vulcan_1_to_2:convert"
 
 [project.entry-points."vulcan.pre_build"]
 example_plugin="vulcan.plugins:test_plugin"
 
 [tool.vulcan]
-packages = [ "vulcan" ]
 no-lock = true
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"]}
+
+[tool.setuptools.packages.find]
+include = ["vulcan*"]
+
 
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
-cli=["shiv~=0.5.2","build[virtualenv]~=0.3.0", "click~=8.0"]
-# remove when https://github.com/psf/fundable-packaging-improvements/issues/25 is complete.
+cli=["shiv~=0.5.2","build[virtualenv]~=0.8.0", "click~=8.0"]
 convert=["pkginfo~=1.7"]
 
 [tool.vulcan.dependencies]
-setuptools='~=59.0'
+setuptools='~=63.0'
 wheel='~=0.36.2'
-dataclasses="~=0.8; python_version<='3.6'"
 typing_extensions='~=3.7'
-tomlkit = "~=0.9"
-ppsetuptools = "==2.0.2"
+tomlkit = "~=0.11"
 importlib_metadata = "~=4.6; python_version<='3.7'"
 editables = '~=0.2'
+
+[tool.vulcan.dev-dependencies.test]
+pytest=""
+pytest-asyncio=""
+pkginfo=""
+coverage=""
+
+[tool.vulcan.dev-dependencies.static-analysis]
+flake8=""
+mypy=""
+types-click=""
+types-dataclasses=""
+types-setuptools=""
+
 
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
-requires=['setuptools~=59.0', 
+requires=['setuptools~=63.0',
           'tomlkit~=0.9',
           "dataclasses~=0.8; python_version<='3.6'", 
           'wheel',
           'typing_extensions', 
-          'ppsetuptools==2.0.0',
           'editables~=0.2',
           "importlib_metadata; python_version<='3.7'"]
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
 [tool.pytest.ini_options]
-filterwarnings = [ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning" ]
+filterwarnings = [ 
+ "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning",
+ "ignore:.*The loop argument is deprecated since Python 3.8, and scheduled for removal in Python 3.10.*:DeprecationWarning" ]
 junit_family="xunit1"
 testpaths = [ "tests", ]
-markers = [ 
-    "cli: Tests that require full cli dependencies" 
-]
+markers = [ "cli: Tests that require full cli dependencies" ]
+asyncio_mode = 'auto'
 
 [tool.mypy]
 files = ["vulcan","tests"]

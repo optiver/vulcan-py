@@ -16,7 +16,7 @@ def versions_exist(*versions: str) -> bool:
         for v in versions:
             get_executable(v)
         return True
-    except subprocess.CalledProcessError:
+    except FileNotFoundError:
         return False
 
 
@@ -42,9 +42,7 @@ class TestCli:
         assert os.access(output, os.X_OK)
         if versions_exist('3.6'):
             # shebang there expects 3.6
-            assert 'Running!\n' == subprocess.check_output([output],
-                                                           encoding='utf-8',
-                                                           env={'SHIV_ROOT': str(tmp_path)})
+            assert 'Running!\n' == subprocess.check_output([output], encoding='utf-8', env={'SHIV_ROOT': str(tmp_path)})
 
     def test_add_works_without_lockfile(self, runner: CliRunner, test_application: Path) -> None:
         (test_application / 'vulcan.lock').unlink()
@@ -75,6 +73,30 @@ class TestCli:
             (test_application / 'vulcan.lock').unlink()
             res = runner.invoke(cli.main, ['build', '--wheel'])
         assert res.exit_code != 0
+
+    def test_develop_installs_all_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
+        with cd(test_application):
+            res = runner.invoke(cli.main, ['develop'])
+        assert 'pytest' in res.output
+        assert 'flake8' in res.output
+
+    def test_develop_test_installs_test_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
+        with cd(test_application):
+            res = successful(runner.invoke(cli.main, ['develop', 'test']))
+        assert 'pytest' in res.output
+        assert 'flake8' not in res.output
+
+    def test_develop_lint_installs_lint_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
+        with cd(test_application):
+            res = successful(runner.invoke(cli.main, ['develop', 'lint']))
+        assert 'pytest' not in res.output
+        assert 'flake8' in res.output
+
+    def test_develop_fake_errors(self, runner: CliRunner, test_application: Path) -> None:
+        with cd(test_application):
+            res = runner.invoke(cli.main, ['develop', 'faketarget'])
+        assert res.exit_code != 0
+        assert 'No such dev dependency' in res.output
 
 
 @contextmanager
