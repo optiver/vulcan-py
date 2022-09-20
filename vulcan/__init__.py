@@ -7,7 +7,7 @@ import tomlkit
 import tomlkit.container
 import tomlkit.items
 from setuptools import setup
-from typing_extensions import TypedDict
+from typing import TypedDict
 
 
 class VulcanConfigError(Exception):

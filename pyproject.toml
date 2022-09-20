@@ -38,7 +38,6 @@ convert=["pkginfo~=1.7"]
 [tool.vulcan.dependencies]
 setuptools='~=63.0'
 wheel='~=0.36.2'
-typing_extensions='~=3.7'
 tomlkit = "~=0.11"
 importlib_metadata = "~=4.6; python_version<='3.7'"
 editables = '~=0.2'
@@ -64,7 +63,6 @@ requires=['setuptools~=63.0',
           'tomlkit~=0.9',
           "dataclasses~=0.8; python_version<='3.6'", 
           'wheel',
-          'typing_extensions', 
           'editables~=0.2',
           "importlib_metadata; python_version<='3.7'"]
 build-backend="vulcan.build_backend"
