@@ -36,7 +36,7 @@ def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
     # https://docs.python.org/3/distutils/apiref.html
     with PluginRunner(config):
-        dist = config.setup()
+        dist = config.setup(config_settings=config_settings)
     rel_dist = Path(dist.dist_files[0][-1])  # type: ignore[attr-defined]
     shutil.move(str(rel_dist), Path(outdir) / rel_dist.name)
     return rel_dist.name
