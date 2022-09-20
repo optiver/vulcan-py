@@ -62,7 +62,6 @@ types-setuptools=""
 # to correctly install and use this tool
 requires=['setuptools~=63.0',
           'tomlkit~=0.9',
-          "dataclasses~=0.8; python_version<='3.6'", 
           'wheel',
           "typing_extensions; python_version<='3.7'", 
           'editables~=0.2',
