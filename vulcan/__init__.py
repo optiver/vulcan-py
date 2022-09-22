@@ -3,11 +3,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
+import sys
 import tomlkit
 import tomlkit.container
 import tomlkit.items
 from setuptools import setup
-from typing_extensions import TypedDict
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
 
 class VulcanConfigError(Exception):
