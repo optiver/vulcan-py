@@ -135,6 +135,13 @@ def add_requirement(unpacked_whl_dir: Path, req: str) -> None:
     metadata.write_text(''.join(metadata_lines))
 
 
+def _find_local_package(name: str) -> Path:
+    """
+    Try and find the local package being refered to for editable. Default to ./{name} if we can't find it otherwise.
+    """
+    return next(Path().rglob(f'{name}'), Path(name))
+
+
 def make_editable(whl: Path) -> None:
     unpacked_whl_dir = unpack(whl)
     add_requirement(unpacked_whl_dir, f"editables (~={version('editables')})")
@@ -149,7 +156,7 @@ def make_editable(whl: Path) -> None:
     project = EditableProject(project_name, Path().absolute())
     packages = (p for p in unpacked_whl_dir.iterdir() if not p.name.endswith('.dist-info'))
     for package in packages:
-        project.map(package.name, package.name)
+        project.map(package.name, _find_local_package(package.name))
         # removing the actual code packages because they will conflict with the .pth files, and take
         # precendence over them
         shutil.rmtree(unpacked_whl_dir / package.name)
