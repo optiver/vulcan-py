@@ -139,7 +139,7 @@ def _find_local_package(name: str) -> Path:
     """
     Try and find the local package being refered to for editable. Default to ./{name} if we can't find it otherwise.
     """
-    return next(Path().rglob(f'{name}'), Path(name))
+    return next(Path().rglob(name), Path(name))
 
 
 def make_editable(whl: Path) -> None:
