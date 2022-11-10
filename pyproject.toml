@@ -81,6 +81,7 @@ asyncio_mode = 'auto'
 [tool.mypy]
 files = ["vulcan","tests"]
 # the following configs are the equivalent of --strict, with the exception of --no-implicit-optional
+no_implicit_optional = false
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
