@@ -5,7 +5,7 @@ description = "Tool for leveraging lockfiles to pin dependencies in wheels and s
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
 license = {text="Apache License Version 2.0"}
-keywords = [ "build", "tooling" ] 
+keywords = [ "build", "tooling" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -48,6 +48,7 @@ pytest=""
 pytest-asyncio=""
 pkginfo=""
 coverage=""
+Jinja2=""
 
 [tool.vulcan.dev-dependencies.static-analysis]
 flake8=""
@@ -63,14 +64,14 @@ types-setuptools=""
 requires=['setuptools~=63.0',
           'tomlkit~=0.9',
           'wheel',
-          "typing_extensions; python_version<='3.7'", 
+          "typing_extensions; python_version<='3.7'",
           'editables~=0.2',
           "importlib_metadata; python_version<='3.7'"]
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
 [tool.pytest.ini_options]
-filterwarnings = [ 
+filterwarnings = [
  "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning",
  "ignore:.*The loop argument is deprecated since Python 3.8, and scheduled for removal in Python 3.10.*:DeprecationWarning" ]
 junit_family="xunit1"

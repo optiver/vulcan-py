@@ -59,6 +59,14 @@ class TestCli:
         config = Vulcan.from_source(test_application)
         assert 'switch-config-render' in config.configured_dependencies
 
+    def test_add_extras_works(self, runner: CliRunner, test_application: Path) -> None:
+        config = Vulcan.from_source(test_application)
+        assert config.extras and 'cli' not in config.extras
+        with cd(test_application):
+            successful(runner.invoke(cli.main, ['add', '-e', 'cli', 'switch-config-render']))
+        config = Vulcan.from_source(test_application)
+        assert config.extras and 'cli' in config.extras and 'switch-config-reader' in [a.split("=")[0] for a in config.extras['cli']]
+
     def test_develop_works(self, runner: CliRunner, test_application: Path) -> None:
         with create_venv() as venv:
             successful(runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir}))

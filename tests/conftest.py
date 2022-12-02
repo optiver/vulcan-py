@@ -5,10 +5,11 @@ import shutil
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Generator, Iterable
+from typing import Any, Dict, Generator, Iterable
 
 import pytest
 from pkginfo import Wheel  # type: ignore
+from jinja2 import Environment, PackageLoader
 
 import build
 
@@ -100,8 +101,39 @@ def class_built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(Path(), 'wheel', dist_dir)
 
 
+@pytest.fixture(scope="session")
+def jinja2_environment() -> Environment:
+    """ Note: Jinja2 strings have '{' replaced with '<' """
+    return Environment(loader=PackageLoader("tests", package_path="data"),
+                       autoescape=False,
+                       optimized=False,
+                       keep_trailing_newline=True,
+                       block_start_string="<%",
+                       block_end_string="%>",
+                       comment_start_string="<#",
+                       comment_end_string="#>",
+                       variable_start_string="<<",
+                       variable_end_string=">>")
+
+
+def generate_pyproject_configs() -> list[dict[Any, Any]]:
+    return [{"include_extras": include_extras, "shiv_count": shiv_count}
+            for include_extras in [False, True]
+            for shiv_count in [2]]  # range(3)]
+
+
+@pytest.fixture(scope="session", params=generate_pyproject_configs())
+def test_pyproject_toml(request, jinja2_environment: Environment) -> str:
+    pyproject_vars = {
+        "cur_interp": sys.executable,
+        **request.param
+    }
+
+    return jinja2_environment.get_template("test_application_pyproject.toml").render(pyproject_vars)
+
+
 @pytest.fixture(scope='session')
-def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def test_application(tmp_path_factory: pytest.TempPathFactory, test_pyproject_toml: str) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
     (tmp_path / 'testproject/__init__.py').write_text("""\
@@ -112,69 +144,9 @@ def test_ep():
         f.write('1.2.3\n')
     test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
     shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
+
     with (tmp_path / 'pyproject.toml').open('w+') as f:
-        f.write("""\
-[project]
-name = "testproject"
-description = "an example test project for testing vulcan builds, %"
-authors = [{{name="Joel Christiansen", email="joelchristiansen@optiver.com"}}]
-keywords = [ "build", "testing" ]
-classifiers = [
-    "Topic :: Software Development :: Build Tools",
-    "Topic :: Software Development :: Libraries :: Python Modules"
-    ]
-requires-python = ">=3.6"
-dynamic = ['version', 'optional-dependencies', 'dependencies']
-
-[project.scripts]
-myep = "testproject:test_ep"
-
-[tool.setuptools.dynamic.version]
-file="testproject/VERSION"
-
-[tool.vulcan.plugin.example_plugin]
-foobar = "barfoo"
-module_dir = "testproject"
-
-
-[project.entry-points.test_eps]
-myep = "testproject:test_ep"
-
-[tool.vulcan]
-packages = [ "testproject" ]
-plugins = ['example_plugin']
-
-[tool.vulcan.dependencies]
-requests = {{version="~=2.25.1", extras=["security"]}}
-
-[tool.vulcan.dev-dependencies.test]
-pytest=""
-
-[tool.vulcan.dev-dependencies.lint]
-flake8=""
-
-[tool.vulcan.extras]
-test1 = ["requests", "build"]
-test2 = ["requests~=2.22", "setuptools"]
-test3 = ["requests>=2.0.0", "wheel"]
-
-[[tool.vulcan.shiv]]
-bin_name="testproject"
-console_script="myep"
-interpreter='{cur_interp}'
-extra_args="-E --compile-pyc"
-
-[[tool.vulcan.shiv]]
-bin_name="testproject2"
-console_script="myep"
-interpreter='{cur_interp}'
-extra_args="-E --compile-pyc"
-
-[build-system]
-requires=['setuptools', 'vulcan-py']
-build-backend="vulcan.build_backend"
-
-""".format(cur_interp=sys.executable))
+        f.write(test_pyproject_toml)
 
     return tmp_path
 

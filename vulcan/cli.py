@@ -168,10 +168,11 @@ def lock(config: Vulcan) -> None:
 @main.command()
 @click.argument('req', type=Requirement.parse)
 @click.option('--lock/--no-lock', '_lock', default=True)
+@click.option('-e', '--extras', '_extras', default=None, help="Which extras list to add the dependnecy to")
 @pass_vulcan  # order matters, closest to the function definition comes first
 @click.pass_context
-def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> None:
-    "Add new top-level dependency and regenerate lockfile"
+def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool, _extras: Optional[str]) -> None:
+    "Add new dependency and regenerate lockfile"
     name: str = req.name  # type: ignore
     if req.extras:
         name = f'{name}[{",".join(req.extras)}]'
@@ -202,8 +203,15 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
             version = ''
     with open('pyproject.toml') as f:
         parse = tomlkit.parse(f.read())
-    deps = parse['tool']['vulcan'].setdefault('dependencies', tomlkit.table())  # type: ignore
-    deps[name] = version
+
+    if _extras:
+        extras_section = parse['tool']['vulcan'].setdefault('extras', tomlkit.table())  # type: ignore
+        deps = extras_section.setdefault(_extras, tomlkit.array())
+        deps.append(f"{name}{version}")
+    else:
+        deps = parse['tool']['vulcan'].setdefault('dependencies', tomlkit.table())  # type: ignore
+        deps[name] = version
+
     with open('pyproject.toml', 'w+') as f:
         f.write(tomlkit.dumps(parse))
     if not config.no_lock and _lock:
