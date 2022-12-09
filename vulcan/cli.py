@@ -192,11 +192,7 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
             # and parse it to a version
             spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier  # type: ignore
                                                )[2:])  # remove the == at the start
-            if isinstance(spec, packaging.version.LegacyVersion):
-                # this will raise a DeprecationWarning as well, so it will yell at user for us.
-                version = ''
-            else:
-                version = f'~={spec.major}.{spec.minor}'
+            version = f'~={spec.major}.{spec.minor}'
         except StopIteration:
             # failed to find the thing we just installed, give up.
             version = ''

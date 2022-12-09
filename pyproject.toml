@@ -1,6 +1,6 @@
 [project]
 name = "vulcan-py"
-version = "2.0.3"
+version = "2.0.4"
 description = "Tool for leveraging lockfiles to pin dependencies in wheels and sdists"
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
@@ -42,6 +42,7 @@ typing_extensions= "~=3.7; python_version<='3.7'"
 tomlkit = "~=0.11"
 importlib_metadata = "~=4.6; python_version<='3.7'"
 editables = '~=0.2'
+packaging = "~=22.0"
 
 [tool.vulcan.dev-dependencies.test]
 pytest=""
