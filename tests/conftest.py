@@ -103,13 +103,17 @@ def class_built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
 @pytest.fixture(scope='session')
 def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
-    (tmp_path / 'testproject').mkdir()
+    test_project = (tmp_path / 'testproject')
+    test_project.mkdir()
     (tmp_path / 'testproject/__init__.py').write_text("""\
 def test_ep():
     print("Running!")
 """)
     with (tmp_path / 'testproject/VERSION').open('w+') as f:
         f.write('1.2.3\n')
+    (tmp_path / 'scripts').mkdir()
+    (tmp_path / 'scripts/script').write_text('#!/usr/bin/bash')
+    (tmp_path / 'MANIFEST.in').write_text('include scripts/script')
     test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
     shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
     with (tmp_path / 'pyproject.toml').open('w+') as f:
@@ -139,6 +143,9 @@ module_dir = "testproject"
 
 [project.entry-points.test_eps]
 myep = "testproject:test_ep"
+
+[tool.setuptools]
+script-files = ["scripts/script"]
 
 [tool.vulcan]
 packages = [ "testproject" ]
@@ -179,6 +186,7 @@ build-backend="vulcan.build_backend"
     return tmp_path
 
 
+
 @pytest.fixture
 def test_application_function_scope(test_application: Path, tmp_path: Path) -> Path:
     shutil.copytree(test_application, tmp_path)
@@ -188,13 +196,13 @@ def test_application_function_scope(test_application: Path, tmp_path: Path) -> P
 @pytest.fixture(scope='session')
 def test_application_forbidden_keys(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
-    (tmp_path / 'testproject').mkdir()
-    (tmp_path / 'testproject/__init__.py').write_text("""\
+    test_project = (tmp_path / 'testproject')
+    test_project.mkdir()
+    (test_project / '__init__.py').write_text("""\
 def test_ep():
     print("Running!")
 """)
-    with (tmp_path / 'testproject/VERSION').open('w+') as f:
-        f.write('1.2.3\n')
+    (test_project / 'VERSION').write_text('1.2.3\n')
     test_lockfile = (Path(__file__).parent / 'data/test_application_vulcan.lock')
     shutil.copy(test_lockfile, tmp_path / 'vulcan.lock')
     with (tmp_path / 'pyproject.toml').open('w+') as f:
