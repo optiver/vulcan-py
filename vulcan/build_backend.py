@@ -139,11 +139,14 @@ def _find_local_package(name: str) -> Path:
     """
     Try and find the local package being refered to for editable. Default to ./{name} if we can't find it otherwise.
     """
+    with open('/Users/thirdegree/workspaces/python/vulcan-py/foo.txt', 'a+') as f:
+        print(f"{name} -> {next(Path().rglob(name), Path(name))}", file=f)
     return next(Path().rglob(name), Path(name))
 
 
 def make_editable(whl: Path) -> None:
     unpacked_whl_dir = unpack(whl)
+    print("It me")
     add_requirement(unpacked_whl_dir, f"editables (~={version('editables')})")
     # https://www.python.org/dev/peps/pep-0427/#escaping-and-unicode
     # this is guarenteed to exist, name is extremely mandatory. Can't make a valid wheel without it.
@@ -154,7 +157,7 @@ def make_editable(whl: Path) -> None:
         if 'Name:' in line)
     project_name = re.sub(r'[^\w\d.]+', '_', name, re.UNICODE)
     project = EditableProject(project_name, Path().absolute())
-    packages = (p for p in unpacked_whl_dir.iterdir() if not p.name.endswith('.dist-info'))
+    packages = (p for p in unpacked_whl_dir.iterdir() if not p.name.endswith(('.dist-info', '.data')))
     for package in packages:
         project.map(package.name, _find_local_package(package.name))
         # removing the actual code packages because they will conflict with the .pth files, and take
