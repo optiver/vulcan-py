@@ -4,15 +4,21 @@ from itertools import chain
 from typing import Dict, List, Tuple
 
 from pkg_resources import Requirement
+from packaging.version import parse
 
 from vulcan.isolation import VulcanEnvBuilder, create_venv
 
 
-async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str]) -> Dict[Requirement, Requirement]:
+async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str],
+                         above_py36: bool) -> Dict[Requirement, Requirement]:
     with tempfile.TemporaryDirectory() as site_packages:
-        await pipenv.install(site_packages, requires)
-        freeze = await pipenv.freeze(site_packages)
-        return freeze
+        if above_py36:
+            out = await pipenv.install_dryrun(site_packages, requires)
+            return out
+        else:
+            await pipenv.install(site_packages, requires)
+            freeze = await pipenv.freeze(site_packages)
+            return freeze
 
 
 async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]],
@@ -22,10 +28,12 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
     if not install_requires and not extras:
         return [], {}
 
+    above_py36 = parse(python_version) > parse('3.6') if python_version is not None else False
+
     extras_list = list(extras.items())
     with create_venv(python_version) as pipenv:
         print("Building base requires")
-        base_freeze = await build_requires(pipenv, install_requires)
+        base_freeze = await build_requires(pipenv, install_requires, above_py36)
         if not extras_list:
             # if we have no extras, we are done here.
             return sorted([str(req) for req in base_freeze.values()]), {}
@@ -34,13 +42,13 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
         final_out_task = asyncio.get_event_loop().create_task(
             build_requires(
                 pipenv,
-                install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list))))
+                install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list)), above_py36))
         resolved_extras = {}
         for extra, extra_reqs in extras_list:
             # this is the expensive bit, because we create a new venv for each extra
             print(f"Building requirements for extra '{extra}'")
             resolved_extras[extra] = asyncio.get_event_loop().create_task(
-                build_requires(pipenv, install_requires + extra_reqs))
+                build_requires(pipenv, install_requires + extra_reqs, above_py36))
 
         # It is important here to wait until ALL tasks are complete (return_exceptions=True) because on
         # windows, if that is not done then the TemporaryDirectory is create_venv will try to remove itself
