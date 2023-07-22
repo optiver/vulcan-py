@@ -160,6 +160,12 @@ def make_editable(whl: Path) -> None:
         # removing the actual code packages because they will conflict with the .pth files, and take
         # precendence over them
         shutil.rmtree(unpacked_whl_dir / package.name)
+
+    # None of the IDEs/static type tools support PEP 660
+    # As a fall-back for static analysis also provide the path in the .pth file
+    # https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#editable-install-modules-not-found
+    project.add_to_path(project.project_dir)
+
     for name, content in project.files():
         (unpacked_whl_dir / name).write_text(content)
 
