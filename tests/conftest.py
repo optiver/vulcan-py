@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Generator, Iterable
 
 import pytest
-from pkginfo import Wheel  # type: ignore
+from pkginfo import Wheel
 
 import build
 

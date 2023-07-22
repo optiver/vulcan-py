@@ -172,7 +172,7 @@ def lock(config: Vulcan) -> None:
 @click.pass_context
 def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> None:
     "Add new top-level dependency and regenerate lockfile"
-    name: str = req.name  # type: ignore
+    name: str = req.name
     if req.extras:
         name = f'{name}[{",".join(req.extras)}]'
     try:
@@ -180,17 +180,17 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     except RuntimeError:
         exit("Must be in a virtualenv to use `vulcan add`")
     subprocess.check_call([str(venv_python), '-m', 'pip', 'install', str(req)])
-    if req.specifier:  # type: ignore
+    if req.specifier:
         # if the user gave a version spec, we blindly take that
-        version = str(req.specifier)  # type: ignore
+        version = str(req.specifier)
     else:
         # otherwise, we take a freeze to see what was actually installed
         freeze = subprocess.check_output([str(venv_python), '-m', 'pip', 'freeze'], encoding='utf-8').strip()
         try:
             # try and find the thing we just added
-            line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))  # type: ignore
+            line = next(ln for ln in freeze.split('\n') if ln.startswith(req.name))
             # and parse it to a version
-            spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier  # type: ignore
+            spec = packaging.version.parse(str(Requirement.parse(line.strip()).specifier
                                                )[2:])  # remove the == at the start
             version = f'~={spec.major}.{spec.minor}'
         except StopIteration:

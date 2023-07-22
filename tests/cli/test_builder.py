@@ -43,7 +43,8 @@ class TestResolveDeps:
 
     def test_resolve_deps_no_conflict(self, wheel_pkg_info: Wheel) -> None:
         reqs = [Requirement.parse(reqstring) for reqstring in wheel_pkg_info.requires_dist]
-        assert len({req.name for req in reqs}) == len({(req.name, req.specifier) for req in reqs}), 'duplicate package found in requirements'  # type: ignore # noqa: E501
+        assert len({req.name for req in reqs}) == len({(req.name, req.specifier) for req in reqs}), \
+            'duplicate package found in requirements'
 
     @pytest.mark.asyncio
     async def test_empty_reqs_empty_deps(self) -> None:

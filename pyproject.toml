@@ -5,14 +5,14 @@ description = "Tool for leveraging lockfiles to pin dependencies in wheels and s
 authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 urls = {github="https://github.com/optiver/vulcan-py"}
 license = {text="Apache License Version 2.0"}
-keywords = [ "build", "tooling" ] 
+keywords = [ "build", "tooling" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: OSI Approved :: Apache Software License"
 ]
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [project.scripts]
@@ -33,15 +33,13 @@ include = ["vulcan*"]
 # e.g. if these are specified, like `pip install vulcan[cli]
 [tool.vulcan.extras]
 cli=["shiv~=0.5.2","build[virtualenv]~=0.8.0", "click~=8.0"]
-convert=["pkginfo~=1.7"]
+convert=["pkginfo~=1.9"]
 
 [tool.vulcan.dependencies]
 setuptools='~=63.0'
 wheel='~=0.36.2'
-typing_extensions= "~=3.7; python_version<='3.7'"
 tomlkit = "~=0.11"
-importlib_metadata = "~=4.6; python_version<='3.7'"
-editables = '~=0.2'
+editables = '~=0.4'
 packaging = "~=22.0"
 
 [tool.vulcan.dev-dependencies.test]
@@ -53,6 +51,7 @@ coverage=""
 [tool.vulcan.dev-dependencies.static-analysis]
 flake8=""
 mypy=""
+pkginfo=""
 types-click=""
 types-dataclasses=""
 types-setuptools=""
@@ -64,14 +63,12 @@ types-setuptools=""
 requires=['setuptools~=63.0',
           'tomlkit~=0.9',
           'wheel',
-          "typing_extensions; python_version<='3.7'", 
-          'editables~=0.2',
-          "importlib_metadata; python_version<='3.7'"]
+          'editables~=0.2']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
 [tool.pytest.ini_options]
-filterwarnings = [ 
+filterwarnings = [
  "ignore:.*the imp module is deprecated in favour of importl.*:DeprecationWarning",
  "ignore:.*The loop argument is deprecated since Python 3.8, and scheduled for removal in Python 3.10.*:DeprecationWarning" ]
 junit_family="xunit1"
@@ -80,7 +77,7 @@ markers = [ "cli: Tests that require full cli dependencies" ]
 asyncio_mode = 'auto'
 
 [tool.mypy]
-files = ["vulcan","tests"]
+packages = ["vulcan","tests"]
 # the following configs are the equivalent of --strict, with the exception of --no-implicit-optional
 no_implicit_optional = false
 check_untyped_defs = true
@@ -98,7 +95,3 @@ warn_unused_configs = true
 warn_unused_ignores = true
 warn_unreachable = true
 strict_equality = true
-
-[[tool.mypy.overrides]]
-module = ['vulcan.isolation']
-warn_unused_ignores = false

@@ -8,7 +8,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, cast
 
-import pkginfo  # type: ignore
+import pkginfo
 import tomlkit
 from pkg_resources import Requirement
 
@@ -29,7 +29,7 @@ def wheel() -> BuildData:
 
     with tempfile.TemporaryDirectory(suffix='.vulcan-migrate') as tmp:
         subprocess.run(['pip', 'wheel', '--no-deps', '-w', tmp, '.'])
-        whl = pkginfo.Wheel(next(Path(tmp).glob('*.whl')))
+        whl = pkginfo.Wheel(str(next(Path(tmp).glob('*.whl'))))
         eps: Dict[str, Dict[str, str]] = defaultdict(dict)
         with zipfile.ZipFile(whl.filename) as zf:
             dist_info = f'{whl.name.replace("-", "_")}-{whl.version}.dist-info'
@@ -106,11 +106,11 @@ def convert() -> None:
     if whl.maintainer or whl.maintainer_email:
         project['maintainers'] = contributors(whl.maintainer, whl.maintainer_email)
     if whl.classifiers:
-        project['classifiers'] = tomlkit.array(whl.classifiers).multiline(True)
+        project['classifiers'] = tomlkit.array(str(whl.classifiers)).multiline(True)
     if whl.summary:
         project['description'] = whl.summary
     if whl.keywords:
-        project['keywords'] = tomlkit.array(whl.keywords.split(',')).multiline(True)
+        project['keywords'] = tomlkit.array(str(whl.keywords.split(','))).multiline(True)
     if whl.license:
         project['license'] = whl.license
     if whl.project_urls:
@@ -129,7 +129,7 @@ def convert() -> None:
             if '; extra == "' in str(parsed_req):
                 # extra, swing back to this
                 continue
-            name = parsed_req.name  # type: ignore
+            name = parsed_req.name
             if parsed_req.extras:
                 name = f'{name}[{",".join(parsed_req.extras)}]'
             vulcan['dependencies'][name] = str(parsed_req.specifier)  # type: ignore
