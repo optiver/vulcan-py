@@ -237,8 +237,9 @@ def install_dev_dependencies(target: str = None) -> None:
 
 @main.command()
 @click.argument('dev_deps_target', required=False, type=str)
-def develop(dev_deps_target: Optional[str]) -> None:
-    install_develop()
+@click.option('--build-isolation/--no-build-isolation', '_build_isolation', default=True)
+def develop(dev_deps_target: Optional[str], _build_isolation: bool) -> None:
+    install_develop(_build_isolation)
     install_dev_dependencies(target=dev_deps_target)
 
 

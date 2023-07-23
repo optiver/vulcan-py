@@ -85,7 +85,7 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
     return tuple((int(n) for n in m.group(1).split('.')))
 
 
-def install_develop() -> None:
+def install_develop(build_isolation: bool) -> None:
     config = Vulcan.from_source(Path().absolute())
 
     try:
@@ -100,7 +100,10 @@ def install_develop() -> None:
     path = str(Path().absolute())
     if config.configured_extras:
         path = f'{path}[{",".join(config.configured_extras)}]'
-    subprocess.check_call([str(virtual_env), '-m', 'pip', 'install', '-e', path])
+    pip_call = [str(virtual_env), '-m', 'pip', 'install', '-e', path]
+    if not build_isolation:
+        pip_call.append('--no-build-isolation')
+    subprocess.check_call(pip_call)
 
 
 # pep660 functions
