@@ -37,7 +37,7 @@ def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
     # https://docs.python.org/3/distutils/apiref.html
     with PluginRunner(config):
         dist = config.setup(config_settings=config_settings)
-    rel_dist = Path(dist.dist_files[0][-1])  # type: ignore[attr-defined]
+    rel_dist = Path(dist.dist_files[0][-1])
     shutil.move(str(rel_dist), Path(outdir) / rel_dist.name)
     return rel_dist.name
 
@@ -85,7 +85,7 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
     return tuple((int(n) for n in m.group(1).split('.')))
 
 
-def install_develop() -> None:
+def install_develop(build_isolation: bool) -> None:
     config = Vulcan.from_source(Path().absolute())
 
     try:
@@ -100,7 +100,10 @@ def install_develop() -> None:
     path = str(Path().absolute())
     if config.configured_extras:
         path = f'{path}[{",".join(config.configured_extras)}]'
-    subprocess.check_call([str(virtual_env), '-m', 'pip', 'install', '-e', path])
+    pip_call = [str(virtual_env), '-m', 'pip', 'install', '-e', path]
+    if not build_isolation:
+        pip_call.append('--no-build-isolation')
+    subprocess.check_call(pip_call)
 
 
 # pep660 functions
@@ -160,6 +163,12 @@ def make_editable(whl: Path) -> None:
         # removing the actual code packages because they will conflict with the .pth files, and take
         # precendence over them
         shutil.rmtree(unpacked_whl_dir / package.name)
+
+    # None of the IDEs/static type tools support PEP 660
+    # As a fall-back for static analysis also provide the path in the .pth file
+    # https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#editable-install-modules-not-found
+    project.add_to_path(project.project_dir)
+
     for name, content in project.files():
         (unpacked_whl_dir / name).write_text(content)
 

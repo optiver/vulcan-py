@@ -7,11 +7,11 @@ from typing import Generator
 
 import pytest
 from pkg_resources import Requirement
-from pkginfo import Wheel  # type: ignore
+from pkginfo import Wheel
 
 from vulcan import VulcanConfigError, to_pep508
 from vulcan.build_backend import (add_requirement, build_editable,
-                                  make_editable, pack, unpack)
+                                  pack, unpack)
 
 # it is NOT expected for these to fall out of date, unless you explicitly regenerate the test lockfile
 # in tests/data
@@ -92,7 +92,7 @@ class TestConfig:
                 assert nohash.read() == b'Text!'
 
     def test_lockfile_reqs_present(self, test_application: Path, test_built_application_wheel: Path) -> None:
-        whl = Wheel(test_built_application_wheel)
+        whl = Wheel(str(test_built_application_wheel))
         assert whl.requires_dist, "No dependencies found"
         assert any("; extra == 'test1'" in req for req in whl.requires_dist), "no extra dependencies found"
 
@@ -110,7 +110,7 @@ class TestEditable:
     def test_add_requirement(self, test_built_editable_application_wheel: Path) -> None:
         unpacked = unpack(test_built_editable_application_wheel)
         add_requirement(unpacked, 'test_req (~=1.2.3)')
-        whl = Wheel(pack(unpacked))
+        whl = Wheel(str(pack(unpacked)))
         assert 'test_req (~=1.2.3)' in whl.requires_dist
 
     def test_pack_unpack_idempotent(self, test_built_editable_application_wheel: Path, tmp_path: Path
@@ -119,8 +119,8 @@ class TestEditable:
         shutil.copy(test_built_editable_application_wheel, tmp_path / 'tmp')
         repacked = pack(unpack(tmp_path / 'tmp' / test_built_editable_application_wheel.name))
 
-        new = Wheel(repacked).__dict__
+        new = Wheel(str(repacked)).__dict__
         new.pop('filename')
-        old = Wheel(test_built_editable_application_wheel).__dict__
+        old = Wheel(str(test_built_editable_application_wheel)).__dict__
         old.pop('filename')
         assert new == old
