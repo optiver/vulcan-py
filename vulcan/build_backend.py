@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple
 
-from editables import EditableProject  # type: ignore
+from editables import EditableProject
 
 from vulcan import Vulcan
 from vulcan.plugins import PluginRunner

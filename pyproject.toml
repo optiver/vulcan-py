@@ -39,7 +39,7 @@ convert=["pkginfo~=1.9"]
 setuptools='~=63.0'
 wheel='~=0.36.2'
 tomlkit = "~=0.11"
-editables = '~=0.4'
+editables = '~=0.5'
 packaging = "~=22.0"
 
 [tool.vulcan.dev-dependencies.test]
@@ -63,7 +63,7 @@ types-setuptools=""
 requires=['setuptools~=63.0',
           'tomlkit~=0.9',
           'wheel',
-          'editables~=0.2']
+          'editables~=0.5']
 build-backend="vulcan.build_backend"
 backend-path=["."]  # and this line should be removed for all other projects
 
