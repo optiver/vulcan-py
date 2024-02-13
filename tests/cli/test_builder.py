@@ -77,7 +77,7 @@ class TestResolveDeps:
         with pytest.raises(subprocess.CalledProcessError):
             await resolve_deps(['requests==2.5.0'], {'test': ['requests==2.4.0']})
 
-    @pytest.mark.skipif(not versions_exist('3.6', '3.9'), reason='missing python version for test')
+    @pytest.mark.skipif(not versions_exist('3.9'), reason='missing python version for test')
     @pytest.mark.asyncio
     async def test_resolve_different_python_versions(self) -> None:
         spec = 'traitlets>=4.0.1,<=5.0.5'

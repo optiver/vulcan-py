@@ -73,7 +73,7 @@ def shiv_from_console_scripts(console_scripts: Dict[str, str]) -> List[Dict[str,
         shivs.append({
             'bin_name': name,
             'console_script': name,
-            'interpreter': '/usr/bin/env python3.6'
+            'interpreter': '/usr/bin/env python3.7'
         })
     return shivs
 

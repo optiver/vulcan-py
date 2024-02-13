@@ -236,7 +236,6 @@ mysql = ["mysqlclient~=1.3"]
 pgsql = ["psycopg2~=2.7"]
 ```
 
-
 # Working pyproject.toml
 
 ```toml
@@ -249,9 +248,9 @@ readme = "README.md"  # OPTIONAL
 keywords = [ "vulcan", ]   # OPTIONAL
 # see https://pypi.org/classifiers/ for allowed classifiers
 classifiers = [  # OPTIONAL
-    "Programming Language :: Python :: 3.6"
+    "Programming Language :: Python :: 3.7"
 ]
-requires-python = ">=3.6"  # OPTIONAL
+requires-python = ">=3.7"  # OPTIONAL
 
 
 [project.scripts]  # OPTIONAL
@@ -272,13 +271,13 @@ some_extra=["psycopg2"]
 [[tool.vulcan.shiv]]
 bin_name="my_app"
 console_script="entry_point"
-interpreter='/usr/bin/env python3.6'
+interpreter='/usr/bin/env python3.7'
 extra_args="--compile-pyc"
 
 [[tool.vulcan.shiv]]
 bin_name="my_app_two"
 entry_point="package_name.cli:main2"
-interpreter='/usr/bin/env python3.6'
+interpreter='/usr/bin/env python3.7'
 extra_args="--compile-pyc"
 
 [tool.vulcan]
