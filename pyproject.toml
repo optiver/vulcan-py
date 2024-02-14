@@ -79,4 +79,4 @@ line-length = 120
 
 [tool.mypy]
 packages = ["vulcan", "tests"]
-strict = false
+strict = true

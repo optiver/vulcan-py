@@ -161,7 +161,7 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
     return (
         list(content["install_requires"]),  # type: ignore
         {k: list(v) for k, v in cast(tomlkit.container.Container, content["extras_require"]).items()},
-    )  # type: ignore
+    )
 
 
 def to_pep508(lib: str, req: Union[str, VersionDict]) -> str:
