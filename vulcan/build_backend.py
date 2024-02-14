@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import re
 import shutil
@@ -30,7 +31,7 @@ def patch_argv(argv: List[str]) -> Generator[None, None, None]:
     sys.argv = old_argv
 
 
-def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
+def build(outdir: str, config_settings: Dict[str, str] | None = None) -> str:
     config = Vulcan.from_source(Path().absolute())
 
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
@@ -44,8 +45,8 @@ def build(outdir: str, config_settings: Dict[str, str] = None) -> str:
 
 def build_wheel(
     wheel_directory: str,
-    config_settings: Dict[str, str] = None,
-    metadata_directory: str = None,
+    config_settings: Dict[str, str] | None = None,
+    metadata_directory: str | None = None,
 ) -> str:
     with patch_argv(["bdist_wheel"]):
         return build(wheel_directory, config_settings)
@@ -53,7 +54,7 @@ def build_wheel(
 
 def build_sdist(
     sdist_directory: str,
-    config_settings: Dict[str, str] = None,
+    config_settings: Dict[str, str] | None = None,
 ) -> str:
     with patch_argv(["sdist"]):
         return build(sdist_directory, config_settings)
@@ -73,11 +74,11 @@ def get_virtualenv_python() -> Path:
 
 
 # tox requires these two for some reason :(
-def get_requires_for_build_sdist(config_settings: Dict[str, str] = None) -> List[str]:
+def get_requires_for_build_sdist(config_settings: Dict[str, str] | None = None) -> List[str]:
     return []
 
 
-def get_requires_for_build_wheel(config_settings: Dict[str, str] = None) -> List[str]:
+def get_requires_for_build_wheel(config_settings: Dict[str, str] | None = None) -> List[str]:
     return []
 
 
@@ -185,8 +186,8 @@ def make_editable(whl: Path) -> None:
 
 def build_editable(
     wheel_directory: str,
-    config_settings: Dict[str, str] = None,
-    metadata_directory: str = None,
+    config_settings: Dict[str, str] | None = None,
+    metadata_directory: str | None = None,
 ) -> str:
     whl_path = Path(wheel_directory) / build_wheel(wheel_directory, config_settings, metadata_directory)
     make_editable(whl_path)

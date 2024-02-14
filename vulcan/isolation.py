@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import shlex
 import subprocess
@@ -15,7 +16,7 @@ from pkg_resources import Requirement
 
 @contextmanager
 def create_venv(
-    python_version: str = None,
+    python_version: str | None = None,
 ) -> Generator["VulcanEnvBuilder", None, None]:
     with tempfile.TemporaryDirectory(prefix="vulcan-build-") as tempdir:
         builder = VulcanEnvBuilder(with_pip=True, python_version=python_version)
@@ -31,7 +32,7 @@ def get_executable(version: str) -> str:
 
 
 @contextmanager
-def patch_executable(python_version: str = None) -> Generator[None, None, None]:
+def patch_executable(python_version: str | None = None) -> Generator[None, None, None]:
     if python_version is None:
         yield
     else:
@@ -66,8 +67,8 @@ class VulcanEnvBuilder(EnvBuilder):
         symlinks: bool = False,
         upgrade: bool = False,
         with_pip: bool = False,
-        prompt: str = None,
-        python_version: str = None,
+        prompt: str | None = None,
+        python_version: str | None = None,
     ):
         self.context: SimpleNamespace
         super().__init__(

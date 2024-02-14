@@ -6,3 +6,6 @@ pip install -e .[cli]
 pip install pytest pytest-asyncio pkginfo
 
 #pytest tests tests/cli/test_cli.py
+
+
+from __future__ import annotations

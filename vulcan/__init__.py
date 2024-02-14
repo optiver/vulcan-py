@@ -157,9 +157,10 @@ def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
         raise FileNotFoundError(f"Expected lockfile {lockfile}, does not exist")
     with lockfile.open() as f:
         content = cast(tomlkit.container.Container, tomlkit.loads(f.read()))
+
     return (
         list(content["install_requires"]),  # type: ignore
-        {k: list(v) for k, v in content["extras_require"].items()},
+        {k: list(v) for k, v in cast(tomlkit.container.Container, content["extras_require"]).items()},
     )  # type: ignore
 
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import asyncio.subprocess
 import os
@@ -110,7 +111,9 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
             os.remove(dist)
 
 
-async def resolve_deps_or_report(config: Vulcan, python_version: str = None) -> Tuple[List[str], Dict[str, List[str]]]:
+async def resolve_deps_or_report(
+    config: Vulcan, python_version: str | None = None
+) -> Tuple[List[str], Dict[str, List[str]]]:
     try:
         return await resolve_deps(
             flatten_reqs(config.configured_dependencies),
@@ -200,7 +203,7 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         ctx.invoke(lock)
 
 
-def install_dev_dependencies(target: str = None) -> None:
+def install_dev_dependencies(target: str | None = None) -> None:
     config = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
 
     try:

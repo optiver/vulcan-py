@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import tempfile
 from itertools import chain
@@ -18,7 +19,7 @@ async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str]) -> Dict[
 async def resolve_deps(
     install_requires: List[str],
     extras: Dict[str, List[str]],
-    python_version: str = None,
+    python_version: str | None = None,
 ) -> Tuple[List[str], Dict[str, List[str]]]:
 
     if not install_requires and not extras:

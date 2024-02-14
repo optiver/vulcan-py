@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from types import TracebackType
 from typing import Any, Dict, Iterable, Type, Optional
@@ -39,9 +40,9 @@ class PluginRunner:
 
     def __exit__(
         self,
-        exc_type: Type[BaseException] = None,
-        exc_value: BaseException = None,
-        tb: TracebackType = None,
+        exc_type: Type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        tb: TracebackType | None = None,
     ) -> None:
         if exc_type is not None:
             # if the build process raises an error, don't bother with the plugins.
