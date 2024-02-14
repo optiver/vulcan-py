@@ -22,7 +22,7 @@ def verbose_called_process_error() -> Iterator[None]:
         raise
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def wheel_pkg_info(test_built_application_wheel: Path) -> Wheel:
     return Wheel(str(test_built_application_wheel))
 

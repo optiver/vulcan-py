@@ -100,7 +100,7 @@ def class_built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_dist(Path(), 'wheel', dist_dir)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def test_application(tmp_path_factory: pytest.TempPathFactory) -> Path:
     tmp_path = tmp_path_factory.mktemp('build_testproject')
     (tmp_path / 'testproject').mkdir()
@@ -257,7 +257,7 @@ def test_built_application(
     return sdist
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def test_built_application_wheel(test_application: Path,
                                  tmp_path_factory: pytest.TempPathFactory) -> Path:
     with cd(test_application):

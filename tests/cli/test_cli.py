@@ -75,26 +75,30 @@ class TestCli:
         assert res.exit_code != 0
 
     def test_develop_installs_all_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
-        with cd(test_application):
-            res = runner.invoke(cli.main, ['develop'])
+        with (
+            cd(test_application),
+            create_venv() as venv):
+            res = runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir})
         assert 'pytest' in res.output
         assert 'flake8' in res.output
 
     def test_develop_test_installs_test_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
-        with cd(test_application):
-            res = successful(runner.invoke(cli.main, ['develop', 'test']))
+        with (
+            cd(test_application),
+            create_venv() as venv):
+            res = successful(runner.invoke(cli.main, ['develop', 'test'], env={'VIRTUAL_ENV': venv.context.env_dir}))
         assert 'pytest' in res.output
         assert 'flake8' not in res.output
 
     def test_develop_lint_installs_lint_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
-        with cd(test_application):
-            res = successful(runner.invoke(cli.main, ['develop', 'lint']))
+        with (cd(test_application), create_venv() as venv):
+            res = successful(runner.invoke(cli.main, ['develop', 'lint'], env={'VIRTUAL_ENV': venv.context.env_dir}))
         assert 'pytest' not in res.output
         assert 'flake8' in res.output
 
     def test_develop_fake_errors(self, runner: CliRunner, test_application: Path) -> None:
-        with cd(test_application):
-            res = runner.invoke(cli.main, ['develop', 'faketarget'])
+        with (cd(test_application), create_venv() as venv):
+            res = runner.invoke(cli.main, ['develop', 'faketarget'], env={'VIRTUAL_ENV': venv.context.env_dir})
         assert res.exit_code != 0
         assert 'No such dev dependency' in res.output
 
