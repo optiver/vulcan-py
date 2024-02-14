@@ -1,6 +1,6 @@
-install_requires = ["certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "requests==2.25.1", "urllib3==1.26.3",]
+install_requires = ["certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "requests==2.25.1", "urllib3==1.26.3"]
 
 [extras_require]
-test1 = [ "build==0.1.0", "certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "importlib-metadata==3.4.0", "packaging==22.0", "pep517==0.9.1", "pyparsing==2.4.7", "requests==2.25.1", "toml==0.10.2", "typing-extensions==3.7.4.3", "urllib3==1.26.3", "zipp==3.4.0",]
+test1 = [ "build==0.1.0", "certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "importlib-metadata==3.4.0", "packaging==20.9", "pep517==0.9.1", "pyparsing==2.4.7", "requests==2.25.1", "toml==0.10.2", "typing-extensions==3.7.4.3", "urllib3==1.26.3", "zipp==3.4.0",]
 test2 = [ "certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "requests==2.25.1", "setuptools==53.0.0", "urllib3==1.26.3",]
 test3 = [ "certifi==2020.12.5", "chardet==4.0.0", "idna==2.10", "requests==2.25.1", "urllib3==1.26.3", "wheel==0.36.2",]

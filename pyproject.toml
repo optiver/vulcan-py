@@ -73,9 +73,6 @@ junit_family="xunit1"
 testpaths = [ "tests", ]
 markers = [ "cli: Tests that require full cli dependencies" ]
 asyncio_mode = 'auto'
-pythonpath = [
-    "vulcan"
-]
 
 [tool.mypy]
 packages = ["vulcan", "tests"]

@@ -153,8 +153,8 @@ pytest=""
 flake8=""
 
 [tool.vulcan.extras]
-test1 = ["requests", "build"]
-test2 = ["requests~=2.22", "setuptools==63.4.3"]
+test1 = ["requests", "build", "packaging~=20.9"]
+test2 = ["requests~=2.22", "setuptools"]
 test3 = ["requests>=2.0.0", "wheel"]
 
 [[tool.vulcan.shiv]]
