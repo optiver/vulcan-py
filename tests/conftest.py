@@ -123,7 +123,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 dynamic = ['version', 'optional-dependencies', 'dependencies']
 
 [project.scripts]
@@ -154,7 +154,7 @@ flake8=""
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
-test2 = ["requests~=2.22", "setuptools"]
+test2 = ["requests~=2.22", "setuptools==63.4.3"]
 test3 = ["requests>=2.0.0", "wheel"]
 
 [[tool.vulcan.shiv]]
@@ -207,7 +207,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
 [project.scripts]
 myep = "testproject:test_ep"

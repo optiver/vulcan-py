@@ -37,18 +37,6 @@ except PackageNotFoundError:
 @click.version_option(vulcan_version)
 @click.pass_context
 def main(ctx: click.Context) -> None:
-    if sys.platform == 'win32':
-        # This is required for python <3.8, where this is not yet the default for windows.
-        # Can be removed when support for those are removed.
-        # https://docs.python.org/3.7/library/asyncio-eventloop.html#event-loop-implementations
-        #
-        # > By default asyncio is configured to use SelectorEventLoop on all platforms.
-        #
-        # And then https://docs.python.org/3.8/library/asyncio-eventloop.html#event-loop-implementations
-        #
-        # > By default asyncio is configured to use SelectorEventLoop on Unix and ProactorEventLoop on
-        #   Windows.
-        asyncio.set_event_loop(asyncio.ProactorEventLoop())
     # don't fail on missing lock here, because this config object is not actually used for building only for
     # cli values
     ctx.obj = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)

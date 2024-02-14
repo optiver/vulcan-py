@@ -1,3 +1,4 @@
+from __future__ import annotations
 import distutils.core
 from dataclasses import dataclass
 from pathlib import Path
@@ -128,7 +129,7 @@ class Vulcan:
                    python_lock_with=python_lock_with,
                    dynamic=dynamic)
 
-    def setup(self, config_settings: Dict[str, str] = None) -> distutils.core.Distribution:
+    def setup(self, config_settings: Dict[str, str] | None = None) -> distutils.core.Distribution:
         install_requires: Optional[List[str]]
         extras_require: Optional[Dict[str, List[str]]]
         if self.no_lock or (config_settings and config_settings.get('no-lock') == 'true'):

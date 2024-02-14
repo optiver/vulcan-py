@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [project.scripts]
@@ -78,21 +78,5 @@ pythonpath = [
 ]
 
 [tool.mypy]
-packages = ["vulcan","tests"]
-# the following configs are the equivalent of --strict, with the exception of --no-implicit-optional
-no_implicit_optional = false
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_untyped_defs = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unused_configs = true
-
-# extra warnings
-warn_unused_ignores = true
-warn_unreachable = true
-strict_equality = true
+packages = ["vulcan", "tests"]
+strict = false

@@ -2,7 +2,7 @@
 
 ---
 
-Vulcan supports building python>=3.7. Vulcan itself may only be installed in python>=3.8. The recommended installation is via pipx. This will save a lot of pain with respect to conflicting versions, as well as having multiple python versions in various projects.
+Vulcan supports building python>=3.9. Vulcan itself may only be installed in python>=3.9. The recommended installation is via pipx. This will save a lot of pain with respect to conflicting versions, as well as having multiple python versions in various projects.
 
 ---
 

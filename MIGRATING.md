@@ -248,9 +248,9 @@ readme = "README.md"  # OPTIONAL
 keywords = [ "vulcan", ]   # OPTIONAL
 # see https://pypi.org/classifiers/ for allowed classifiers
 classifiers = [  # OPTIONAL
-    "Programming Language :: Python :: 3.7"
+    "Programming Language :: Python :: 3.9"
 ]
-requires-python = ">=3.7"  # OPTIONAL
+requires-python = ">=3.9"  # OPTIONAL
 
 
 [project.scripts]  # OPTIONAL
@@ -271,13 +271,13 @@ some_extra=["psycopg2"]
 [[tool.vulcan.shiv]]
 bin_name="my_app"
 console_script="entry_point"
-interpreter='/usr/bin/env python3.7'
+interpreter='/usr/bin/env python3.'
 extra_args="--compile-pyc"
 
 [[tool.vulcan.shiv]]
 bin_name="my_app_two"
 entry_point="package_name.cli:main2"
-interpreter='/usr/bin/env python3.7'
+interpreter='/usr/bin/env python3.9'
 extra_args="--compile-pyc"
 
 [tool.vulcan]
