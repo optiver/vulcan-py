@@ -14,15 +14,17 @@ from pkg_resources import Requirement
 
 
 @contextmanager
-def create_venv(python_version: str = None) -> Generator['VulcanEnvBuilder', None, None]:
-    with tempfile.TemporaryDirectory(prefix='vulcan-build-') as tempdir:
+def create_venv(
+    python_version: str = None,
+) -> Generator["VulcanEnvBuilder", None, None]:
+    with tempfile.TemporaryDirectory(prefix="vulcan-build-") as tempdir:
         builder = VulcanEnvBuilder(with_pip=True, python_version=python_version)
         builder.create(tempdir)
         yield builder
 
 
 def get_executable(version: str) -> str:
-    py = shutil.which(f'python{version}')
+    py = shutil.which(f"python{version}")
     if py is None:
         raise FileNotFoundError(f"No such thing as python{version}")
     return py
@@ -57,59 +59,84 @@ def patch_executable(python_version: str = None) -> Generator[None, None, None]:
 
 class VulcanEnvBuilder(EnvBuilder):
 
-    def __init__(self, system_site_packages: bool = False, clear: bool = False,
-                 symlinks: bool = False, upgrade: bool = False, with_pip: bool = False, prompt: str = None,
-                 python_version: str = None):
+    def __init__(
+        self,
+        system_site_packages: bool = False,
+        clear: bool = False,
+        symlinks: bool = False,
+        upgrade: bool = False,
+        with_pip: bool = False,
+        prompt: str = None,
+        python_version: str = None,
+    ):
         self.context: SimpleNamespace
-        super().__init__(system_site_packages=system_site_packages, clear=clear, symlinks=symlinks,
-                         upgrade=upgrade, with_pip=with_pip, prompt=prompt)
+        super().__init__(
+            system_site_packages=system_site_packages,
+            clear=clear,
+            symlinks=symlinks,
+            upgrade=upgrade,
+            with_pip=with_pip,
+            prompt=prompt,
+        )
         self._executable_python_version = python_version
 
-    def ensure_directories(self,
-                           env_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
-                           ) -> SimpleNamespace:
+    def ensure_directories(self, env_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"]) -> SimpleNamespace:
         with patch_executable(self._executable_python_version):
             self.context = super().ensure_directories(env_dir)
         return self.context
 
     def _setup_pip(self, context: SimpleNamespace) -> None:
         super()._setup_pip(context)
-        cmd = [context.env_exe, '-Im', 'pip', 'install', '--upgrade', 'pip']
+        cmd = [context.env_exe, "-Im", "pip", "install", "--upgrade", "pip"]
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
-    async def install(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'],
-                      requirements: List[str]
-                      ) -> None:
+    async def install(
+        self,
+        deps_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"],
+        requirements: List[str],
+    ) -> None:
         # install Isolated with module pip using pep517
         if not requirements:
             return
         cmd = [
             self.context.env_exe,
-            '-Im',
-            'pip',
-            'install',
-            '--no-cache-dir',
-            '--use-pep517',
-            '--target',
-            str(deps_dir)] + requirements
-        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
-                                                    stdout=asyncio.subprocess.PIPE)
+            "-Im",
+            "pip",
+            "install",
+            "--no-cache-dir",
+            "--use-pep517",
+            "--target",
+            str(deps_dir),
+        ] + requirements
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE
+        )
         out, err = await proc.communicate()
         assert proc.returncode is not None
         if proc.returncode != 0:
             raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out, stderr=err)
 
-    async def freeze(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]']
-                     ) -> Dict[Requirement, Requirement]:
+    async def freeze(
+        self, deps_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"]
+    ) -> Dict[Requirement, Requirement]:
         # list with the requirements.txt format only libraries installed in specifically this venv
-        cmd = [self.context.env_exe, '-Im', 'pip', 'list', '--format=freeze', '--path', str(deps_dir)]
+        cmd = [
+            self.context.env_exe,
+            "-Im",
+            "pip",
+            "list",
+            "--format=freeze",
+            "--path",
+            str(deps_dir),
+        ]
 
-        frozen = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
-                                                      stdout=asyncio.subprocess.PIPE)
+        frozen = await asyncio.create_subprocess_exec(
+            *cmd, stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE
+        )
 
         out, err = await frozen.communicate()
         assert frozen.returncode is not None
         if frozen.returncode != 0:
             raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)
-        reqs = [Requirement.parse(line) for line in out.decode().split('\n') if line]
+        reqs = [Requirement.parse(line) for line in out.decode().split("\n") if line]
         return {Requirement.parse(req.name): req for req in reqs}

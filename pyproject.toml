@@ -74,6 +74,9 @@ testpaths = [ "tests", ]
 markers = [ "cli: Tests that require full cli dependencies" ]
 asyncio_mode = 'auto'
 
+[tool.black]
+line-length = 120
+
 [tool.mypy]
 packages = ["vulcan", "tests"]
 strict = false
