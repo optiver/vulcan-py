@@ -72,23 +72,19 @@ class TestCli:
         with cd(test_application):
             (test_application / 'vulcan.lock').unlink()
             res = runner.invoke(cli.main, ['build', '--wheel'])
-        assert res.exit_code != 0
+            assert res.exit_code != 0
 
     def test_develop_installs_all_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
-        with (
-            cd(test_application),
-            create_venv() as venv):
+        with (cd(test_application), create_venv() as venv):
             res = runner.invoke(cli.main, ['develop'], env={'VIRTUAL_ENV': venv.context.env_dir})
-        assert 'pytest' in res.output
-        assert 'flake8' in res.output
+            assert 'pytest' in res.output
+            assert 'flake8' in res.output
 
     def test_develop_test_installs_test_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
-        with (
-            cd(test_application),
-            create_venv() as venv):
+        with (cd(test_application), create_venv() as venv):
             res = successful(runner.invoke(cli.main, ['develop', 'test'], env={'VIRTUAL_ENV': venv.context.env_dir}))
-        assert 'pytest' in res.output
-        assert 'flake8' not in res.output
+            assert 'pytest' in res.output
+            assert 'flake8' not in res.output
 
     def test_develop_lint_installs_lint_dev_dependencies(self, runner: CliRunner, test_application: Path) -> None:
         with (cd(test_application), create_venv() as venv):
@@ -99,8 +95,8 @@ class TestCli:
     def test_develop_fake_errors(self, runner: CliRunner, test_application: Path) -> None:
         with (cd(test_application), create_venv() as venv):
             res = runner.invoke(cli.main, ['develop', 'faketarget'], env={'VIRTUAL_ENV': venv.context.env_dir})
-        assert res.exit_code != 0
-        assert 'No such dev dependency' in res.output
+            assert res.exit_code != 0
+            assert 'No such dev dependency' in res.output
 
 
 @contextmanager
