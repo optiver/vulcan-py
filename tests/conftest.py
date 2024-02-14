@@ -123,7 +123,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 dynamic = ['version', 'optional-dependencies', 'dependencies']
 
 [project.scripts]
@@ -135,7 +135,6 @@ file="testproject/VERSION"
 [tool.vulcan.plugin.example_plugin]
 foobar = "barfoo"
 module_dir = "testproject"
-
 
 [project.entry-points.test_eps]
 myep = "testproject:test_ep"
@@ -208,7 +207,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries :: Python Modules"
     ]
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 
 [project.scripts]
 myep = "testproject:test_ep"

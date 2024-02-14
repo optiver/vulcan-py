@@ -82,10 +82,6 @@ class TestResolveDeps:
     async def test_resolve_different_python_versions(self) -> None:
         spec = 'traitlets>=4.0.1,<=5.0.5'
         with verbose_called_process_error():
-            resolved, _ = await resolve_deps([spec], {}, python_version='3.6')
-        print(resolved)
-        assert 'traitlets==4.3.3' in resolved
-        with verbose_called_process_error():
             resolved, _ = await resolve_deps([spec], {}, python_version='3.9')
         print(resolved)
         assert 'traitlets==5.0.5' in resolved
