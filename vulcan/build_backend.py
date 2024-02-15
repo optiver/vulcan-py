@@ -15,10 +15,7 @@ from vulcan import Vulcan
 from vulcan.plugins import PluginRunner
 
 version: Callable[[str], str]
-if sys.version_info >= (3, 8):
-    from importlib.metadata import version
-else:
-    from importlib_metadata import version
+from importlib.metadata import version
 
 __all__ = ["build_wheel", "build_sdist"]
 

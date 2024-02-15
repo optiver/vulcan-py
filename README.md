@@ -128,22 +128,6 @@ extra1 = ["requests[socks]~=2.0"]
 extra2 = ["click"]
 ```
 
-### dev-dependencies
-
-Finally, this section is used to specify any dependencies used for development, such as mypy or pytest. These are NOT used in resolving the lockfile, and are installed when `vulcan develop` is run (in addition to installing the application as an editable install, equivalent to `pip install -e .`). It is possible to only install a single set of dev dependencies with `vulcan develop {key}` (e.x `vulcan develop static-analysis`)
-
-```toml
-[tool.vulcan.dev-dependencies.test]
-pytest=""
-coverage=""
-pytest-asyncio=""
-
-[tool.vulcan.dev-dependencies.static-analysis]
-flake8=""
-mypy=""
-types-dataclasses=""
-```
-
 ## Build the package
 
 Assuming the above has worked, you should now be able to do the following:

@@ -19,11 +19,7 @@ from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_pip_version, get_virtualenv_python, install_develop
 from vulcan.builder import resolve_deps
 
-version: Callable[[str], str]
-if sys.version_info >= (3, 8):
-    from importlib.metadata import PackageNotFoundError, version
-else:
-    from importlib_metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError, version
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
 

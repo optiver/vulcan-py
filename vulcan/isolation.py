@@ -37,25 +37,15 @@ def patch_executable(python_version: str | None = None) -> Generator[None, None,
         yield
     else:
         try:
-            if sys.version_info >= (3, 8):
-                # for some reason mypy thinks this is incorrect for 3.8
-                # even though it is definitely correct and I've read the code showing it
-                # So this whole file disables the "warn_unused_ignore" config due to these 2 lines :(
-                old_exe = sys._base_executable  # type: ignore
-                sys._base_executable = get_executable(python_version)  # type: ignore
-            else:
-                old_exe = sys.executable
-                sys.executable = get_executable(python_version)
+            old_exe = sys._base_executable  # type: ignore
+            sys._base_executable = get_executable(python_version)  # type: ignore
             yield
         except subprocess.CalledProcessError as e:
             print(f"Command '{' '.join(shlex.quote(a) for a in e.cmd)}' failed with exit code {e.returncode}")
             print(e.stderr)
             exit(1)
         finally:
-            if sys.version_info >= (3, 8):
-                sys._base_executable = old_exe  # type: ignore
-            else:
-                sys.executable = old_exe
+            sys._base_executable = old_exe  # type: ignore
 
 
 class VulcanEnvBuilder(EnvBuilder):

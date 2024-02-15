@@ -146,15 +146,11 @@ myep = "testproject:test_ep"
 [tool.vulcan]
 packages = [ "testproject" ]
 plugins = ['example_plugin']
+test = ['pytest']
+lint = ['flake']
 
 [tool.vulcan.dependencies]
 requests = {{version="~=2.25.1", extras=["security"]}}
-
-[tool.vulcan.dev-dependencies.test]
-pytest=""
-
-[tool.vulcan.dev-dependencies.lint]
-flake8=""
 
 [tool.vulcan.extras]
 test1 = ["requests", "build", "packaging~=20.9"]
