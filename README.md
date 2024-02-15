@@ -221,10 +221,10 @@ Pre-build steps take place immediately before creating the wheel or sdist output
 
 ```python
 # myplugin.py
-from typing import Optional, Dict
+from typing import dict
 from pathlib import Path
 from datetime import datetime
-def populate_buildtime(config: Optional[Dict[str, str]]) -> None:
+def populate_buildtime(config: dict[str, str] | None) -> None:
    assert config is not None
    assert 'target' in config
    Path(config['target']).write_text(f'{datetime.now():%Y-%m-%d %H:%M}')

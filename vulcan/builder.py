@@ -3,14 +3,13 @@ from __future__ import annotations
 import asyncio
 import tempfile
 from itertools import chain
-from typing import Dict, Tuple
 
 from pkg_resources import Requirement
 
 from vulcan.isolation import VulcanEnvBuilder, create_venv
 
 
-async def build_requires(pipenv: VulcanEnvBuilder, requires: list[str]) -> Dict[Requirement, Requirement]:
+async def build_requires(pipenv: VulcanEnvBuilder, requires: list[str]) -> dict[Requirement, Requirement]:
     with tempfile.TemporaryDirectory() as site_packages:
         await pipenv.install(site_packages, requires)
         freeze = await pipenv.freeze(site_packages)
@@ -19,9 +18,9 @@ async def build_requires(pipenv: VulcanEnvBuilder, requires: list[str]) -> Dict[
 
 async def resolve_deps(
     install_requires: list[str],
-    extras: Dict[str, list[str]],
+    extras: dict[str, list[str]],
     python_version: str | None = None,
-) -> Tuple[list[str], Dict[str, list[str]]]:
+) -> tuple[list[str], dict[str, list[str]]]:
 
     if not install_requires and not extras:
         return [], {}
