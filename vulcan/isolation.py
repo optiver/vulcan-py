@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import json
 import shlex
 import subprocess
 import sys
@@ -9,6 +10,7 @@ from contextlib import contextmanager
 from os import PathLike
 from types import SimpleNamespace
 from typing import Dict, Generator, List, Union
+from tempfile import NamedTemporaryFile
 from venv import EnvBuilder
 
 from pkg_resources import Requirement
@@ -49,7 +51,7 @@ def patch_executable(python_version: str | None = None) -> Generator[None, None,
             yield
         except subprocess.CalledProcessError as e:
             print(f"Command '{' '.join(shlex.quote(a) for a in e.cmd)}' failed with exit code {e.returncode}")
-            print(e.stderr)
+            print(e.stderr.decode())
             exit(1)
         finally:
             if sys.version_info >= (3, 8):
@@ -115,7 +117,8 @@ class VulcanEnvBuilder(EnvBuilder):
         out, err = await proc.communicate()
         assert proc.returncode is not None
         if proc.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out, stderr=err)
+            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out.decode(),
+                                                stderr=err.decode())
 
     async def freeze(
         self, deps_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"]
@@ -141,3 +144,44 @@ class VulcanEnvBuilder(EnvBuilder):
             raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)
         reqs = [Requirement.parse(line) for line in out.decode().split("\n") if line]
         return {Requirement.parse(req.name): req for req in reqs}
+
+    async def install_dryrun(self, deps_dir: Union[str, bytes, 'PathLike[str]', 'PathLike[bytes]'],
+                             requirements: List[str]
+                             ) -> Dict[Requirement, Requirement]:
+        proc = await asyncio.create_subprocess_exec(*[self.context.env_exe, "-Im", "pip", "-V"],
+                                                    stderr=asyncio.subprocess.PIPE,
+                                                    stdout=asyncio.subprocess.PIPE)
+        out, err = await proc.communicate()
+        # install Isolated with module pip using pep517
+        if not requirements:
+            return {}
+
+        with NamedTemporaryFile() as fp:
+            cmd = [
+                self.context.env_exe,
+                '-Im',
+                'pip',
+                'install',
+                '--use-pep517',
+                '--dry-run',
+                '--quiet',
+                '--report',
+                fp.name,
+                '--ignore-installed',
+                '--target',
+                str(deps_dir)] + requirements
+            proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE,
+                                                        stdout=asyncio.subprocess.PIPE)
+            out, err = await proc.communicate()
+            fp.seek(0)
+            data = json.loads(fp.read().decode())
+
+        assert proc.returncode is not None
+        if proc.returncode != 0:
+            raise subprocess.CalledProcessError(returncode=proc.returncode, cmd=cmd, output=out, stderr=err.decode())
+
+        reqs = []
+        for install in data['install']:
+            reqs.append(Requirement.parse(f"{install['metadata']['name']}=={install['metadata']['version']}"))
+
+        return {Requirement.parse(req.name): req for req in reqs}  # type: ignore
