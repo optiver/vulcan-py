@@ -6,7 +6,7 @@ from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, cast
+from typing import NamedTuple, cast
 
 import pkginfo
 import tomlkit
@@ -16,7 +16,7 @@ from pkg_resources import Requirement
 class BuildData(NamedTuple):
     wheel: pkginfo.Wheel
     table: tomlkit.items.Table
-    packages: List[str]
+    packages: list[str]
 
 
 def make_parser() -> ArgumentParser:
@@ -30,7 +30,7 @@ def wheel() -> BuildData:
     with tempfile.TemporaryDirectory(suffix=".vulcan-migrate") as tmp:
         subprocess.run(["pip", "wheel", "--no-deps", "-w", tmp, "."])
         whl = pkginfo.Wheel(str(next(Path(tmp).glob("*.whl"))))
-        eps: Dict[str, Dict[str, str]] = defaultdict(dict)
+        eps: dict[str, dict[str, str]] = defaultdict(dict)
         with zipfile.ZipFile(whl.filename) as zf:
             dist_info = f'{whl.name.replace("-", "_")}-{whl.version}.dist-info'
             try:
@@ -58,7 +58,7 @@ def wheel() -> BuildData:
     return BuildData(whl, ep_table, packages)
 
 
-def contributors(author: Optional[str], author_email: Optional[str]) -> List[tomlkit.items.Table]:
+def contributors(author: str | None, author_email: str | None) -> list[tomlkit.items.Table]:
     vals = tomlkit.table()
     if author:
         vals["name"] = author
@@ -67,8 +67,8 @@ def contributors(author: Optional[str], author_email: Optional[str]) -> List[tom
     return [vals]
 
 
-def shiv_from_console_scripts(console_scripts: Dict[str, str]) -> List[Dict[str, str]]:
-    shivs: List[Dict[str, str]] = []
+def shiv_from_console_scripts(console_scripts: dict[str, str]) -> list[dict[str, str]]:
+    shivs: list[dict[str, str]] = []
     for name in console_scripts:
         shivs.append(
             {

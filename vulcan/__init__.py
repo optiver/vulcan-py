@@ -1,15 +1,15 @@
 from __future__ import annotations
+
 import distutils.core
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Tuple, TypedDict, Union, cast
 
-import sys
 import tomlkit
 import tomlkit.container
 import tomlkit.items
 from setuptools import setup
-from typing import TypedDict
 
 
 class VulcanConfigError(Exception):

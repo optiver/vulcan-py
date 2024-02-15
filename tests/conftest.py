@@ -5,7 +5,7 @@ import shutil
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Generator, Iterable
+from typing import Generator, Iterable
 
 import pytest
 from pkginfo import Wheel
@@ -31,7 +31,7 @@ def cd(p: Path) -> Generator[None, None, None]:
     os.chdir(old)
 
 
-def hashes(directory: Path) -> Dict[Path, str]:
+def hashes(directory: Path) -> dict[Path, str]:
     hs = {}
     for file in directory.rglob("*"):
         if str(file).startswith("."):

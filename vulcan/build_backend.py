@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -6,12 +7,12 @@ import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
+from importlib.metadata import version
 from pathlib import Path
 from typing import Dict, Generator, List, Optional, Tuple
 
 from editables import EditableProject
 
-from importlib.metadata import version
 from vulcan import Vulcan
 from vulcan.plugins import PluginRunner
 
