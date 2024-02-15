@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [project.scripts]
@@ -29,8 +29,7 @@ no-lock = true
 [tool.setuptools.packages.find]
 include = ["vulcan*"]
 
-
-# e.g. if these are specified, like `pip install vulcan[cli]
+# e.g. if these are specified, like `pip install vulcan-py[cli]
 [tool.vulcan.extras]
 cli=["shiv~=0.5.2","build[virtualenv]~=0.8.0", "click~=8.0"]
 convert=["pkginfo~=1.9"]
@@ -56,7 +55,6 @@ types-click=""
 types-dataclasses=""
 types-setuptools=""
 
-
 [build-system]
 # in other build systems, this would says "requires=['setuptools', 'vulcan']" and that is all that is needed
 # to correctly install and use this tool
@@ -76,22 +74,9 @@ testpaths = [ "tests", ]
 markers = [ "cli: Tests that require full cli dependencies" ]
 asyncio_mode = 'auto'
 
-[tool.mypy]
-packages = ["vulcan","tests"]
-# the following configs are the equivalent of --strict, with the exception of --no-implicit-optional
-no_implicit_optional = false
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_untyped_defs = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unused_configs = true
+[tool.black]
+line-length = 120
 
-# extra warnings
-warn_unused_ignores = true
-warn_unreachable = true
-strict_equality = true
+[tool.mypy]
+packages = ["vulcan", "tests"]
+strict = true
