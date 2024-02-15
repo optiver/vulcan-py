@@ -4,7 +4,7 @@ import distutils.core
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple, TypedDict, Union, cast
+from typing import Any, Mapping, TypedDict, Union, cast
 
 import tomlkit
 import tomlkit.container
@@ -18,51 +18,51 @@ class VulcanConfigError(Exception):
 
 class VersionDict(TypedDict, total=False):
     version: str
-    extras: List[str]
+    extras: list[str]
 
 
 VersionSpecs = Mapping[str, Union[str, VersionDict]]
 
 
-def flatten_reqs(versions: VersionSpecs) -> List[str]:
+def flatten_reqs(versions: VersionSpecs) -> list[str]:
     return [to_pep508(lib, req) for lib, req in versions.items()]
 
 
 @dataclass
 class ShivOpts:
     bin_name: str
-    console_script: Optional[str] = None
-    entry_point: Optional[str] = None
-    interpreter: Optional[str] = None
-    with_extras: Optional[List[str]] = None
+    console_script: str | None = None
+    entry_point: str | None = None
+    interpreter: str | None = None
+    with_extras: list[str] | None = None
     extra_args: str = ""
 
 
-def list_or_none(val: Any) -> Optional[List[str]]:
+def list_or_none(val: Any) -> list[str] | None:
     return [str(v) for v in val] if val is not None else None
 
 
-def str_or_none(val: Any) -> Optional[str]:
+def str_or_none(val: Any) -> str | None:
     return str(val) if val is not None else None
 
 
-def dict_or_none(val: Any) -> Optional[Dict[str, Any]]:
+def dict_or_none(val: Any) -> dict[str, Any] | None:
     return {str(k): v for k, v in val.items()} if val is not None else None
 
 
 @dataclass
 class Vulcan:
     source_path: Path
-    plugins: Optional[List[str]]
-    shiv_options: List[ShivOpts]
+    plugins: list[str] | None
+    shiv_options: list[ShivOpts]
     lockfile: Path
-    dependencies: Optional[List[str]]
+    dependencies: list[str] | None
     configured_dependencies: VersionSpecs
-    extras: Optional[Dict[str, List[str]]]
-    configured_extras: Dict[str, List[str]]
-    dynamic: Optional[List[str]]
+    extras: dict[str, list[str]] | None
+    configured_extras: dict[str, list[str]]
+    dynamic: list[str] | None
     no_lock: bool = False
-    python_lock_with: Optional[str] = None
+    python_lock_with: str | None = None
 
     @classmethod
     def from_source(cls, source_path: Path, fail_on_missing_lock: bool = True) -> "Vulcan":
@@ -74,8 +74,8 @@ class Vulcan:
         lockfile = source_path / config.get("lockfile", "vulcan.lock")
 
         no_lock = config.get("no-lock", False)
-        install_requires: Optional[List[str]] = []
-        extras_require: Optional[Dict[str, List[str]]] = {}
+        install_requires: list[str] | None = None
+        extras_require: dict[str, list[str]] | None = {}
         if not no_lock:
             try:
                 install_requires, extras_require = get_requires(lockfile)
@@ -137,9 +137,9 @@ class Vulcan:
             dynamic=dynamic,
         )
 
-    def setup(self, config_settings: Dict[str, str] | None = None) -> distutils.core.Distribution:
-        install_requires: Optional[List[str]]
-        extras_require: Optional[Dict[str, List[str]]]
+    def setup(self, config_settings: dict[str, str] | None = None) -> distutils.core.Distribution:
+        install_requires: list[str] | None
+        extras_require: dict[str, list[str]] | None
         if self.no_lock or (config_settings and config_settings.get("no-lock") == "true"):
             install_requires = flatten_reqs(self.configured_dependencies)
             extras_require = self.configured_extras
@@ -153,7 +153,7 @@ class Vulcan:
         )
 
 
-def get_requires(lockfile: Path) -> Tuple[List[str], Dict[str, List[str]]]:
+def get_requires(lockfile: Path) -> tuple[list[str], dict[str, list[str]]]:
     if not lockfile.exists():
         raise FileNotFoundError(f"Expected lockfile {lockfile}, does not exist")
     with lockfile.open() as f:
