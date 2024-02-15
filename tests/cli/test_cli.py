@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner, Result
 
 from vulcan import Vulcan, cli
-from vulcan.isolation import create_venv, get_executable
+from vulcan.isolation import get_executable
 
 
 def versions_exist(*versions: str) -> bool:
@@ -59,10 +59,6 @@ class TestCli:
         config = Vulcan.from_source(test_application)
         assert "switch-config-render" in config.configured_dependencies
 
-    def test_develop_works(self, runner: CliRunner, test_application: Path) -> None:
-        with create_venv() as venv:
-            successful(runner.invoke(cli.main, ["develop"], env={"VIRTUAL_ENV": venv.context.env_dir}))
-
     def test_lock_without_lockfile_succeeds(self, runner: CliRunner, test_application: Path) -> None:
         with cd(test_application):
             (test_application / "vulcan.lock").unlink()
@@ -73,6 +69,7 @@ class TestCli:
             (test_application / "vulcan.lock").unlink()
             res = runner.invoke(cli.main, ["build", "--wheel"])
             assert res.exit_code != 0
+
 
 @contextmanager
 def cd(p: Path) -> Generator[None, None, None]:

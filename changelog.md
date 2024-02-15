@@ -6,4 +6,5 @@
 ## Todo
 
 * Remove shiv from the project 
-* Ensure taht 
+* Add cli argument to lock with specific version
+* Remove all `Dict` and `List` to the std one

@@ -51,12 +51,9 @@ In addition, there are some vulcan-specific configurations which may be specifie
 
 ### no-lock
 
-If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a
-shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
+If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
 
-Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the
-fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked
-dependencies conflicting almost immediately.
+Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked dependencies conflicting almost immediately.
 
 ```toml
 [tool.vulcan]
@@ -212,25 +209,6 @@ positional arguments:
 optional arguments:                                                      
   -h, --help  show this help message and exit                            
   --no-lock                                                              
-```
-
-## develop
-
-```bash
-$ vulcan develop --help
-usage: vulcan develop [-h]
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-`develop` is a convenience tool intended to replicate the effects of `pip install -e .` when developing an application, as that command was [removed in pep 517](https://www.python.org/dev/peps/pep-0517/#get-requires-for-build-sdist).
-
-If you did not previously use `pip install -e .`, this command may be safely ignored. If you did, follow these steps (assuming you have already created the lockfile) to update your development environment to use `develop`:
-
-```bash
-pip uninstall your_package_name
-vulcan develop
 ```
 
 # Plugins
