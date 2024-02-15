@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import tempfile
 from itertools import chain
@@ -21,9 +22,11 @@ async def build_requires(pipenv: VulcanEnvBuilder, requires: List[str],
             return freeze
 
 
-async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]],
-                       python_version: str = None
-                       ) -> Tuple[List[str], Dict[str, List[str]]]:
+async def resolve_deps(
+    install_requires: List[str],
+    extras: Dict[str, List[str]],
+    python_version: str | None = None,
+) -> Tuple[List[str], Dict[str, List[str]]]:
 
     if not install_requires and not extras:
         return [], {}
@@ -42,13 +45,16 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
         final_out_task = asyncio.get_event_loop().create_task(
             build_requires(
                 pipenv,
-                install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list)), above_py36))
+                install_requires + list(chain.from_iterable(reqs for _, reqs in extras_list)),
+            )
+        )
         resolved_extras = {}
         for extra, extra_reqs in extras_list:
             # this is the expensive bit, because we create a new venv for each extra
             print(f"Building requirements for extra '{extra}'")
             resolved_extras[extra] = asyncio.get_event_loop().create_task(
-                build_requires(pipenv, install_requires + extra_reqs, above_py36))
+                build_requires(pipenv, install_requires + extra_reqs)
+            )
 
         # It is important here to wait until ALL tasks are complete (return_exceptions=True) because on
         # windows, if that is not done then the TemporaryDirectory is create_venv will try to remove itself
@@ -60,6 +66,8 @@ async def resolve_deps(install_requires: List[str], extras: Dict[str, List[str]]
                 raise res
         all_resolved = final_out_task.result()
 
-        extras_out = {k: sorted([str(all_resolved[req]) for req in v.result()])
-                      for k, v in resolved_extras.items()}
-        return sorted([str(all_resolved[req]) for req in base_freeze.keys()]), extras_out
+        extras_out = {k: sorted([str(all_resolved[req]) for req in v.result()]) for k, v in resolved_extras.items()}
+        return (
+            sorted([str(all_resolved[req]) for req in base_freeze.keys()]),
+            extras_out,
+        )
