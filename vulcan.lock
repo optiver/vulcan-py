@@ -49,6 +49,7 @@ mypy = [
     'mypy-extensions==1.0.0',
     'mypy==1.8.0',
     'packaging==22.0',
+    'pkginfo==1.9.6',
     'setuptools==63.4.3',
     'tomlkit==0.12.3',
     'types-click==7.1.8',
