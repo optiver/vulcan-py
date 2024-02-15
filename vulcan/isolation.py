@@ -141,7 +141,7 @@ class VulcanEnvBuilder(EnvBuilder):
         out, err = await frozen.communicate()
         assert frozen.returncode is not None
         if frozen.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)|
+            raise subprocess.CalledProcessError(returncode=frozen.returncode, cmd=cmd, output=out, stderr=err)
         reqs = [Requirement.parse(line) for line in out.decode().split("\n") if line]
         return {Requirement.parse(req.name): req for req in reqs}
 
