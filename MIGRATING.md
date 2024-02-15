@@ -177,11 +177,6 @@ requests = "~=2.13"
 requests2 = {version="~=2.13", extras=["security"]}
 ```
 
-### dev-dependencies
-
-Not supported, as vulcan is not a one-stop-shop tool for all development tools. Rather vulcan is specifically
-for locking and building.
-
 ### scripts, plugins
 
 The semantics for PEP621 and poetry entry points are identical, the only change is the name of the table.

@@ -7,18 +7,13 @@ import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Optional, Tuple
+from typing import Dict, Generator, List, Optional, Tuple
 
 from editables import EditableProject
 
+from importlib.metadata import version
 from vulcan import Vulcan
 from vulcan.plugins import PluginRunner
-
-version: Callable[[str], str]
-if sys.version_info >= (3, 8):
-    from importlib.metadata import version
-else:
-    from importlib_metadata import version
 
 __all__ = ["build_wheel", "build_sdist"]
 
@@ -88,29 +83,6 @@ def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
     if not m:
         return None
     return tuple((int(n) for n in m.group(1).split(".")))
-
-
-def install_develop(build_isolation: bool) -> None:
-    config = Vulcan.from_source(Path().absolute())
-
-    try:
-        virtual_env = get_virtualenv_python()
-    except RuntimeError:
-        exit("may not use vulcan develop outside of a virtualenv")
-    pip_version = get_pip_version(virtual_env)
-    if pip_version is None or pip_version < (21, 3):
-        print(
-            f"pip version {pip_version} does not support editable installs for PEP517 projects,"
-            " Please upgrade your pip"
-        )
-
-    path = str(Path().absolute())
-    if config.configured_extras:
-        path = f'{path}[{",".join(config.configured_extras)}]'
-    pip_call = [str(virtual_env), "-m", "pip", "install", "-e", path]
-    if not build_isolation:
-        pip_call.append("--no-build-isolation")
-    subprocess.check_call(pip_call)
 
 
 # pep660 functions

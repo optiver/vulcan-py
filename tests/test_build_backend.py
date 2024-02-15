@@ -16,21 +16,21 @@ from vulcan.build_backend import add_requirement, build_editable, pack, unpack
 # in tests/data
 EXPECTED_REQS = {
     Requirement.parse(
-        'certifi==2020.12.5; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"'
-    ),  # noqa: E501
+        'certifi==2020.12.5; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"'  # noqa: E501
+    ),
     Requirement.parse(
         'chardet==4.0.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"'
-    ),  # noqa: E501
+    ),
     Requirement.parse(
         'idna==2.10; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"'
-    ),  # noqa: E501
+    ),
     Requirement.parse(
-        'requests==2.25.1; (python_version >= "2.7" and python_full_version < "3.0.0") or python_full_version >= "3.5.0"'
+        'requests==2.25.1; (python_version >= "2.7" and python_full_version < "3.0.0") or python_full_version >= "3.5.0"'  # noqa: E501
     ),  # noqa: E501
     Requirement.parse(
         'urllib3==1.22; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"'
     ),
-}  # noqa: E501
+}
 
 
 @contextmanager

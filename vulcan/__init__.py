@@ -9,11 +9,7 @@ import tomlkit
 import tomlkit.container
 import tomlkit.items
 from setuptools import setup
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
+from typing import TypedDict
 
 
 class VulcanConfigError(Exception):
@@ -64,7 +60,6 @@ class Vulcan:
     configured_dependencies: VersionSpecs
     extras: Optional[Dict[str, List[str]]]
     configured_extras: Dict[str, List[str]]
-    dev_dependencies: Dict[str, VersionSpecs]
     dynamic: Optional[List[str]]
     no_lock: bool = False
     python_lock_with: Optional[str] = None
@@ -91,6 +86,13 @@ class Vulcan:
                 extras_require = None
 
         python_lock_with = config.get("python-lock-with")
+
+        if "dev-dependencies" in config:
+            print(
+                "ERROR: tool.vulcan.dev-dependencies is not supported since 3.0.0, please use extras instead.",
+                file=sys.stderr,
+            )
+            exit(1)
 
         shiv_ops = []
         shiv_config = config.get("shiv", [])
@@ -129,7 +131,6 @@ class Vulcan:
             dependencies=install_requires,
             configured_dependencies=config.get("dependencies", {}),
             extras=extras_require,
-            dev_dependencies=config.get("dev-dependencies", {}),
             configured_extras=config.get("extras", {}),
             no_lock=no_lock,
             python_lock_with=python_lock_with,

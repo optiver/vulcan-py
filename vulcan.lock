@@ -1,0 +1,71 @@
+install_requires = [
+    'editables==0.5',
+    'packaging==22.0',
+    'setuptools==63.4.3',
+    'tomlkit==0.12.3',
+    'wheel==0.36.2',
+]
+
+[extras_require]
+cli = [
+    'build==0.8.0',
+    'click==8.1.7',
+    'distlib==0.3.8',
+    'editables==0.5',
+    'filelock==3.13.1',
+    'packaging==22.0',
+    'pep517==0.13.1',
+    'pip==24.0',
+    'platformdirs==4.2.0',
+    'setuptools==63.4.3',
+    'shiv==0.5.2',
+    'tomlkit==0.12.3',
+    'virtualenv==20.25.0',
+    'wheel==0.36.2',
+]
+convert = [
+    'editables==0.5',
+    'packaging==22.0',
+    'pkginfo==1.9.6',
+    'setuptools==63.4.3',
+    'tomlkit==0.12.3',
+    'wheel==0.36.2',
+]
+test = [
+    'coverage==7.4.1',
+    'editables==0.5',
+    'iniconfig==2.0.0',
+    'packaging==22.0',
+    'pkginfo==1.9.6',
+    'pluggy==1.4.0',
+    'pytest-asyncio==0.23.5',
+    'pytest==8.0.0',
+    'setuptools==63.4.3',
+    'tomlkit==0.12.3',
+    'wheel==0.36.2',
+]
+mypy = [
+    'editables==0.5',
+    'mypy-extensions==1.0.0',
+    'mypy==1.8.0',
+    'packaging==22.0',
+    'pkginfo==1.9.6',
+    'setuptools==63.4.3',
+    'tomlkit==0.12.3',
+    'types-click==7.1.8',
+    'types-dataclasses==0.6.6',
+    'types-setuptools==69.1.0.20240215',
+    'typing_extensions==4.9.0',
+    'wheel==0.36.2',
+]
+flake8 = [
+    'editables==0.5',
+    'flake8==7.0.0',
+    'mccabe==0.7.0',
+    'packaging==22.0',
+    'pycodestyle==2.11.1',
+    'pyflakes==3.2.0',
+    'setuptools==63.4.3',
+    'tomlkit==0.12.3',
+    'wheel==0.36.2',
+]

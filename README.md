@@ -51,12 +51,9 @@ In addition, there are some vulcan-specific configurations which may be specifie
 
 ### no-lock
 
-If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a
-shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
+If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
 
-Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the
-fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked
-dependencies conflicting almost immediately.
+Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked dependencies conflicting almost immediately.
 
 ```toml
 [tool.vulcan]
@@ -126,22 +123,6 @@ This section is similar to the above section, and is used to specify additional 
 [tool.vulcan.extras]
 extra1 = ["requests[socks]~=2.0"]
 extra2 = ["click"]
-```
-
-### dev-dependencies
-
-Finally, this section is used to specify any dependencies used for development, such as mypy or pytest. These are NOT used in resolving the lockfile, and are installed when `vulcan develop` is run (in addition to installing the application as an editable install, equivalent to `pip install -e .`). It is possible to only install a single set of dev dependencies with `vulcan develop {key}` (e.x `vulcan develop static-analysis`)
-
-```toml
-[tool.vulcan.dev-dependencies.test]
-pytest=""
-coverage=""
-pytest-asyncio=""
-
-[tool.vulcan.dev-dependencies.static-analysis]
-flake8=""
-mypy=""
-types-dataclasses=""
 ```
 
 ## Build the package
@@ -228,25 +209,6 @@ positional arguments:
 optional arguments:                                                      
   -h, --help  show this help message and exit                            
   --no-lock                                                              
-```
-
-## develop
-
-```bash
-$ vulcan develop --help
-usage: vulcan develop [-h]
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-`develop` is a convenience tool intended to replicate the effects of `pip install -e .` when developing an application, as that command was [removed in pep 517](https://www.python.org/dev/peps/pep-0517/#get-requires-for-build-sdist).
-
-If you did not previously use `pip install -e .`, this command may be safely ignored. If you did, follow these steps (assuming you have already created the lockfile) to update your development environment to use `develop`:
-
-```bash
-pip uninstall your_package_name
-vulcan develop
 ```
 
 # Plugins
