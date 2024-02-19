@@ -121,7 +121,7 @@ def test_ep():
 [project]
 name = "testproject"
 description = "an example test project for testing vulcan builds, %"
-authors = [{{name="Joel Christiansen", email="joelchristiansen@optiver.com"}}]
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -150,7 +150,7 @@ test = ['pytest']
 lint = ['flake']
 
 [tool.vulcan.dependencies]
-requests = {{version="~=2.25.1", extras=["security"]}}
+requests = {version="~=2.25.1", extras=["security"]}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build", "packaging~=20.9"]
@@ -191,8 +191,8 @@ def test_ep():
             """\
 [project]
 name = "testproject"
-description = "an example test project for testing vulcan builds, %"
-authors = [{{name="Joel Christiansen", email="joelchristiansen@optiver.com"}}]
+description = "an example test project for testing vulcan builds"
+authors = [{name="Joel Christiansen", email="joelchristiansen@optiver.com"}]
 keywords = [ "build", "testing" ]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -207,7 +207,6 @@ myep = "testproject:test_ep"
 foobar = "barfoo"
 module_dir = "testproject"
 
-
 [project.entry-points.test_eps]
 myep = "testproject:test_ep"
 
@@ -216,7 +215,7 @@ packages = [ "testproject" ]
 plugins = ['example_plugin']
 
 [tool.vulcan.dependencies]
-requests = {{version="~=2.25.1", extras=["security"]}}
+requests = {version="~=2.25.1", extras=["security"]}
 
 [tool.vulcan.extras]
 test1 = ["requests", "build"]
@@ -226,7 +225,6 @@ test3 = ["requests>=2.0.0", "wheel"]
 [build-system]
 requires=['setuptools', 'vulcan-py']
 build-backend="vulcan.build_backend"
-
 """)
 
     return tmp_path
