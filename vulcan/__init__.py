@@ -43,7 +43,7 @@ def dict_or_none(val: Any) -> dict[str, Any] | None:
 @dataclass
 class Vulcan:
     source_path: Path
-    plugins: list[str] | FileNotFoundError
+    plugins: list[str] | None
     lockfile: Path
     dependencies: list[str] | None
     configured_dependencies: VersionSpecs
