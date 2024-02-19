@@ -84,7 +84,6 @@ Not supported.
 ### include_package_data
 
 Not supported, always True. Use the MANIFEST.in to control what data files are included in the final built
-wheel/shiv/sdist.
 
 ### package_data, exclude_package_data
 
@@ -262,18 +261,6 @@ requests='*'
 
 [tool.vulcan.extras]  # OPTIONAL
 some_extra=["psycopg2"]
-
-[[tool.vulcan.shiv]]
-bin_name="my_app"
-console_script="entry_point"
-interpreter='/usr/bin/env python3.'
-extra_args="--compile-pyc"
-
-[[tool.vulcan.shiv]]
-bin_name="my_app_two"
-entry_point="package_name.cli:main2"
-interpreter='/usr/bin/env python3.9'
-extra_args="--compile-pyc"
 
 [tool.vulcan]
 packages = [ "package_name" ]

@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import asyncio.subprocess
-import os
-import shlex
 import subprocess
 import sys
 from importlib.metadata import PackageNotFoundError, version
@@ -37,54 +35,17 @@ def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
 
 
-async def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> list[Path]:
-    results = []
-    for app in vulcan.shiv_options:
-        try:
-            if app.with_extras:
-                dist = f'{from_dist}[{",".join(app.with_extras)}]'
-            else:
-                dist = from_dist
-            cmd = [sys.executable, "-m", "shiv", dist, "-o", str(outdir / app.bin_name)]
-            if app.console_script:
-                cmd += ["-c", app.console_script]
-            if app.entry_point:
-                cmd += ["-e", app.entry_point]
-            if app.interpreter:
-                cmd += ["-p", app.interpreter]
-            if app.extra_args:
-                cmd += shlex.split(app.extra_args)
-            proc = await asyncio.subprocess.create_subprocess_exec(*cmd)
-            results.append((proc, app.bin_name))
-        except KeyError as e:
-            raise KeyError("missing config value in pyproject.toml: {e}") from e
-    await asyncio.gather(*(p.wait() for p, _ in results))
-    succeeded = []
-    failed = []
-    for proc, res in results:
-        if await proc.wait() == 0:
-            succeeded.append(outdir / res)
-        else:
-            failed.append(res)
-    for fail in failed:
-        print(f"failed to create executable {failed}", file=sys.stderr)
-    return succeeded
-
-
 @main.command(name="build")
 @click.option("--outdir", "-o", default="dist/", type=Path)
 @click.option("--lock/--no-lock", "_lock", default=True)
 @click.option("--wheel", is_flag=True, default=False)
 @click.option("--sdist", is_flag=True, default=False)
-@click.option("--shiv", is_flag=True, default=False)
 @pass_vulcan
-def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: bool, shiv: bool) -> None:
-    "Create wheels, sdists, and shiv executables"
+def build_out(_: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: bool) -> None:
+    "Create wheels, and sdists"
     # for ease of use
-    if len([v for v in (shiv, wheel, sdist) if v]) != 1:
-        raise click.UsageError("Must specify exactly 1 of --shiv, --wheel, or --sdist")
-
-    should_lock = _lock and not config.no_lock
+    if len([v for v in (wheel, sdist) if v]) != 1:
+        raise click.UsageError("Must specify exactly 1 of --wheel, or --sdist")
 
     config_settings = {}
     if not _lock:
@@ -92,18 +53,11 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
     project = build.ProjectBuilder(".")
     outdir.mkdir(exist_ok=True)
     if sdist:
-        dist = project.build("sdist", str(outdir), config_settings=config_settings)
-    elif wheel or shiv:
-        if shiv and not should_lock:
-            raise click.UsageError("May not specify both --shiv and --no-lock; shiv builds must be locked")
-        dist = project.build("wheel", str(outdir), config_settings=config_settings)
+        project.build("sdist", str(outdir), config_settings=config_settings)
+    elif wheel:
+        project.build("wheel", str(outdir), config_settings=config_settings)
     else:
         assert False, "unreachable because dist_types is required"
-    if shiv:
-        try:
-            asyncio.get_event_loop().run_until_complete(build_shiv_apps(dist, config, outdir))
-        finally:
-            os.remove(dist)
 
 
 async def resolve_deps_or_report(

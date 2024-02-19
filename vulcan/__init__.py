@@ -28,16 +28,6 @@ def flatten_reqs(versions: VersionSpecs) -> list[str]:
     return [to_pep508(lib, req) for lib, req in versions.items()]
 
 
-@dataclass
-class ShivOpts:
-    bin_name: str
-    console_script: str | None = None
-    entry_point: str | None = None
-    interpreter: str | None = None
-    with_extras: list[str] | None = None
-    extra_args: str = ""
-
-
 def list_or_none(val: Any) -> list[str] | None:
     return [str(v) for v in val] if val is not None else None
 
@@ -53,8 +43,7 @@ def dict_or_none(val: Any) -> dict[str, Any] | None:
 @dataclass
 class Vulcan:
     source_path: Path
-    plugins: list[str] | None
-    shiv_options: list[ShivOpts]
+    plugins: list[str] | FileNotFoundError
     lockfile: Path
     dependencies: list[str] | None
     configured_dependencies: VersionSpecs
@@ -94,19 +83,11 @@ class Vulcan:
             )
             exit(1)
 
-        shiv_ops = []
         shiv_config = config.get("shiv", [])
-        for conf in shiv_config:
-            shiv_ops.append(
-                ShivOpts(
-                    bin_name=str(conf.get("bin_name")),
-                    console_script=str_or_none(conf.get("console_script")),
-                    entry_point=str_or_none(conf.get("entry_point")),
-                    interpreter=str_or_none(conf.get("interpreter")),
-                    with_extras=[str(e) for e in conf.get("with_extras", [])],
-                    extra_args=str(conf.get("extra_args", "")),
-                )
-            )
+        if shiv_config:
+            print("shiv configuration is not supported since 3.0.0.", file=sys.stderr)
+            exit(1)
+
         # note that setuptools also checks this, and says that it _should_ consider this a warning, but will
         # not for the intermediate period.
         # We'll consider it an error until setuptools sees fit to do it for us, and then remove this check.
@@ -127,7 +108,6 @@ class Vulcan:
             source_path=source_path,
             plugins=list_or_none(config.get("plugins")),
             lockfile=lockfile,
-            shiv_options=shiv_ops,
             dependencies=install_requires,
             configured_dependencies=config.get("dependencies", {}),
             extras=extras_require,

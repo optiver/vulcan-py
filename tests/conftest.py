@@ -157,26 +157,11 @@ test1 = ["requests", "build", "packaging~=20.9"]
 test2 = ["requests~=2.22", "setuptools"]
 test3 = ["requests>=2.0.0", "wheel"]
 
-[[tool.vulcan.shiv]]
-bin_name="testproject"
-console_script="myep"
-interpreter='{cur_interp}'
-extra_args="-E --compile-pyc"
-
-[[tool.vulcan.shiv]]
-bin_name="testproject2"
-console_script="myep"
-interpreter='{cur_interp}'
-extra_args="-E --compile-pyc"
-
 [build-system]
 requires=['setuptools', 'vulcan-py']
 build-backend="vulcan.build_backend"
 
-""".format(
-                cur_interp=sys.executable
-            )
-        )
+""")
 
     return tmp_path
 
@@ -192,7 +177,7 @@ def test_application_forbidden_keys(tmp_path_factory: pytest.TempPathFactory) ->
     tmp_path = tmp_path_factory.mktemp("build_testproject")
     (tmp_path / "testproject").mkdir()
     (tmp_path / "testproject/__init__.py").write_text(
-        """\
+        """
 def test_ep():
     print("Running!")
 """
@@ -238,21 +223,11 @@ test1 = ["requests", "build"]
 test2 = ["requests~=2.22", "setuptools"]
 test3 = ["requests>=2.0.0", "wheel"]
 
-[[tool.vulcan.shiv]]
-bin_name="testproject"
-console_script="myep"
-interpreter='{cur_interp}'
-extra_args="-E --compile-pyc"
-
-
 [build-system]
 requires=['setuptools', 'vulcan-py']
 build-backend="vulcan.build_backend"
 
-""".format(
-                cur_interp=sys.executable
-            )
-        )
+""")
 
     return tmp_path
 
