@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -6,12 +7,12 @@ import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
+from importlib.metadata import version
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Generator
 
 from editables import EditableProject
 
-from importlib.metadata import version
 from vulcan import Vulcan
 from vulcan.plugins import PluginRunner
 
@@ -19,14 +20,14 @@ __all__ = ["build_wheel", "build_sdist"]
 
 
 @contextmanager
-def patch_argv(argv: List[str]) -> Generator[None, None, None]:
+def patch_argv(argv: list[str]) -> Generator[None, None, None]:
     old_argv = sys.argv[:]
     sys.argv = [sys.argv[0]] + argv
     yield
     sys.argv = old_argv
 
 
-def build(outdir: str, config_settings: Dict[str, str] | None = None) -> str:
+def build(outdir: str, config_settings: dict[str, str] | None = None) -> str:
     config = Vulcan.from_source(Path().absolute())
 
     # https://setuptools.readthedocs.io/en/latest/userguide/keywords.html
@@ -40,7 +41,7 @@ def build(outdir: str, config_settings: Dict[str, str] | None = None) -> str:
 
 def build_wheel(
     wheel_directory: str,
-    config_settings: Dict[str, str] | None = None,
+    config_settings: dict[str, str] | None = None,
     metadata_directory: str | None = None,
 ) -> str:
     with patch_argv(["bdist_wheel"]):
@@ -49,7 +50,7 @@ def build_wheel(
 
 def build_sdist(
     sdist_directory: str,
-    config_settings: Dict[str, str] | None = None,
+    config_settings: dict[str, str] | None = None,
 ) -> str:
     with patch_argv(["sdist"]):
         return build(sdist_directory, config_settings)
@@ -69,15 +70,15 @@ def get_virtualenv_python() -> Path:
 
 
 # tox requires these two for some reason :(
-def get_requires_for_build_sdist(config_settings: Dict[str, str] | None = None) -> List[str]:
+def get_requires_for_build_sdist(config_settings: dict[str, str] | None = None) -> list[str]:
     return []
 
 
-def get_requires_for_build_wheel(config_settings: Dict[str, str] | None = None) -> List[str]:
+def get_requires_for_build_wheel(config_settings: dict[str, str] | None = None) -> list[str]:
     return []
 
 
-def get_pip_version(python_callable: Path) -> Optional[Tuple[int, ...]]:
+def get_pip_version(python_callable: Path) -> tuple[int, ...] | None:
     out = subprocess.check_output([str(python_callable), "-m", "pip", "--version"], encoding="utf-8")
     m = re.search(r"pip (\d+\.\d+(\.\d+)?)", out)
     if not m:
@@ -158,7 +159,7 @@ def make_editable(whl: Path) -> None:
 
 def build_editable(
     wheel_directory: str,
-    config_settings: Dict[str, str] | None = None,
+    config_settings: dict[str, str] | None = None,
     metadata_directory: str | None = None,
 ) -> str:
     whl_path = Path(wheel_directory) / build_wheel(wheel_directory, config_settings, metadata_directory)

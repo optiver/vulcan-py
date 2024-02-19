@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import asyncio
 import asyncio.subprocess
 import os
 import shlex
 import subprocess
 import sys
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import build.env
 import click
@@ -18,8 +19,6 @@ import build
 from vulcan import Vulcan, flatten_reqs
 from vulcan.build_backend import get_virtualenv_python
 from vulcan.builder import resolve_deps
-
-from importlib.metadata import PackageNotFoundError, version
 
 pass_vulcan = click.make_pass_decorator(Vulcan)
 
@@ -38,7 +37,7 @@ def main(ctx: click.Context) -> None:
     ctx.obj = Vulcan.from_source(Path().absolute(), fail_on_missing_lock=False)
 
 
-async def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> List[Path]:
+async def build_shiv_apps(from_dist: str, vulcan: Vulcan, outdir: Path) -> list[Path]:
     results = []
     for app in vulcan.shiv_options:
         try:
@@ -109,7 +108,7 @@ def build_out(config: Vulcan, outdir: Path, _lock: bool, wheel: bool, sdist: boo
 
 async def resolve_deps_or_report(
     config: Vulcan, python_version: str | None = None
-) -> Tuple[List[str], Dict[str, List[str]]]:
+) -> tuple[list[str], dict[str, list[str]]]:
     try:
         return await resolve_deps(
             flatten_reqs(config.configured_dependencies),
