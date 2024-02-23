@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 import asyncio
 import shlex
+import shutil
 import subprocess
 import sys
-import shutil
 import tempfile
 from contextlib import contextmanager
 from os import PathLike
 from types import SimpleNamespace
-from typing import Dict, Generator, List, Union
+from typing import Generator, Union
 from venv import EnvBuilder
 
 from pkg_resources import Requirement
@@ -84,7 +85,7 @@ class VulcanEnvBuilder(EnvBuilder):
     async def install(
         self,
         deps_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"],
-        requirements: List[str],
+        requirements: list[str],
     ) -> None:
         # install Isolated with module pip using pep517
         if not requirements:
@@ -109,7 +110,7 @@ class VulcanEnvBuilder(EnvBuilder):
 
     async def freeze(
         self, deps_dir: Union[str, bytes, "PathLike[str]", "PathLike[bytes]"]
-    ) -> Dict[Requirement, Requirement]:
+    ) -> dict[Requirement, Requirement]:
         # list with the requirements.txt format only libraries installed in specifically this venv
         cmd = [
             self.context.env_exe,

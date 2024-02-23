@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from types import TracebackType
-from typing import Any, Dict, Iterable, Type, Optional
 from pathlib import Path
+from types import TracebackType
+from typing import Any, Iterable, Type
 
 import tomlkit
 from pkg_resources import EntryPoint, iter_entry_points
@@ -13,7 +14,7 @@ from vulcan import Vulcan
 @dataclass
 class PluginRunner:
     vulcan: Vulcan
-    plugin_configs: Dict[str, Any] = field(init=False)
+    plugin_configs: dict[str, Any] = field(init=False)
 
     def __post_init__(self) -> None:
         try:
@@ -51,7 +52,7 @@ class PluginRunner:
         return None
 
 
-def test_plugin(config: Optional[Dict[str, str]]) -> None:
+def test_plugin(config: dict[str, str] | None) -> None:
     assert config is not None
     assert config["foobar"] == "barfoo"
     (Path(config["module_dir"]) / "example.no-hash.py").write_text("Text!")

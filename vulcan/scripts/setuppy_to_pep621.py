@@ -1,12 +1,12 @@
+from __future__ import annotations
 import subprocess
 import tempfile
 import zipfile
-from argparse import ArgumentParser
 from collections import defaultdict
 from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, cast
+from typing import NamedTuple, cast
 
 import pkginfo
 import tomlkit
@@ -16,13 +16,7 @@ from pkg_resources import Requirement
 class BuildData(NamedTuple):
     wheel: pkginfo.Wheel
     table: tomlkit.items.Table
-    packages: List[str]
-
-
-def make_parser() -> ArgumentParser:
-    parser = ArgumentParser()
-    parser.add_argument("--shiv-console-scripts", action="store_true")
-    return parser
+    packages: list[str]
 
 
 def wheel() -> BuildData:
@@ -30,7 +24,7 @@ def wheel() -> BuildData:
     with tempfile.TemporaryDirectory(suffix=".vulcan-migrate") as tmp:
         subprocess.run(["pip", "wheel", "--no-deps", "-w", tmp, "."])
         whl = pkginfo.Wheel(str(next(Path(tmp).glob("*.whl"))))
-        eps: Dict[str, Dict[str, str]] = defaultdict(dict)
+        eps: dict[str, dict[str, str]] = defaultdict(dict)
         with zipfile.ZipFile(whl.filename) as zf:
             dist_info = f'{whl.name.replace("-", "_")}-{whl.version}.dist-info'
             try:
@@ -58,26 +52,13 @@ def wheel() -> BuildData:
     return BuildData(whl, ep_table, packages)
 
 
-def contributors(author: Optional[str], author_email: Optional[str]) -> List[tomlkit.items.Table]:
+def contributors(author: str | None, author_email: str | None) -> list[tomlkit.items.Table]:
     vals = tomlkit.table()
     if author:
         vals["name"] = author
     if author_email:
         vals["email"] = author_email
     return [vals]
-
-
-def shiv_from_console_scripts(console_scripts: Dict[str, str]) -> List[Dict[str, str]]:
-    shivs: List[Dict[str, str]] = []
-    for name in console_scripts:
-        shivs.append(
-            {
-                "bin_name": name,
-                "console_script": name,
-                "interpreter": "/usr/bin/env python3.9",
-            }
-        )
-    return shivs
 
 
 def convert() -> None:
@@ -88,7 +69,6 @@ def convert() -> None:
         pyproject = tomlkit.document()
     if "project" in pyproject:
         exit("refusing to overwrite current project configuration")
-    args = make_parser().parse_args()
     whl, entry_points, packages = wheel()
     project = tomlkit.table()
     vulcan = tomlkit.table()
@@ -161,8 +141,6 @@ def convert() -> None:
         del entry_points["gui_scripts"]
     if entry_points:
         project["entry-points"] = entry_points
-    if args.shiv_console_scripts and "scripts" in project:
-        vulcan["shiv"] = shiv_from_console_scripts(project["scripts"])  # type: ignore
 
     build_system = tomlkit.table()
     pyproject["build-system"] = build_system

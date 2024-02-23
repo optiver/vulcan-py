@@ -51,7 +51,7 @@ In addition, there are some vulcan-specific configurations which may be specifie
 
 ### no-lock
 
-If set, ignore the lockfile when building wheels and installing locally. It is an error to use no-lock with a shiv build. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
+If set, ignore the lockfile when building wheels and installing locally. This may be overridden with `vulcan build --no-lock` or `vulcan build --lock`.
 
 Generally, no-lock should be used with libraries, and should not be used with applications. This is due to the fact that having multiple libraries with locked dependencies tends to be very difficult, with the locked dependencies conflicting almost immediately.
 
@@ -85,20 +85,6 @@ Vulcan supports plugins, which can be called as a part of the build system to do
 ```toml
 [tool.vulcan]
 plugins = ["plug1", "plug2"]
-```
-
-### shiv
-
-This repeatable section allows configuration of a shiv command to be called when invoking `vulcan build --shiv`. There are some mandatory keys, and some optional keys available.  Note the double brackets, this is what makes the section repeatable.
-
-```toml
-[[tool.vulcan.shiv]]
-bin_name = "output_binary_name"    # mandatory
-console_script = "console_script_name"      #| Pick exactly one of
-entry_point = "path.to.entry_point:main"    #|
-interpreter = "/usr/bin/env python3.9"  # optional
-with_extras = ["extra1", "another_extra"]  # optional
-extra_args = "--any --other --shiv --arguments"
 ```
 
 ### dependencies
@@ -143,41 +129,18 @@ And find a wheel in `dist/package_name-0.0.0-py3-none-any.whl`
 
 ```bash
 $ vulcan build --help
-usage: vulcan build [-h] [--sdist | --wheel | --shiv] [-o OUTDIR]
+usage: vulcan build [-h] [--sdist | --wheel] [-o OUTDIR]
 
 optional arguments:
   -h, --help            show this help message and exit
   --sdist
   --wheel
-  --shiv
   -o OUTDIR, --outdir OUTDIR
 ```
 
-Vulcan build gives a way to create wheels, sdists, and shiv applications. Instead of having the following in tox.ini:
+Vulcan build gives a way to create wheels, and sdists.
 
-```bash
-shiv -p '/usr/bin/env python3.7' -e your_application.__main__:run  -o {distdir}/binary_name" --compile-pyc .
-```
-
-You can instead have only:
-
-```bash
-vulcan build --shiv -o {distdir}
-```
-
-and have the actual  configuration for that command in your pyproject.toml:
-
-```toml
-[[tool.vulcan.shiv]]
-bin_name="binary_name"
-entry_point="your_application.__main__:run"
-interpreter="/usr/bin/env python3.6"
-extra_args="--compile-pyc"
-```
-
-This section may be repeated, in which case `build` will create all the specified binaries.
-
-`build` also supports outputting wheel and sdists, which can be used to distribute your application as a pip package as well as a shiv binary if desired.
+`build` also supports outputting wheel and sdists, which can be used to distribute your application as a pip package.
 
 ## lock
 
@@ -221,10 +184,10 @@ Pre-build steps take place immediately before creating the wheel or sdist output
 
 ```python
 # myplugin.py
-from typing import Optional, Dict
+from typing import dict
 from pathlib import Path
 from datetime import datetime
-def populate_buildtime(config: Optional[Dict[str, str]]) -> None:
+def populate_buildtime(config: dict[str, str] | None) -> None:
    assert config is not None
    assert 'target' in config
    Path(config['target']).write_text(f'{datetime.now():%Y-%m-%d %H:%M}')

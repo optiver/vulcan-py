@@ -1,5 +1,4 @@
 import os
-import subprocess
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
@@ -33,16 +32,6 @@ class TestCli:
         with cd(test_application):
             successful(runner.invoke(cli.main, ["lock"]))
         assert (test_application / "vulcan.lock").read_text() == first_pass
-
-    def test_shiv_build_works(self, runner: CliRunner, test_application: Path, tmp_path: Path) -> None:
-        with cd(test_application):
-            successful(runner.invoke(cli.main, ["build", "--shiv", "-o", "dist"]))
-        output = test_application / "dist/testproject"
-        assert output.exists()
-        assert os.access(output, os.X_OK)
-        if versions_exist("3.6"):
-            # shebang there expects 3.6
-            assert "Running!\n" == subprocess.check_output([output], encoding="utf-8", env={"SHIV_ROOT": str(tmp_path)})
 
     def test_add_works_without_lockfile(self, runner: CliRunner, test_application: Path) -> None:
         (test_application / "vulcan.lock").unlink()
