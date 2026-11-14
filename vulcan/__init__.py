@@ -73,7 +73,7 @@ class Vulcan:
     def from_source(cls, source_path: Path, fail_on_missing_lock: bool = True) -> "Vulcan":
         with open(source_path / "pyproject.toml") as f:
             all_config = tomlkit.loads(f.read())
-            config = all_config["tool"]["vulcan"]  # type: ignore[index]
+            config = all_config.get("tool", {}).get("vulcan", {})  # type: ignore[union-attr]
             assert isinstance(config, dict)
             dynamic = all_config["project"].get("dynamic", [])  # type: ignore[union-attr]
         lockfile = source_path / config.get("lockfile", "vulcan.lock")
