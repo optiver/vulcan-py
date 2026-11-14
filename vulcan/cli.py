@@ -170,6 +170,14 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
     name: str = req.name
     if req.extras:
         name = f'{name}[{",".join(req.extras)}]'
+    with open("pyproject.toml") as f:
+        parse = tomlkit.parse(f.read())
+    project = parse["project"]
+    if "dependencies" in project:  # type: ignore[operator]
+        raise click.UsageError("Declare project.dependencies as dynamic before using vulcan add.")
+    dynamic = project.setdefault("dynamic", tomlkit.array())  # type: ignore[union-attr]
+    if "dependencies" not in dynamic:
+        dynamic.append("dependencies")
     try:
         venv_python = get_virtualenv_python()
     except RuntimeError:
@@ -192,9 +200,9 @@ def add(ctx: click.Context, config: Vulcan, req: Requirement, _lock: bool) -> No
         except StopIteration:
             # failed to find the thing we just installed, give up.
             version = ""
-    with open("pyproject.toml") as f:
-        parse = tomlkit.parse(f.read())
-    deps = parse["tool"]["vulcan"].setdefault("dependencies", tomlkit.table())  # type: ignore
+    tool = parse.setdefault("tool", tomlkit.table())
+    vulcan = tool.setdefault("vulcan", tomlkit.table())  # type: ignore[union-attr]
+    deps = vulcan.setdefault("dependencies", tomlkit.table())
     deps[name] = version
     with open("pyproject.toml", "w+") as f:
         f.write(tomlkit.dumps(parse))
