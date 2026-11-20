@@ -7,7 +7,7 @@ from pathlib import Path
 import tomlkit
 from pkg_resources import EntryPoint, iter_entry_points
 
-from vulcan import Vulcan
+from vulcan import Vulcan, VulcanConfigError
 
 
 @dataclass
@@ -29,13 +29,20 @@ class PluginRunner:
         return iter_entry_points("vulcan.post_build")
 
     def __enter__(self) -> "PluginRunner":
-        if not self.vulcan.plugins:
+        enabled_plugins = self.vulcan.plugins
+        if not enabled_plugins:
             return self
+        for name in enabled_plugins:
+            if name not in self.plugin_configs:
+                raise VulcanConfigError(
+                    f"Missing configuration for Vulcan plugin {name!r}: "
+                    "add an entry under [tool.vulcan.plugin] in pyproject.toml."
+                )
         for ep in self.get_pre_entrypoints():
-            if ep.name not in self.vulcan.plugins:
+            if ep.name not in enabled_plugins:
                 continue
             print(f"Running pre_build plugin {ep}")
-            ep.load()(self.plugin_configs.get(ep.name))
+            ep.load()(self.plugin_configs[ep.name])
         return self
 
     def __exit__(
